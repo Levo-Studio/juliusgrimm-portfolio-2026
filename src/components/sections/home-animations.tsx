@@ -10,15 +10,16 @@ export const HomeAnimations = (): null => {
   useEffect(() => {
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     ScrollTrigger.config({ ignoreMobileResize: true });
+    ScrollTrigger.defaults({ fastScrollEnd: true });
     const dFast = reduce ? 0.28 : 0.55;
     const dMain = reduce ? 0.42 : 0.8;
 
     const ctx = gsap.context(() => {
       gsap
         .timeline({ defaults: { ease: "power3.out" } })
-        .from("[data-hero-sub]", { opacity: 0, y: 20, duration: dFast })
-        .from("[data-hero-title]", { opacity: 0, y: 30, duration: dMain }, "-=0.2")
-        .from("[data-hero-cta]", { opacity: 0, y: 18, duration: reduce ? 0.34 : 0.6 }, "-=0.3");
+        .fromTo("[data-hero-sub]", { autoAlpha: 0, y: 20 }, { autoAlpha: 1, y: 0, duration: dFast, clearProps: "opacity,visibility,transform" })
+        .fromTo("[data-hero-title]", { autoAlpha: 0, y: 30 }, { autoAlpha: 1, y: 0, duration: dMain, clearProps: "opacity,visibility,transform" }, "-=0.2")
+        .fromTo("[data-hero-cta]", { autoAlpha: 0, y: 18 }, { autoAlpha: 1, y: 0, duration: reduce ? 0.34 : 0.6, clearProps: "opacity,visibility,transform" }, "-=0.3");
 
       gsap.fromTo(
         "[data-hero-title]",
@@ -26,24 +27,84 @@ export const HomeAnimations = (): null => {
         { filter: "blur(0px)", duration: reduce ? 0.45 : 0.9, ease: "power2.out" }
       );
 
-      gsap.to("[data-hero-cta]", { boxShadow: "0 0 24px rgba(91,227,139,0.28)", repeat: -1, yoyo: true, duration: reduce ? 2.6 : 1.8, ease: "sine.inOut" });
-      gsap.to("[data-hero-title]", { y: -5, duration: reduce ? 4.4 : 3.6, ease: "sine.inOut", repeat: -1, yoyo: true });
+      gsap.utils.toArray<HTMLElement>("[data-reveal], [data-card]").forEach((element) => {
+        gsap.fromTo(
+          element,
+          { opacity: 0.34 },
+          {
+            opacity: 1,
+            ease: "none",
+            immediateRender: false,
+            scrollTrigger: {
+              trigger: element,
+              start: "top 95%",
+              end: "top 68%",
+              scrub: reduce ? 0.55 : 1.15,
+              invalidateOnRefresh: true,
+              fastScrollEnd: true
+            }
+          }
+        );
+      });
 
-      gsap.utils.toArray<HTMLElement>("[data-reveal]").forEach((element) => {
-        gsap.from(element, {
-          opacity: 0,
-          y: 26,
-          immediateRender: false,
-          duration: reduce ? 0.34 : 0.65,
+      gsap.fromTo(
+        "[data-tech-tag]",
+        { opacity: 0.4, y: 10 },
+        {
+          opacity: 1,
+          y: 0,
+          stagger: reduce ? 0.03 : 0.045,
+          duration: reduce ? 0.3 : 0.42,
           ease: "power2.out",
           scrollTrigger: {
-            trigger: element,
+            trigger: "[data-tech-wrap]",
             start: "top 90%",
             toggleActions: "play none none reverse",
-            invalidateOnRefresh: true
-          }
-        });
-      });
+            invalidateOnRefresh: true,
+            fastScrollEnd: true
+          },
+          clearProps: "opacity,transform"
+        }
+      );
+
+      gsap.fromTo(
+        "[data-contact-card]",
+        { opacity: 0.42, y: 12 },
+        {
+          opacity: 1,
+          y: 0,
+          stagger: reduce ? 0.035 : 0.05,
+          duration: reduce ? 0.3 : 0.45,
+          ease: "power2.out",
+          scrollTrigger: {
+            trigger: "[data-contact-wrap]",
+            start: "top 90%",
+            toggleActions: "play none none reverse",
+            invalidateOnRefresh: true,
+            fastScrollEnd: true
+          },
+          clearProps: "opacity,transform"
+        }
+      );
+
+      gsap.fromTo(
+        "[data-footer-wrap]",
+        { opacity: 0.36, y: 14 },
+        {
+          opacity: 1,
+          y: 0,
+          duration: reduce ? 0.34 : 0.5,
+          ease: "power2.out",
+          scrollTrigger: {
+            trigger: "[data-footer-wrap]",
+            start: "top 92%",
+            toggleActions: "play none none reverse",
+            invalidateOnRefresh: true,
+            fastScrollEnd: true
+          },
+          clearProps: "opacity,transform"
+        }
+      );
 
       gsap.to("[data-code-cloud]", {
         yPercent: -6,
@@ -85,34 +146,6 @@ export const HomeAnimations = (): null => {
         }
       });
 
-      gsap.from("[data-tech-tag]", {
-        opacity: 0,
-        y: 14,
-        stagger: 0.04,
-        duration: reduce ? 0.26 : 0.45,
-        ease: "power2.out",
-        scrollTrigger: {
-          trigger: "[data-tech-tag]",
-          start: "top 90%",
-          toggleActions: "play none none reverse",
-          invalidateOnRefresh: true
-        }
-      });
-
-      gsap.from("[data-contact-card]", {
-        opacity: 0,
-        y: 18,
-        stagger: 0.06,
-        duration: reduce ? 0.3 : 0.5,
-        ease: "power2.out",
-        scrollTrigger: {
-          trigger: "[data-contact-card]",
-          start: "top 90%",
-          toggleActions: "play none none reverse",
-          invalidateOnRefresh: true
-        }
-      });
-
       gsap.utils.toArray<HTMLElement>("[data-card]").forEach((card, index) => {
         const thumb = card.querySelector<HTMLElement>("[data-card-thumb]");
         const title = card.querySelector<HTMLElement>("[data-card-title]");
@@ -136,16 +169,7 @@ export const HomeAnimations = (): null => {
         card.addEventListener("mouseleave", () => gsap.to(card, { y: 0, scale: 1, duration: 0.24, ease: "power2.out", overwrite: "auto" }));
       });
 
-      gsap.utils.toArray<HTMLElement>("[data-card]").forEach((card) => {
-        gsap.to(card, {
-          y: -3,
-          duration: reduce ? 2.8 : 2.2,
-          ease: "sine.inOut",
-          repeat: -1,
-          yoyo: true
-        });
-      });
-
+      ScrollTrigger.normalizeScroll(true);
       ScrollTrigger.refresh();
     });
 

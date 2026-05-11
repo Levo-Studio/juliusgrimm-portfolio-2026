@@ -1,43 +1,75 @@
 # Julius Grimm Portfolio 2026
 
-![Julius Grimm Logo](./public/jg_logo.png)
+<p align="center">
+  <img src="./public/jg_logo.png" alt="Julius Grimm Logo" width="120" height="120" />
+</p>
 
-Founder on accident. Engineer by design.
+<p align="center"><strong>Founder on accident. Engineer by design.</strong></p>
 
-Built with Next.js, PostgreSQL, Tailwind, and a suspicious amount of spacing decisions.
+<p align="center">
+  <a href="https://juliusgrimm.dev">Website</a> ·
+  <a href="https://github.com/Levo-Studio/juliusgrimm-portfolio-2026">Source</a> ·
+  <a href="https://github.com/justthatrandomcoder">GitHub</a> ·
+  <a href="https://instagram.com/julius_gr_">Instagram</a> ·
+  <a href="https://linkedin.com/in/julius-grimm">LinkedIn</a>
+</p>
 
-Open sourced because I like open source and because hiding portfolio code felt boring.
-Readable on purpose. Overengineered only where emotionally necessary.
+<p align="center">
+  <code>next.js</code>
+  <code>typescript</code>
+  <code>tailwind v4</code>
+  <code>drizzle</code>
+  <code>postgresql</code>
+  <code>gsap</code>
+</p>
 
-## Overview
-A personal portfolio and case-study system with an editorial black/green design language, dynamic project pages, and a secure admin panel.
+Built with Next.js, PostgreSQL, and a very healthy amount of unnecessary precision.
 
-## Tech Stack
-- Next.js (App Router) + React + TypeScript (strict)
+This is my personal portfolio plus case-study system.  
+It is open source because:
+- I like open source.
+- Good portfolio code should not live behind a black box.
+- Publicly overengineering things is part of the brand now.
+
+## What This Repo Is
+
+- Editorial black/green design system matching my Figma references
+- Dynamic project + case study pages from PostgreSQL
+- Custom animations (hero code cloud, reveal flows, card interactions)
+- Secure admin panel for managing projects and case studies
+
+## Stack
+
+- Next.js App Router
+- React + TypeScript (`strict`)
 - Tailwind CSS v4
 - PostgreSQL + Drizzle ORM
-- Server-side GitHub API fetch for "Last touched"
+- GSAP
 - Vitest + React Testing Library + Playwright
 
-## Features
-- Pixel-faithful homepage and case-study layout based on Figma references
-- Reusable section architecture (label/content split)
-- Dynamic project list and project detail routes from PostgreSQL
-- Admin panel (`/admin`) for editing/hiding projects and revoking sessions
-- Audit logs for auth and project actions
-- Security headers, CSRF validation, rate-limited login path, HttpOnly session cookies
-- Impressum page with up-to-date German legal wording (`§ 5 DDG`)
+## Core Features
 
-## Design System
-- Background: `#000000`
-- Main text: `#FFFFFF`
-- Green: `#5BE38B`
-- Orange: `#E3AD5B`
-- Red: `#E35B5B`
-- Blue: `#5B76E3`
-- Fonts: `Inria Sans` + `Instrument Serif` (via `next/font`)
+- Homepage sections:
+  - Hero
+  - About
+  - Projects
+  - Tech Stack / Survival Kit
+  - Contact
+  - Other Info
+- Case study pages with rich typography + accents
+- Admin panel:
+  - Dashboard overview
+  - Edit existing case studies
+  - Add Orbitaly seed case study
+  - Visibility toggles
+  - Session management
+  - Password update
+- Footer:
+  - Dynamic current year
+  - Last touched date from latest GitHub commit
 
 ## Project Structure
+
 ```txt
 src/
   app/
@@ -51,45 +83,42 @@ scripts/
 drizzle/
 ```
 
-## Environment Variables
-Copy `.env.example` to `.env.local`:
+## Environment
+
+Use only one env variable:
 
 ```bash
 DATABASE_URL=
 ```
 
-First visit to `/admin`:
-- The first successful login creates the single admin account automatically.
-- After that, only that account can log in.
+See [.env.example](./.env.example).
 
-## Database
-Generate and run migrations:
+## Local Setup
 
 ```bash
+pnpm install
 pnpm db:generate
 pnpm db:migrate
 pnpm db:seed
-```
-
-## Development
-```bash
-pnpm install
 pnpm dev
 ```
 
-Run tests:
+## Quality Checks
 
 ```bash
 pnpm test
 pnpm test:e2e
-```
-
-Before release:
-
-```bash
 pnpm audit
 pnpm build
 ```
 
+## Notes
+
+- No secrets are committed.
+- First successful admin signup becomes the only admin account.
+- Title images can be managed per case study from the admin edit view.
+
 ## License
-MIT License, 2026 Julius Grimm. See [LICENSE](./LICENSE).
+
+MIT © Julius Grimm (2026)
+

@@ -1,6 +1,7 @@
 import Link from "next/link";
+import Image from "next/image";
 import { notFound } from "next/navigation";
-import { Globe } from "lucide-react";
+import { ArrowUpRight, Globe } from "lucide-react";
 import { SectionShell } from "@/components/shared/section-shell";
 import { ColorTag } from "@/components/shared/color-tag";
 import { CaseStudyAnimations } from "@/components/sections/case-study-animations";
@@ -18,7 +19,8 @@ const accentBySlug: Record<string, string[]> = {
   ],
   "levo-studio-tickets": ["quick changes", "support chaos into structured chaos"],
   "levo-studio-db-controller": ["self-hosted Neon/Supabase-style control panel", "SSH into production and pray"],
-  "levo-studio-finance": ["painful realization that business is mostly admin", "without pretending Excel is a lifestyle"]
+  "levo-studio-finance": ["painful realization that business is mostly admin", "without pretending Excel is a lifestyle"],
+  orbitaly: ["trusting random messenger stacks felt reckless", "secure Matrix client onboarding as easy as possible"]
 };
 
 const withAccent = (text: string, accents: string[]): React.ReactNode => {
@@ -42,15 +44,30 @@ export default async function ProjectDetailPage({ params }: Props): Promise<Reac
   const project = await getProjectBySlug(slug);
   if (!project) notFound();
   const accents = accentBySlug[project.slug] ?? [];
+  const projectDateBySlug: Record<string, string> = {
+    "levo-studio-tickets": "March 2026",
+    "levo-studio-db-controller": "April 2026",
+    "levo-studio-finance": "April 2026",
+    vibevote: "April 2026",
+    orbitaly: "April 2026"
+  };
 
   return (
     <main className="min-h-screen bg-black px-7 pb-36 pt-14 text-white md:flex md:items-center md:px-16 md:py-16 lg:px-[64px]">
       <CaseStudyAnimations />
       <div className="mx-auto w-full max-w-[1320px] space-y-16">
         <SectionShell label="DESCRIPTION">
+          {project.imageUrl ? (
+            <div className="mb-8 relative aspect-[1200/630] w-full max-w-[980px] overflow-hidden border border-white/15 bg-[#151618]">
+              <Image src={project.imageUrl} alt={`${project.title} OG preview`} fill className="object-cover" sizes="(max-width: 1200px) 100vw, 60vw" />
+            </div>
+          ) : null}
           <h1 data-case-heading className="font-instrument text-[30px] leading-[1.03] md:text-[46px]">
             {project.title} <span className="text-[#5BE38B]">{project.subtitle}</span>
           </h1>
+          <p className="mt-3 font-inria text-[12px] uppercase tracking-[0.06em] text-white/60 md:text-[13px]">
+            {projectDateBySlug[project.slug] ?? "April 2026"}
+          </p>
           <p data-case-body className="mt-9 max-w-[1080px] font-instrument text-[20px] leading-[1.14] md:text-[34px]">
             {withAccent(project.description, accents)}
           </p>
@@ -74,9 +91,10 @@ export default async function ProjectDetailPage({ params }: Props): Promise<Reac
           <SectionShell label="LINKS">
             <div className="flex flex-wrap gap-4">
               {project.links.filter((link) => link.visible).map((link) => (
-                <Link key={link.id} href={link.url} target="_blank" className="inline-flex items-center gap-3 border border-[#5BE38B] bg-[rgba(91,227,139,0.1)] px-6 py-4 font-inria text-[16px] text-[#5BE38B] md:text-[14px]">
+                <Link key={link.id} href={link.url} target="_blank" className="inline-flex items-center gap-2.5 border border-[#5BE38B] bg-[rgba(91,227,139,0.1)] px-5 py-2.5 font-inria text-[15px] text-[#5BE38B] transition hover:bg-[rgba(91,227,139,0.2)] md:text-[14px]">
                   <Globe className="size-5" />
                   {link.label}
+                  <ArrowUpRight className="size-4" />
                 </Link>
               ))}
             </div>

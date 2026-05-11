@@ -2,6 +2,7 @@ import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 
 export const middleware = (request: NextRequest): NextResponse => {
+  const isProd = process.env.NODE_ENV === "production";
   const response = NextResponse.next();
   response.headers.set("X-Frame-Options", "DENY");
   response.headers.set("X-Content-Type-Options", "nosniff");
@@ -14,7 +15,7 @@ export const middleware = (request: NextRequest): NextResponse => {
   if (request.nextUrl.pathname.startsWith("/admin") && !request.cookies.get("admin_csrf")?.value) {
     response.cookies.set("admin_csrf", crypto.randomUUID().replace(/-/g, ""), {
       httpOnly: true,
-      secure: true,
+      secure: isProd,
       sameSite: "lax",
       path: "/"
     });

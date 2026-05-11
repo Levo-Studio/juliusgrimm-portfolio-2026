@@ -12,7 +12,7 @@ export const ProjectThumb = ({ title, imageUrl }: ProjectThumbProps): React.JSX.
   const [isLoading, setIsLoading] = useState<boolean>(Boolean(imageUrl));
 
   return (
-    <div className="relative h-[118px] overflow-hidden bg-[#1a1b1f] sm:h-[138px] md:h-[168px]">
+    <div className="relative aspect-[1200/630] w-full overflow-hidden bg-[#1a1b1f]">
       {imageUrl ? (
         <Image
           src={imageUrl}

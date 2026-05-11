@@ -59,6 +59,10 @@ body {
   animation: crt-flicker 1.8s steps(12, end) infinite;
 }
 
+.about-word-initial {
+  opacity: 0.3;
+}
+
 @keyframes crt-flicker {
   0% { opacity: 0.85; }
   30% { opacity: 0.95; }

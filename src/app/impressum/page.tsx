@@ -9,7 +9,7 @@ export default function ImpressumPage(): React.JSX.Element {
       <div className="mx-auto max-w-[1320px]">
       <div className="mb-20">
         <h1 data-imp-title className="font-instrument text-[44px] leading-[0.95] md:text-[78px]">Legal stuff.</h1>
-        <p data-imp-subtitle className="mt-4 font-instrument text-[25px] text-[#5BE38B] md:text-[42px]">Unfortunately required by German law.</p>
+        <p data-imp-subtitle className="mt-4 font-instrument text-[23px] text-[#5BE38B] md:text-[36px]">Unfortunately required by German law.</p>
         <Link data-imp-back href="/" className="mt-7 inline-block font-inria text-[18px] underline underline-offset-4 md:text-[20px]">
           ← BACK
         </Link>
@@ -17,7 +17,7 @@ export default function ImpressumPage(): React.JSX.Element {
 
       <div className="space-y-16">
         <SectionShell label="INFO">
-          <div className="max-w-[980px] space-y-8 font-instrument text-[26px] leading-[1.2] md:text-[34px]">
+          <div className="max-w-[980px] space-y-8 font-instrument text-[24px] leading-[1.24] md:text-[30px]">
             <p>Angaben gemäß § 5 DDG</p>
             <p>
               Julius Grimm
@@ -39,7 +39,7 @@ export default function ImpressumPage(): React.JSX.Element {
         </SectionShell>
 
         <SectionShell label="RESPONSIBLE">
-          <p className="max-w-[980px] font-instrument text-[26px] leading-[1.2] md:text-[34px]">
+          <p className="max-w-[980px] font-instrument text-[22px] leading-[1.24] md:text-[26px]">
             Julius Grimm
             <br />
             Europaplatz 2/1

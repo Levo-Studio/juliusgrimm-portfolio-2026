@@ -26,6 +26,22 @@ export const CaseStudyAnimations = (): null => {
             toggleActions: "play none none reverse"
           }
         });
+
+        gsap.fromTo(
+          element,
+          { opacity: 0.36 },
+          {
+            opacity: 1,
+            ease: "none",
+            immediateRender: false,
+            scrollTrigger: {
+              trigger: element,
+              start: "top 92%",
+              end: "top 62%",
+              scrub: 0.55
+            }
+          }
+        );
       });
 
       gsap.from("[data-tech-tag]", {

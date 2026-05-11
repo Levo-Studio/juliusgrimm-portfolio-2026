@@ -85,6 +85,30 @@ const fallbackProjects: Project[] = [
       { id: "f4t4", label: "PostgreSQL", colorCategory: "green", sortOrder: 4 }
     ],
     links: [{ id: "f4l1", label: "vibevote.de", url: "https://vibevote.de", visible: true, sortOrder: 1 }]
+  },
+  {
+    id: "fallback-5",
+    slug: "orbitaly",
+    title: "Orbitaly",
+    subtitle: "Messenger encryption paranoia, so I built my own.",
+    description:
+      "A self-hosted Matrix onboarding platform built because trusting random messenger stacks felt reckless. Orbitaly turns Matrix client setup into a flow that normal people can finish without rage quitting.",
+    whyBuilt:
+      "I was paranoid about messenger encryption and onboarding complexity, so I built Orbitaly to make secure Matrix client onboarding as easy as possible while keeping everything under my own control.",
+    imageUrl: null,
+    visible: true,
+    sortOrder: 5,
+    techStack: [
+      { id: "f5t1", label: "Next.js", colorCategory: "green", sortOrder: 1 },
+      { id: "f5t2", label: "TypeScript", colorCategory: "green", sortOrder: 2 },
+      { id: "f5t3", label: "PostgreSQL", colorCategory: "green", sortOrder: 3 },
+      { id: "f5t4", label: "Matrix", colorCategory: "blue", sortOrder: 4 },
+      { id: "f5t5", label: "Docker", colorCategory: "orange", sortOrder: 5 }
+    ],
+    links: [
+      { id: "f5l1", label: "orbitaly.de", url: "https://orbitaly.de", visible: true, sortOrder: 1 },
+      { id: "f5l2", label: "GitHub", url: "https://github.com/levo-studio/orbitaly", visible: true, sortOrder: 2 }
+    ]
   }
 ];
 

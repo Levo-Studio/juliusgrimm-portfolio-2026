@@ -50,6 +50,21 @@ const seedProjects = [
     sortOrder: 4,
     tech: ["React", "TypeScript", "Next.js", "PostgreSQL"],
     links: [{ label: "vibevote.de", url: "https://vibevote.de", visible: true }]
+  },
+  {
+    slug: "orbitaly",
+    title: "Orbitaly",
+    subtitle: "Messenger encryption paranoia, so I built my own.",
+    description:
+      "A self-hosted Matrix onboarding platform built because trusting random messenger stacks felt reckless. Orbitaly turns Matrix client setup into a flow that normal people can finish without rage quitting.",
+    whyBuilt:
+      "I was paranoid about messenger encryption and onboarding complexity, so I built Orbitaly to make secure Matrix client onboarding as easy as possible while keeping everything under my own control.",
+    sortOrder: 5,
+    tech: ["Next.js", "TypeScript", "PostgreSQL", "Matrix", "Docker"],
+    links: [
+      { label: "orbitaly.de", url: "https://orbitaly.de", visible: true },
+      { label: "GitHub", url: "https://github.com/levo-studio/orbitaly", visible: true }
+    ]
   }
 ];
 

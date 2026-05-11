@@ -9,6 +9,7 @@ const SESSION_COOKIE = "admin_session";
 const CSRF_COOKIE = "admin_csrf";
 const sessionMs = 1000 * 60 * 60 * 24 * 7;
 const attempts = new Map<string, { count: number; until: number }>();
+const isProd = process.env.NODE_ENV === "production";
 
 const hashToken = (token: string): string => createHash("sha256").update(token).digest("hex");
 
@@ -43,7 +44,7 @@ export const createSession = async (userId: string): Promise<void> => {
   });
 
   const cookieStore = await cookies();
-  cookieStore.set(SESSION_COOKIE, token, { httpOnly: true, secure: true, sameSite: "lax", expires: expiresAt, path: "/" });
+  cookieStore.set(SESSION_COOKIE, token, { httpOnly: true, secure: isProd, sameSite: "lax", expires: expiresAt, path: "/" });
 };
 
 export const getSessionUser = async (): Promise<{ id: string; email: string } | null> => {
@@ -69,7 +70,7 @@ export const clearSession = async (): Promise<void> => {
 export const generateCsrfToken = async (): Promise<string> => {
   const token = randomBytes(16).toString("hex");
   const cookieStore = await cookies();
-  cookieStore.set(CSRF_COOKIE, token, { httpOnly: true, secure: true, sameSite: "lax", path: "/" });
+  cookieStore.set(CSRF_COOKIE, token, { httpOnly: true, secure: isProd, sameSite: "lax", path: "/" });
   return token;
 };
 

@@ -17,6 +17,7 @@ export const survivalTags: SurvivalTag[] = [
   { label: "Fedora", color: "red" },
   { label: "Debian", color: "red" },
   { label: "YubiKeys", color: "red" },
+  { label: "Bitwarden", color: "red" },
   { label: "Coffee", color: "red" },
   { label: "Gym", color: "blue" },
   { label: "Tennis", color: "blue" },
