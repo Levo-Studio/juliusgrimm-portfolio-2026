@@ -2,7 +2,7 @@ import { cookies } from "next/headers";
 import { desc } from "drizzle-orm";
 import { db } from "@/server/db/client";
 import { adminSessions, projects } from "@/server/db/schema";
-import { getSessionUser } from "@/server/auth";
+import { generateCsrfToken, getSessionUser } from "@/server/auth";
 import { AdminLoginForm } from "./admin-login-form";
 import { AdminDashboard } from "./admin-dashboard";
 
@@ -13,7 +13,8 @@ type Props = {
 export default async function AdminPage({ searchParams }: Props): Promise<React.JSX.Element> {
   const params = await searchParams;
   const user = await getSessionUser();
-  const csrfToken = (await cookies()).get("admin_csrf")?.value ?? "";
+  const cookieToken = (await cookies()).get("admin_csrf")?.value ?? "";
+  const csrfToken = cookieToken || (await generateCsrfToken());
 
   if (!user) {
     return (

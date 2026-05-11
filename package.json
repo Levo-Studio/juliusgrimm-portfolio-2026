@@ -28,7 +28,7 @@
     "bcryptjs": "2.4.3",
     "class-variance-authority": "0.7.0",
     "clsx": "2.1.1",
-    "drizzle-orm": "0.38.3",
+    "drizzle-orm": "0.45.2",
     "gsap": "3.13.0",
     "lucide-react": "1.14.0",
     "next": "16.2.6",
@@ -54,11 +54,16 @@
     "@types/qrcode": "1.5.5",
     "@types/react": "19.2.14",
     "@types/react-dom": "19.2.3",
-    "drizzle-kit": "0.30.1",
+    "drizzle-kit": "0.31.4",
     "jsdom": "25.0.1",
     "tailwindcss": "4.3.0",
     "tsx": "4.19.2",
     "typescript": "5.6.3",
     "vitest": "2.1.4"
+  },
+  "pnpm": {
+    "overrides": {
+      "postcss": "8.5.14"
+    }
   }
 }

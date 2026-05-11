@@ -12,16 +12,22 @@ import { contactItems, survivalTags } from "@/lib/content";
 import { getVisibleProjects } from "@/server/projects";
 
 const getGitHubLastUpdate = async (): Promise<string> => {
+  const formatDate = (value: Date): string =>
+    value.toLocaleDateString("de-DE", { day: "2-digit", month: "2-digit", year: "numeric" }).replace(/\./g, "-");
+
   try {
-    const response = await fetch("https://api.github.com/repos/Levo-Studio/juliusgrimm-portfolio-2026/commits?per_page=1", { next: { revalidate: 3600 } });
-    if (!response.ok) return "probably recently";
+    const response = await fetch("https://api.github.com/repos/Levo-Studio/juliusgrimm-portfolio-2026/commits?per_page=1", {
+      headers: { Accept: "application/vnd.github+json", "User-Agent": "juliusgrimm-portfolio-2026" },
+      next: { revalidate: 3600 }
+    });
+    if (!response.ok) return formatDate(new Date());
     const payload = (await response.json()) as Array<{ commit?: { author?: { date?: string } } }>;
     const commitDate = payload[0]?.commit?.author?.date;
-    if (!commitDate) return "probably recently";
+    if (!commitDate) return formatDate(new Date());
     const date = new Date(commitDate);
-    return date.toLocaleDateString("de-DE", { day: "2-digit", month: "2-digit", year: "numeric" }).replace(/\./g, "-");
+    return formatDate(date);
   } catch {
-    return "probably recently";
+    return formatDate(new Date());
   }
 };
 
@@ -97,11 +103,11 @@ export const Homepage = async (): Promise<React.JSX.Element> => {
                 <ColorTag key={tag.label} label={tag.label} color={tag.color} />
               ))}
             </div>
-            <div className="mt-9 space-y-3 font-inria text-[22px] md:text-[26px]">
-              <p className="flex items-center gap-3 text-[#5BE38B]"><span className="inline-block size-3 bg-[#5BE38B]" />Things causing compiling errors.</p>
-              <p className="flex items-center gap-3 text-[#E3AD5B]"><span className="inline-block size-3 bg-[#E3AD5B]" />Daily damage control.</p>
-              <p className="flex items-center gap-3 text-[#E35B5B]"><span className="inline-block size-3 bg-[#E35B5B]" />Root access and emotional damage.</p>
-              <p className="flex items-center gap-3 text-[#5B76E3]"><span className="inline-block size-3 bg-[#5B76E3]" />Real-world side quests.</p>
+            <div className="mt-9 space-y-3 font-inria text-[15px] md:text-[26px]">
+              <p className="flex items-center gap-3 whitespace-nowrap text-[#5BE38B]"><span className="inline-block size-3 shrink-0 bg-[#5BE38B]" />Things causing compiling errors.</p>
+              <p className="flex items-center gap-3 whitespace-nowrap text-[#E3AD5B]"><span className="inline-block size-3 shrink-0 bg-[#E3AD5B]" />Daily damage control.</p>
+              <p className="flex items-center gap-3 whitespace-nowrap text-[#E35B5B]"><span className="inline-block size-3 shrink-0 bg-[#E35B5B]" />Root access and emotional damage.</p>
+              <p className="flex items-center gap-3 whitespace-nowrap text-[#5B76E3]"><span className="inline-block size-3 shrink-0 bg-[#5B76E3]" />Real-world side quests.</p>
             </div>
           </SectionShell>
 
@@ -113,8 +119,13 @@ export const Homepage = async (): Promise<React.JSX.Element> => {
               {contactItems.map((item) => (
                 <div key={item.title} data-contact-card>
                   <p className="font-inria text-[16px] text-white md:text-[16px]">{item.title}</p>
-                  <Link href={contactLinks[item.title]} target="_blank" className="mt-2 block font-inria text-[27px] underline-offset-4 hover:underline md:text-[28px]">
+                  <Link
+                    href={contactLinks[item.title]}
+                    target="_blank"
+                    className="group mt-2 inline-flex items-center gap-2 font-inria text-[27px] md:text-[28px]"
+                  >
                     {item.value}
+                    <ArrowUpRight className="size-5 transition-transform duration-200 ease-out group-hover:-translate-y-0.5 group-hover:translate-x-0.5 md:size-[18px]" />
                   </Link>
                   <p className="mt-1 font-instrument text-[20px] leading-[1.12] text-[#5BE38B] md:text-[20px]">{item.note}</p>
                 </div>

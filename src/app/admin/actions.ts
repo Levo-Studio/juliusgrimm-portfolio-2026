@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { headers } from "next/headers";
 import { z } from "zod";
 import { and, count, eq, isNull } from "drizzle-orm";
 import { authenticator } from "otplib";
@@ -12,7 +13,7 @@ import { audit, clearSession, createSession, getSessionUser, hashPassword, rateL
 const loginSchema = z.object({
   email: z.string().email(),
   password: z.string().min(12),
-  csrf: z.string().optional(),
+  csrf: z.string().min(8),
   twoFactorCode: z.string().optional()
 });
 
@@ -27,8 +28,10 @@ export const loginAdmin = async (_prevState: LoginState, formData: FormData): Pr
   });
 
   if (!parsed.success) return { ok: false, error: "Please use a valid email and a password with at least 12 characters." };
-  if (parsed.data.csrf && !(await verifyCsrfToken(parsed.data.csrf))) return { ok: false, error: "Session expired. Please reload /admin and try again." };
-  if (!rateLimitAuth(parsed.data.email)) return { ok: false, error: "Too many login attempts. Please wait a few minutes." };
+  if (!(await verifyCsrfToken(parsed.data.csrf))) return { ok: false, error: "Session expired. Please reload /admin and try again." };
+  const headerBag = await headers();
+  const loginFingerprint = `${parsed.data.email.toLowerCase()}::${headerBag.get("x-forwarded-for") ?? headerBag.get("x-real-ip") ?? "unknown-ip"}`;
+  if (!rateLimitAuth(loginFingerprint)) return { ok: false, error: "Too many login attempts. Please wait a few minutes." };
 
   try {
     const [{ totalUsers }] = await db.select({ totalUsers: count() }).from(adminUsers);

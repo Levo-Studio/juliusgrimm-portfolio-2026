@@ -4,121 +4,72 @@
   <img src="./public/jg_logo.png" alt="Julius Grimm Logo" width="120" height="120" />
 </p>
 
-<p align="center"><strong>Founder on accident. Engineer by design.</strong></p>
-
 <p align="center">
-  <a href="https://juliusgrimm.dev">Website</a> ·
-  <a href="https://github.com/Levo-Studio/juliusgrimm-portfolio-2026">Source</a> ·
-  <a href="https://github.com/justthatrandomcoder">GitHub</a> ·
-  <a href="https://instagram.com/julius_gr_">Instagram</a> ·
-  <a href="https://linkedin.com/in/julius-grimm">LinkedIn</a>
+  <img src="https://readme-typing-svg.demolab.com?font=Inria+Sans&size=24&duration=2200&pause=650&color=5BE38B&center=true&vCenter=true&width=720&lines=Founder+on+accident.;Engineer+by+design.;Readable+on+purpose.;Overengineered+where+emotionally+necessary." alt="Typing intro" />
 </p>
 
 <p align="center">
-  <code>next.js</code>
-  <code>typescript</code>
-  <code>tailwind v4</code>
-  <code>drizzle</code>
-  <code>postgresql</code>
-  <code>gsap</code>
+  <a href="https://juliusgrimm.dev"><img alt="Website" src="https://img.shields.io/badge/Website-juliusgrimm.dev-5BE38B?style=for-the-badge&labelColor=000000"></a>
+  <a href="https://github.com/Levo-Studio/juliusgrimm-portfolio-2026"><img alt="Source Code" src="https://img.shields.io/badge/Source%20Code-GitHub-5BE38B?style=for-the-badge&labelColor=000000"></a>
+  <a href="https://github.com/justthatrandomcoder"><img alt="GitHub" src="https://img.shields.io/badge/GitHub-justthatrandomcoder-FFFFFF?style=for-the-badge&labelColor=000000"></a>
 </p>
 
-Built with Next.js, PostgreSQL, and a very healthy amount of unnecessary precision.
+<p align="center">
+  <a href="https://instagram.com/julius_gr_"><img alt="Instagram" src="https://img.shields.io/badge/Instagram-@julius__gr_-E35B5B?style=flat-square&labelColor=000000"></a>
+  <a href="https://linkedin.com/in/julius-grimm"><img alt="LinkedIn" src="https://img.shields.io/badge/LinkedIn-julius--grimm-5B76E3?style=flat-square&labelColor=000000"></a>
+  <a href="mailto:me@juliusgrimm.dev"><img alt="Email" src="https://img.shields.io/badge/Email-me@juliusgrimm.dev-E3AD5B?style=flat-square&labelColor=000000"></a>
+</p>
 
-This is my personal portfolio plus case-study system.  
-It is open source because:
-- I like open source.
-- Good portfolio code should not live behind a black box.
-- Publicly overengineering things is part of the brand now.
+---
 
-## What This Repo Is
+## `what this is`
 
-- Editorial black/green design system matching my Figma references
-- Dynamic project + case study pages from PostgreSQL
-- Custom animations (hero code cloud, reveal flows, card interactions)
-- Secure admin panel for managing projects and case studies
+My personal infrastructure playground disguised as a portfolio.  
+Fast case studies, moody black/green editorial type, custom motion, and an admin panel that treats bad auth habits like a personal insult.
 
-## Stack
+Built to be remixed.  
+Not built to look like everyone else.
 
-- Next.js App Router
-- React + TypeScript (`strict`)
-- Tailwind CSS v4
-- PostgreSQL + Drizzle ORM
-- GSAP
-- Vitest + React Testing Library + Playwright
+---
 
-## Core Features
+## `stack tags`
 
-- Homepage sections:
-  - Hero
-  - About
-  - Projects
-  - Tech Stack / Survival Kit
-  - Contact
-  - Other Info
-- Case study pages with rich typography + accents
-- Admin panel:
-  - Dashboard overview
-  - Edit existing case studies
-  - Add Orbitaly seed case study
-  - Visibility toggles
-  - Session management
-  - Password update
-- Footer:
-  - Dynamic current year
-  - Last touched date from latest GitHub commit
+<p>
+  <img src="https://img.shields.io/badge/Next.js-000000?style=flat-square&logo=next.js&logoColor=white" />
+  <img src="https://img.shields.io/badge/TypeScript-000000?style=flat-square&logo=typescript&logoColor=5BE38B" />
+  <img src="https://img.shields.io/badge/Tailwind_v4-000000?style=flat-square&logo=tailwindcss&logoColor=5BE38B" />
+  <img src="https://img.shields.io/badge/PostgreSQL-000000?style=flat-square&logo=postgresql&logoColor=5BE38B" />
+  <img src="https://img.shields.io/badge/Drizzle-000000?style=flat-square&logo=drizzle&logoColor=5BE38B" />
+  <img src="https://img.shields.io/badge/GSAP-000000?style=flat-square&logo=greensock&logoColor=5BE38B" />
+</p>
 
-## Project Structure
+---
+
+## `feature slices`
+
+- Hero code-cloud + typographic reveal flow
+- Database-backed project/case-study pages
+- Admin dashboard with project editing + visibility control
+- Session controls, password flow, auth audit trail
+- Dynamic footer metadata (`current year`, `last touched`)
+
+---
+
+## `project map`
 
 ```txt
 src/
   app/
   components/
-  hooks/
   lib/
   server/
   tests/
-  types/
 scripts/
 drizzle/
 ```
 
-## Environment
+---
 
-Use only one env variable:
+## `license`
 
-```bash
-DATABASE_URL=
-```
-
-See [.env.example](./.env.example).
-
-## Local Setup
-
-```bash
-pnpm install
-pnpm db:generate
-pnpm db:migrate
-pnpm db:seed
-pnpm dev
-```
-
-## Quality Checks
-
-```bash
-pnpm test
-pnpm test:e2e
-pnpm audit
-pnpm build
-```
-
-## Notes
-
-- No secrets are committed.
-- First successful admin signup becomes the only admin account.
-- Title images can be managed per case study from the admin edit view.
-
-## License
-
-MIT © Julius Grimm (2026)
-
+MIT © Julius Grimm

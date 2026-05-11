@@ -53,11 +53,16 @@ export const getSessionUser = async (): Promise<{ id: string; email: string } | 
   if (!token) return null;
   const tokenHash = hashToken(token);
   const [session] = await db
-    .select({ userId: adminSessions.userId })
+    .select({ id: adminSessions.id, userId: adminSessions.userId, expiresAt: adminSessions.expiresAt })
     .from(adminSessions)
     .where(and(eq(adminSessions.tokenHash, tokenHash), isNull(adminSessions.revokedAt)));
 
   if (!session) return null;
+  if (session.expiresAt.getTime() <= Date.now()) {
+    await db.update(adminSessions).set({ revokedAt: new Date() }).where(eq(adminSessions.id, session.id));
+    cookieStore.delete(SESSION_COOKIE);
+    return null;
+  }
   const [user] = await db.select({ id: adminUsers.id, email: adminUsers.email }).from(adminUsers).where(eq(adminUsers.id, session.userId)).limit(1);
   return user ?? null;
 };

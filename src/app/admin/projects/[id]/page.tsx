@@ -5,7 +5,7 @@ import { cookies } from "next/headers";
 import { eq } from "drizzle-orm";
 import { db } from "@/server/db/client";
 import { projects } from "@/server/db/schema";
-import { getSessionUser } from "@/server/auth";
+import { generateCsrfToken, getSessionUser } from "@/server/auth";
 import { Button } from "@/components/ui/button";
 import { upsertProject } from "@/app/admin/actions";
 
@@ -23,7 +23,8 @@ export default async function AdminProjectEditPage({ params, searchParams }: Pro
   const sp = await searchParams;
   const [project] = await db.select().from(projects).where(eq(projects.id, id)).limit(1);
   if (!project) notFound();
-  const csrfToken = (await cookies()).get("admin_csrf")?.value ?? "";
+  const cookieToken = (await cookies()).get("admin_csrf")?.value ?? "";
+  const csrfToken = cookieToken || (await generateCsrfToken());
   const error =
     sp.error === "csrf"
       ? "Session expired. Please go back and try again."
