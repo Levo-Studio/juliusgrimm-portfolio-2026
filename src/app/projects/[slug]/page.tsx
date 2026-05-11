@@ -56,7 +56,13 @@ export default async function ProjectDetailPage({ params }: Props): Promise<Reac
             <div className="mb-8 relative aspect-[1200/630] w-full max-w-[980px] overflow-hidden border border-white/15 bg-[#151618]">
               <Image src={project.imageUrl} alt={`${project.title} OG preview`} fill className="object-cover" sizes="(max-width: 1200px) 100vw, 60vw" />
             </div>
-          ) : null}
+          ) : (
+            <div className="crt-loader mb-8 relative aspect-[1200/630] w-full max-w-[980px] overflow-hidden border border-white/15 bg-[#151618]">
+              <div className="absolute inset-0 flex items-center justify-center font-mono text-[12px] tracking-[0.18em] text-[#5BE38B] md:text-[13px]">
+                NO SIGNAL
+              </div>
+            </div>
+          )}
           <h1 data-case-heading className="font-instrument text-[30px] leading-[1.03] md:text-[46px]">
             {project.title} <span className="text-[#5BE38B]">{project.subtitle}</span>
           </h1>

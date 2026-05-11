@@ -9,13 +9,14 @@ type ProjectThumbProps = {
 };
 
 export const ProjectThumb = ({ title, imageUrl }: ProjectThumbProps): React.JSX.Element => {
-  const [isLoading, setIsLoading] = useState<boolean>(Boolean(imageUrl));
+  const hasImage = Boolean(imageUrl);
+  const [isLoading, setIsLoading] = useState<boolean>(hasImage);
 
   return (
     <div className="relative aspect-[1200/630] w-full overflow-hidden bg-[#1a1b1f]">
-      {imageUrl ? (
+      {hasImage ? (
         <Image
-          src={imageUrl}
+          src={imageUrl ?? ""}
           alt={`${title} preview`}
           fill
           className="object-cover"
@@ -24,13 +25,13 @@ export const ProjectThumb = ({ title, imageUrl }: ProjectThumbProps): React.JSX.
         />
       ) : null}
 
-      {isLoading ? (
+      {!hasImage || isLoading ? (
         <div className="crt-loader absolute inset-0 flex items-center justify-center">
-          <div className="font-mono text-[11px] tracking-[0.18em] text-[#5BE38B] md:text-[12px]">TUNING SIGNAL...</div>
+          <div className="font-mono text-[11px] tracking-[0.18em] text-[#5BE38B] md:text-[12px]">
+            {hasImage ? "TUNING SIGNAL..." : "NO SIGNAL"}
+          </div>
         </div>
       ) : null}
-
-      {!imageUrl ? <div className="absolute inset-0 bg-[#1a1b1f]" /> : null}
     </div>
   );
 };
