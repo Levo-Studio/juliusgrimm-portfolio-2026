@@ -26,13 +26,11 @@ import { env } from "@/lib/env";
 
 const loginSchema = z.object({
   email: z.string(),
-  password: z.string(),
-  csrf: z.string()
+  password: z.string()
 });
 
 const twoFactorLoginSchema = z.object({
-  code: z.string(),
-  csrf: z.string()
+  code: z.string()
 });
 
 export type LoginState = { ok: boolean; error?: string };
@@ -41,19 +39,16 @@ export type TwoFactorLoginState = { ok: boolean; error?: string };
 export const loginAdmin = async (_prevState: LoginState, formData: FormData): Promise<LoginState> => {
   const parsed = loginSchema.safeParse({
     email: formData.get("email"),
-    password: formData.get("password"),
-    csrf: formData.get("csrf")
+    password: formData.get("password")
   });
 
   if (!parsed.success) return { ok: false, error: "Invalid form submission." };
 
   const email = parsed.data.email.trim().toLowerCase();
   const password = parsed.data.password;
-  const csrf = parsed.data.csrf.trim();
   if (!z.string().email().safeParse(email).success || password.length < 12) {
     return { ok: false, error: "Please use a valid email and a password with at least 12 characters." };
   }
-  if (csrf.length < 8 || !(await verifyCsrfToken(csrf))) return { ok: false, error: "Session expired. Please reload /admin and try again." };
 
   const headerBag = await headers();
   const loginFingerprint = `${email}::${headerBag.get("x-forwarded-for") ?? headerBag.get("x-real-ip") ?? "unknown-ip"}`;
@@ -103,13 +98,9 @@ export const loginAdmin = async (_prevState: LoginState, formData: FormData): Pr
 
 export const verifyTwoFactorLogin = async (_prevState: TwoFactorLoginState, formData: FormData): Promise<TwoFactorLoginState> => {
   const parsed = twoFactorLoginSchema.safeParse({
-    code: formData.get("code"),
-    csrf: formData.get("csrf")
+    code: formData.get("code")
   });
   if (!parsed.success) return { ok: false, error: "Invalid form submission." };
-
-  const csrf = parsed.data.csrf.trim();
-  if (csrf.length < 8 || !(await verifyCsrfToken(csrf))) return { ok: false, error: "Session expired. Please reload and try again." };
   const userId = await getPendingTwoFactorUserId();
   if (!userId) return { ok: false, error: "2FA session expired. Please sign in again." };
 

@@ -6,11 +6,11 @@ import { Button } from "@/components/ui/button";
 import type { TwoFactorLoginState } from "@/app/admin/actions";
 import { verifyTwoFactorLogin } from "@/app/admin/actions";
 
-type Props = { csrfToken: string };
+type Props = Record<string, never>;
 
 const initialState: TwoFactorLoginState = { ok: false };
 
-export const AdminTwoFactorForm = ({ csrfToken }: Props): React.JSX.Element => {
+export const AdminTwoFactorForm = (_props: Props): React.JSX.Element => {
   const [state, formAction, pending] = useActionState(verifyTwoFactorLogin, initialState);
   const [digits, setDigits] = useState<string[]>(["", "", "", "", "", ""]);
   const refs = useRef<Array<HTMLInputElement | null>>([]);
@@ -54,7 +54,6 @@ export const AdminTwoFactorForm = ({ csrfToken }: Props): React.JSX.Element => {
     <form action={formAction} className="w-full max-w-md space-y-4 border border-white/20 bg-black/80 p-6">
       <h1 className="font-inria text-2xl">Two-Factor Verification</h1>
       <p className="font-inria text-sm text-white/70">Enter the 6-digit code from your authenticator app.</p>
-      <input type="hidden" name="csrf" value={csrfToken} />
       <input type="hidden" name="code" value={code} />
 
       <div className="flex gap-2">
@@ -89,4 +88,3 @@ export const AdminTwoFactorForm = ({ csrfToken }: Props): React.JSX.Element => {
     </form>
   );
 };
-

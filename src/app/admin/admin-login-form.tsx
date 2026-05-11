@@ -8,11 +8,11 @@ import { Input } from "@/components/ui/input";
 import type { LoginState } from "@/app/admin/actions";
 import { loginAdmin } from "@/app/admin/actions";
 
-type Props = { csrfToken: string };
+type Props = Record<string, never>;
 
 const initialState: LoginState = { ok: false };
 
-export const AdminLoginForm = ({ csrfToken }: Props): React.JSX.Element => {
+export const AdminLoginForm = (_props: Props): React.JSX.Element => {
   const [state, formAction, pending] = useActionState(loginAdmin, initialState);
   const [passkeyPending, setPasskeyPending] = useState(false);
 
@@ -46,7 +46,6 @@ export const AdminLoginForm = ({ csrfToken }: Props): React.JSX.Element => {
   return (
     <form action={formAction} className="w-full max-w-md space-y-4 border border-white/20 bg-black/80 p-6">
       <h1 className="font-inria text-2xl">Admin Login</h1>
-      <input type="hidden" name="csrf" value={csrfToken} />
 
       <Input name="email" type="email" required placeholder="me@juliusgrimm.dev" />
       <Input name="password" type="password" required placeholder="••••••••••••" />

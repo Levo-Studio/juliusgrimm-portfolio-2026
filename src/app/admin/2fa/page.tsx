@@ -1,4 +1,3 @@
-import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { AdminTwoFactorForm } from "@/app/admin/admin-two-factor-form";
 import { getPendingTwoFactorUserId, getSessionUser } from "@/server/auth";
@@ -10,12 +9,9 @@ export default async function AdminTwoFactorPage(): Promise<React.JSX.Element> {
   const pendingUserId = await getPendingTwoFactorUserId();
   if (!pendingUserId) redirect("/admin");
 
-  const csrfToken = (await cookies()).get("admin_csrf")?.value ?? "";
-
   return (
     <main className="flex min-h-screen items-center justify-center bg-black p-8 text-white">
-      <AdminTwoFactorForm csrfToken={csrfToken} />
+      <AdminTwoFactorForm />
     </main>
   );
 }
-
