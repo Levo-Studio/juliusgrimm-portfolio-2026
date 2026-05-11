@@ -9,30 +9,54 @@ import { authenticator } from "otplib";
 import QRCode from "qrcode";
 import { db } from "@/server/db/client";
 import { adminAuthenticators, adminSessions, adminTwoFactorSecrets, adminUsers, projectLinks, projects, projectTechStack } from "@/server/db/schema";
-import { audit, clearSession, createSession, getSessionUser, hashPassword, rateLimitAuth, verifyCsrfToken, verifyPassword } from "@/server/auth";
+import {
+  audit,
+  clearPendingTwoFactor,
+  clearSession,
+  createPendingTwoFactor,
+  createSession,
+  getPendingTwoFactorUserId,
+  getSessionUser,
+  hashPassword,
+  rateLimitAuth,
+  verifyCsrfToken,
+  verifyPassword
+} from "@/server/auth";
 import { env } from "@/lib/env";
 
 const loginSchema = z.object({
-  email: z.string().email(),
-  password: z.string().min(12),
-  csrf: z.string().min(8),
-  twoFactorCode: z.string().optional()
+  email: z.string(),
+  password: z.string(),
+  csrf: z.string()
 });
 
-export type LoginState = { ok: boolean; error?: string; requiresTwoFactor?: boolean };
+const twoFactorLoginSchema = z.object({
+  code: z.string(),
+  csrf: z.string()
+});
+
+export type LoginState = { ok: boolean; error?: string };
+export type TwoFactorLoginState = { ok: boolean; error?: string };
 
 export const loginAdmin = async (_prevState: LoginState, formData: FormData): Promise<LoginState> => {
   const parsed = loginSchema.safeParse({
     email: formData.get("email"),
     password: formData.get("password"),
-    csrf: formData.get("csrf"),
-    twoFactorCode: formData.get("twoFactorCode")
+    csrf: formData.get("csrf")
   });
 
-  if (!parsed.success) return { ok: false, error: "Please use a valid email and a password with at least 12 characters." };
-  if (!(await verifyCsrfToken(parsed.data.csrf))) return { ok: false, error: "Session expired. Please reload /admin and try again." };
+  if (!parsed.success) return { ok: false, error: "Invalid form submission." };
+
+  const email = parsed.data.email.trim().toLowerCase();
+  const password = parsed.data.password;
+  const csrf = parsed.data.csrf.trim();
+  if (!z.string().email().safeParse(email).success || password.length < 12) {
+    return { ok: false, error: "Please use a valid email and a password with at least 12 characters." };
+  }
+  if (csrf.length < 8 || !(await verifyCsrfToken(csrf))) return { ok: false, error: "Session expired. Please reload /admin and try again." };
+
   const headerBag = await headers();
-  const loginFingerprint = `${parsed.data.email.toLowerCase()}::${headerBag.get("x-forwarded-for") ?? headerBag.get("x-real-ip") ?? "unknown-ip"}`;
+  const loginFingerprint = `${email}::${headerBag.get("x-forwarded-for") ?? headerBag.get("x-real-ip") ?? "unknown-ip"}`;
   if (!rateLimitAuth(loginFingerprint)) return { ok: false, error: "Too many login attempts. Please wait a few minutes." };
 
   try {
@@ -41,8 +65,8 @@ export const loginAdmin = async (_prevState: LoginState, formData: FormData): Pr
       const [createdUser] = await db
         .insert(adminUsers)
         .values({
-          email: parsed.data.email,
-          passwordHash: await hashPassword(parsed.data.password),
+          email,
+          passwordHash: await hashPassword(password),
           role: "admin"
         })
         .returning();
@@ -54,23 +78,19 @@ export const loginAdmin = async (_prevState: LoginState, formData: FormData): Pr
       redirect("/admin");
     }
 
-    const [user] = await db.select().from(adminUsers).where(eq(adminUsers.email, parsed.data.email)).limit(1);
-    if (!user || !(await verifyPassword(parsed.data.password, user.passwordHash))) {
-      await audit({ action: "failed_login", entityType: "auth", metadata: parsed.data.email });
+    const [user] = await db.select().from(adminUsers).where(eq(adminUsers.email, email)).limit(1);
+    if (!user || !(await verifyPassword(password, user.passwordHash))) {
+      await audit({ action: "failed_login", entityType: "auth", metadata: email });
       return { ok: false, error: "Invalid credentials." };
     }
 
     if (user.twoFactorEnabled) {
-      const code = (parsed.data.twoFactorCode ?? "").replace(/\D/g, "");
-      if (code.length !== 6) return { ok: false, requiresTwoFactor: true, error: "Enter your 2FA code." };
-
-      const [secret] = await db.select().from(adminTwoFactorSecrets).where(eq(adminTwoFactorSecrets.userId, user.id)).limit(1);
-      if (!secret || !authenticator.check(code, secret.secretEncrypted)) {
-        await audit({ userId: user.id, action: "failed_login_2fa", entityType: "auth" });
-        return { ok: false, requiresTwoFactor: true, error: "Invalid 2FA code." };
-      }
+      await createPendingTwoFactor(user.id);
+      await audit({ userId: user.id, action: "login_2fa_challenge", entityType: "auth" });
+      redirect("/admin/2fa");
     }
 
+    await clearPendingTwoFactor();
     await createSession(user.id);
     await audit({ userId: user.id, action: "login", entityType: "auth" });
     revalidatePath("/admin");
@@ -79,6 +99,34 @@ export const loginAdmin = async (_prevState: LoginState, formData: FormData): Pr
     console.error("Admin login/create failed:", error);
     return { ok: false, error: "Could not create/login admin user. Check database permissions and schema." };
   }
+};
+
+export const verifyTwoFactorLogin = async (_prevState: TwoFactorLoginState, formData: FormData): Promise<TwoFactorLoginState> => {
+  const parsed = twoFactorLoginSchema.safeParse({
+    code: formData.get("code"),
+    csrf: formData.get("csrf")
+  });
+  if (!parsed.success) return { ok: false, error: "Invalid form submission." };
+
+  const csrf = parsed.data.csrf.trim();
+  if (csrf.length < 8 || !(await verifyCsrfToken(csrf))) return { ok: false, error: "Session expired. Please reload and try again." };
+  const userId = await getPendingTwoFactorUserId();
+  if (!userId) return { ok: false, error: "2FA session expired. Please sign in again." };
+
+  const code = parsed.data.code.replace(/\D/g, "");
+  if (code.length !== 6) return { ok: false, error: "Enter a valid 6-digit code." };
+
+  const [secret] = await db.select().from(adminTwoFactorSecrets).where(eq(adminTwoFactorSecrets.userId, userId)).limit(1);
+  if (!secret || !authenticator.check(code, secret.secretEncrypted)) {
+    await audit({ userId, action: "failed_login_2fa", entityType: "auth" });
+    return { ok: false, error: "Invalid 2FA code." };
+  }
+
+  await clearPendingTwoFactor();
+  await createSession(userId);
+  await audit({ userId, action: "login", entityType: "auth" });
+  revalidatePath("/admin");
+  redirect("/admin");
 };
 
 export const logoutAdmin = async (): Promise<void> => {

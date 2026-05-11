@@ -1,4 +1,4 @@
-import { createHash, randomBytes } from "crypto";
+import { createHash, createHmac, randomBytes, timingSafeEqual } from "crypto";
 import bcrypt from "bcryptjs";
 import { cookies, headers } from "next/headers";
 import { and, eq, isNull } from "drizzle-orm";
@@ -7,6 +7,7 @@ import { adminSessions, adminUsers, auditLogs } from "@/server/db/schema";
 
 const SESSION_COOKIE = "admin_session";
 const CSRF_COOKIE = "admin_csrf";
+const TWO_FACTOR_COOKIE = "admin_2fa_pending";
 const sessionMs = 1000 * 60 * 60 * 24 * 7;
 const attempts = new Map<string, { count: number; until: number }>();
 const isProd = process.env.NODE_ENV === "production";
@@ -70,6 +71,58 @@ export const getSessionUser = async (): Promise<{ id: string; email: string } | 
 export const clearSession = async (): Promise<void> => {
   const cookieStore = await cookies();
   cookieStore.delete(SESSION_COOKIE);
+};
+
+const signingKey = (): Buffer => {
+  const base = process.env.DATABASE_URL ?? process.env.AUTH_URL ?? "fallback-signing-key";
+  return createHash("sha256").update(base).digest();
+};
+
+const signPendingPayload = (payload: string): string =>
+  createHmac("sha256", signingKey()).update(payload).digest("hex");
+
+export const createPendingTwoFactor = async (userId: string): Promise<void> => {
+  const expiresAt = Date.now() + 10 * 60 * 1000;
+  const nonce = randomBytes(16).toString("hex");
+  const payload = `${userId}.${expiresAt}.${nonce}`;
+  const signature = signPendingPayload(payload);
+  const token = `${payload}.${signature}`;
+  const cookieStore = await cookies();
+  cookieStore.set(TWO_FACTOR_COOKIE, token, {
+    httpOnly: true,
+    secure: isProd,
+    sameSite: "lax",
+    path: "/",
+    expires: new Date(expiresAt)
+  });
+};
+
+export const clearPendingTwoFactor = async (): Promise<void> => {
+  const cookieStore = await cookies();
+  cookieStore.delete(TWO_FACTOR_COOKIE);
+};
+
+export const getPendingTwoFactorUserId = async (): Promise<string | null> => {
+  const cookieStore = await cookies();
+  const raw = cookieStore.get(TWO_FACTOR_COOKIE)?.value;
+  if (!raw) return null;
+  const parts = raw.split(".");
+  if (parts.length < 4) return null;
+
+  const signature = parts.pop();
+  if (!signature) return null;
+  const payload = parts.join(".");
+  const expected = signPendingPayload(payload);
+
+  const signatureBuffer = Buffer.from(signature, "hex");
+  const expectedBuffer = Buffer.from(expected, "hex");
+  if (signatureBuffer.length !== expectedBuffer.length) return null;
+  if (!timingSafeEqual(signatureBuffer, expectedBuffer)) return null;
+
+  const [userId, expiresRaw] = parts;
+  const expiresAt = Number(expiresRaw);
+  if (!userId || Number.isNaN(expiresAt) || expiresAt < Date.now()) return null;
+  return userId;
 };
 
 export const generateCsrfToken = async (): Promise<string> => {
