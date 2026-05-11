@@ -4,9 +4,40 @@ import "./globals.css";
 import { inriaSans, instrumentSerif } from "@/lib/fonts";
 
 export const metadata: Metadata = {
-  title: "Julius Grimm Portfolio 2026",
-  description: "Founder on accident. Engineer by design.",
   metadataBase: new URL("https://juliusgrimm.dev"),
+  title: {
+    default: "Julius Grimm - Engineer by Design",
+    template: "%s | Julius Grimm"
+  },
+  description: "Portfolio of Julius Grimm, founder and full-stack engineer building polished web apps, internal tools, and self-hosted product systems.",
+  applicationName: "Julius Grimm",
+  authors: [{ name: "Julius Grimm", url: "https://juliusgrimm.dev" }],
+  creator: "Julius Grimm",
+  publisher: "Julius Grimm",
+  alternates: {
+    canonical: "/"
+  },
+  keywords: [
+    "Julius Grimm",
+    "Julius Grimm Portfolio",
+    "Levo Studio",
+    "full-stack developer",
+    "Next.js developer",
+    "UI UX designer",
+    "web app developer",
+    "portfolio 2026"
+  ],
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+      "max-video-preview": -1
+    }
+  },
   icons: {
     icon: [
       { url: "/favicon.ico", type: "image/x-icon" },
@@ -16,15 +47,18 @@ export const metadata: Metadata = {
     apple: [{ url: "/apple-icon.png" }]
   },
   openGraph: {
-    title: "Julius Grimm Portfolio 2026",
-    description: "Founder on accident. Engineer by design.",
+    title: "Julius Grimm - Engineer by Design",
+    description: "Full-stack engineering, product systems, and case studies by Julius Grimm.",
+    url: "https://juliusgrimm.dev",
+    siteName: "Julius Grimm",
     images: [{ url: "/jg_badge.png", width: 1200, height: 630, alt: "Julius Grimm Portfolio Badge" }],
+    locale: "en_US",
     type: "website"
   },
   twitter: {
     card: "summary_large_image",
-    title: "Julius Grimm Portfolio 2026",
-    description: "Founder on accident. Engineer by design.",
+    title: "Julius Grimm - Engineer by Design",
+    description: "Full-stack engineering, product systems, and case studies by Julius Grimm.",
     images: ["/jg_badge.png"]
   }
 };

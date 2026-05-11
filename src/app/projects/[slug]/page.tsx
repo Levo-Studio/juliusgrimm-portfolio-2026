@@ -1,5 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { ArrowUpRight, Globe } from "lucide-react";
 import { SectionShell } from "@/components/shared/section-shell";
@@ -39,6 +40,37 @@ const withAccent = (text: string, accents: string[]): React.ReactNode => {
       <span key={`${part}-${index}`}>{part}</span>
     )
   );
+};
+
+export const generateMetadata = async ({ params }: Props): Promise<Metadata> => {
+  const { slug } = await params;
+  const project = await getProjectBySlug(slug);
+  if (!project) return {};
+
+  const title = `${project.title} Case Study`;
+  const description = project.description.length > 155 ? `${project.description.slice(0, 152).trim()}...` : project.description;
+  const image = project.imageUrl ?? "/jg_badge.png";
+
+  return {
+    title,
+    description,
+    alternates: {
+      canonical: `/projects/${project.slug}`
+    },
+    openGraph: {
+      title: `${title} | Julius Grimm`,
+      description,
+      url: `/projects/${project.slug}`,
+      type: "article",
+      images: [{ url: image, width: 1200, height: 630, alt: `${project.title} case study` }]
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: `${title} | Julius Grimm`,
+      description,
+      images: [image]
+    }
+  };
 };
 
 export default async function ProjectDetailPage({ params }: Props): Promise<React.JSX.Element> {
