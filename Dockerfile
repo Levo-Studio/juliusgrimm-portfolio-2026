@@ -38,4 +38,4 @@ USER nextjs
 
 EXPOSE 3017
 
-CMD ["pnpm", "start", "-p", "3017"]
+CMD ["pnpm", "exec", "next", "start", "--port", "3017", "--hostname", "0.0.0.0"]
