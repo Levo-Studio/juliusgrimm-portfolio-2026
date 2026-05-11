@@ -1,7 +1,12 @@
 import { z } from "zod";
 
 const envSchema = z.object({
-  DATABASE_URL: z.string().url()
+  DATABASE_URL: z.string().url(),
+  WEBAUTHN_RP_ID: z.string().optional(),
+  WEBAUTHN_RP_NAME: z.string().optional(),
+  WEBAUTHN_ORIGIN: z.string().url().optional(),
+  TOTP_ISSUER: z.string().optional(),
+  AUTH_URL: z.string().url().optional()
 });
 
 const parsed = envSchema.safeParse(process.env);

@@ -6,9 +6,11 @@ import { headers } from "next/headers";
 import { z } from "zod";
 import { and, count, eq, isNull } from "drizzle-orm";
 import { authenticator } from "otplib";
+import QRCode from "qrcode";
 import { db } from "@/server/db/client";
-import { adminSessions, adminTwoFactorSecrets, adminUsers, projectLinks, projects, projectTechStack } from "@/server/db/schema";
+import { adminAuthenticators, adminSessions, adminTwoFactorSecrets, adminUsers, projectLinks, projects, projectTechStack } from "@/server/db/schema";
 import { audit, clearSession, createSession, getSessionUser, hashPassword, rateLimitAuth, verifyCsrfToken, verifyPassword } from "@/server/auth";
+import { env } from "@/lib/env";
 
 const loginSchema = z.object({
   email: z.string().email(),
@@ -230,6 +232,14 @@ export const revokeSession = async (formData: FormData): Promise<void> => {
 const passwordSchema = z.object({ currentPassword: z.string().min(12), newPassword: z.string().min(12), confirmPassword: z.string().min(12), csrf: z.string().min(8) });
 
 export type PasswordState = { ok: boolean; error?: string; message?: string };
+export type TwoFactorState = {
+  ok: boolean;
+  error?: string;
+  message?: string;
+  secret?: string;
+  qrDataUrl?: string;
+  enabled?: boolean;
+};
 
 export const changePassword = async (_prev: PasswordState, formData: FormData): Promise<PasswordState> => {
   const user = await getSessionUser();
@@ -246,4 +256,79 @@ export const changePassword = async (_prev: PasswordState, formData: FormData): 
   await db.update(adminUsers).set({ passwordHash: await hashPassword(parsed.data.newPassword), updatedAt: new Date() }).where(eq(adminUsers.id, user.id));
   await audit({ userId: user.id, action: "password_change", entityType: "auth" });
   return { ok: true, message: "Password updated." };
+};
+
+const twoFactorSetupSchema = z.object({ csrf: z.string().min(8) });
+const twoFactorConfirmSchema = z.object({ csrf: z.string().min(8), code: z.string().min(6) });
+const twoFactorDisableSchema = z.object({ csrf: z.string().min(8) });
+const deletePasskeySchema = z.object({ csrf: z.string().min(8), authenticatorId: z.string().uuid() });
+
+export const startTwoFactorSetup = async (_prev: TwoFactorState, formData: FormData): Promise<TwoFactorState> => {
+  const user = await getSessionUser();
+  if (!user) return { ok: false, error: "Not authenticated." };
+
+  const parsed = twoFactorSetupSchema.safeParse(Object.fromEntries(formData.entries()));
+  if (!parsed.success || !(await verifyCsrfToken(parsed.data.csrf))) return { ok: false, error: "Invalid form submission." };
+
+  let [secretRow] = await db.select().from(adminTwoFactorSecrets).where(eq(adminTwoFactorSecrets.userId, user.id)).limit(1);
+  if (!secretRow) {
+    const secret = authenticator.generateSecret();
+    [secretRow] = await db.insert(adminTwoFactorSecrets).values({ userId: user.id, secretEncrypted: secret }).returning();
+  }
+
+  const issuer = env.TOTP_ISSUER ?? "Julius Grimm Admin";
+  const otpAuthUrl = authenticator.keyuri(user.email, issuer, secretRow.secretEncrypted);
+  const qrDataUrl = await QRCode.toDataURL(otpAuthUrl);
+
+  return {
+    ok: true,
+    message: "Scan this QR and confirm with your 6-digit code.",
+    secret: secretRow.secretEncrypted,
+    qrDataUrl,
+    enabled: false
+  };
+};
+
+export const confirmTwoFactorSetup = async (_prev: TwoFactorState, formData: FormData): Promise<TwoFactorState> => {
+  const user = await getSessionUser();
+  if (!user) return { ok: false, error: "Not authenticated." };
+
+  const parsed = twoFactorConfirmSchema.safeParse(Object.fromEntries(formData.entries()));
+  if (!parsed.success || !(await verifyCsrfToken(parsed.data.csrf))) return { ok: false, error: "Invalid form submission." };
+
+  const code = parsed.data.code.replace(/\D/g, "");
+  if (code.length !== 6) return { ok: false, error: "Please enter a valid 6-digit code." };
+
+  const [secretRow] = await db.select().from(adminTwoFactorSecrets).where(eq(adminTwoFactorSecrets.userId, user.id)).limit(1);
+  if (!secretRow) return { ok: false, error: "No pending 2FA setup found." };
+  if (!authenticator.check(code, secretRow.secretEncrypted)) return { ok: false, error: "Invalid authenticator code." };
+
+  await db.update(adminUsers).set({ twoFactorEnabled: true, updatedAt: new Date() }).where(eq(adminUsers.id, user.id));
+  await audit({ userId: user.id, action: "2fa_enabled", entityType: "auth" });
+  revalidatePath("/admin");
+  return { ok: true, enabled: true, message: "2FA enabled successfully." };
+};
+
+export const disableTwoFactor = async (formData: FormData): Promise<void> => {
+  const user = await getSessionUser();
+  if (!user) return;
+
+  const parsed = twoFactorDisableSchema.safeParse(Object.fromEntries(formData.entries()));
+  if (!parsed.success || !(await verifyCsrfToken(parsed.data.csrf))) return;
+
+  await db.update(adminUsers).set({ twoFactorEnabled: false, updatedAt: new Date() }).where(eq(adminUsers.id, user.id));
+  await db.delete(adminTwoFactorSecrets).where(eq(adminTwoFactorSecrets.userId, user.id));
+  await audit({ userId: user.id, action: "2fa_disabled", entityType: "auth" });
+  revalidatePath("/admin");
+};
+
+export const deletePasskey = async (formData: FormData): Promise<void> => {
+  const user = await getSessionUser();
+  if (!user) return;
+  const parsed = deletePasskeySchema.safeParse(Object.fromEntries(formData.entries()));
+  if (!parsed.success || !(await verifyCsrfToken(parsed.data.csrf))) return;
+
+  await db.delete(adminAuthenticators).where(and(eq(adminAuthenticators.id, parsed.data.authenticatorId), eq(adminAuthenticators.userId, user.id)));
+  await audit({ userId: user.id, action: "passkey_deleted", entityType: "authenticator", entityId: parsed.data.authenticatorId });
+  revalidatePath("/admin");
 };

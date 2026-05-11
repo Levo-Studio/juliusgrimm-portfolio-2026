@@ -1,6 +1,7 @@
 "use client";
 
 import { useActionState, useMemo, useRef, useState } from "react";
+import { startAuthentication } from "@simplewebauthn/browser";
 import { KeyRound } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -13,6 +14,7 @@ const initialState: LoginState = { ok: false };
 
 export const AdminLoginForm = ({ csrfToken }: Props): React.JSX.Element => {
   const [state, formAction, pending] = useActionState(loginAdmin, initialState);
+  const [passkeyPending, setPasskeyPending] = useState(false);
   const [digits, setDigits] = useState<string[]>(["", "", "", "", "", ""]);
   const refs = useRef<Array<HTMLInputElement | null>>([]);
   const code = useMemo(() => digits.join(""), [digits]);
@@ -50,6 +52,33 @@ export const AdminLoginForm = ({ csrfToken }: Props): React.JSX.Element => {
     const arr = pasted.split("");
     setDigits([arr[0] ?? "", arr[1] ?? "", arr[2] ?? "", arr[3] ?? "", arr[4] ?? "", arr[5] ?? ""]);
     refs.current[Math.min(arr.length, 5)]?.focus();
+  };
+
+  const signInWithPasskey = async (): Promise<void> => {
+    setPasskeyPending(true);
+    try {
+      const optionsResponse = await fetch("/api/admin/passkeys/login/options", { method: "POST" });
+      if (!optionsResponse.ok) {
+        const payload = (await optionsResponse.json()) as { error?: string };
+        throw new Error(payload.error ?? "Could not start passkey login.");
+      }
+      const options = (await optionsResponse.json()) as Parameters<typeof startAuthentication>[0];
+      const authResponse = await startAuthentication(options);
+      const verifyResponse = await fetch("/api/admin/passkeys/login/verify", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ response: authResponse })
+      });
+      if (!verifyResponse.ok) {
+        const payload = (await verifyResponse.json()) as { error?: string };
+        throw new Error(payload.error ?? "Passkey login failed.");
+      }
+      window.location.href = "/admin";
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setPasskeyPending(false);
+    }
   };
 
   return (
@@ -90,9 +119,9 @@ export const AdminLoginForm = ({ csrfToken }: Props): React.JSX.Element => {
         {pending ? "Signing in..." : "Sign in"}
       </Button>
 
-      <Button type="button" variant="ghost" className="w-full border border-white/20 text-white">
+      <Button type="button" variant="ghost" className="w-full border border-white/20 text-white" onClick={signInWithPasskey} disabled={passkeyPending}>
         <KeyRound className="mr-2 size-4" />
-        Sign in with Passkey
+        {passkeyPending ? "Signing in..." : "Sign in with Passkey"}
       </Button>
     </form>
   );

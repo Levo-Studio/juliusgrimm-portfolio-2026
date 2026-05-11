@@ -1,0 +1,14 @@
+.git
+.gitignore
+.next
+node_modules
+.env
+.env.local
+.env.*.local
+npm-debug.log*
+pnpm-debug.log*
+coverage
+playwright-report
+test-results
+tsconfig.tsbuildinfo
+

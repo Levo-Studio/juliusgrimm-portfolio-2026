@@ -3,10 +3,11 @@
 import Link from "next/link";
 import Image from "next/image";
 import { useActionState, useState } from "react";
+import { startRegistration } from "@simplewebauthn/browser";
 import { Menu, PanelLeftClose, ShieldCheck, FileText, Settings, Eye, EyeOff, Monitor, Smartphone, KeyRound, LogOut, ImageIcon, LayoutDashboard, Globe, FolderOpen, BarChart3 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import type { PasswordState } from "@/app/admin/actions";
-import { changePassword, createOrbitalyCaseStudy, logoutAdmin, revokeSession, toggleProjectVisibility } from "@/app/admin/actions";
+import type { PasswordState, TwoFactorState } from "@/app/admin/actions";
+import { changePassword, confirmTwoFactorSetup, createOrbitalyCaseStudy, deletePasskey, disableTwoFactor, logoutAdmin, revokeSession, startTwoFactorSetup, toggleProjectVisibility } from "@/app/admin/actions";
 
 type ProjectItem = {
   id: string;
@@ -30,20 +31,55 @@ type Props = {
   csrfToken: string;
   projects: ProjectItem[];
   sessions: SessionItem[];
+  passkeys: Array<{ id: string; createdAt: Date; lastUsedAt: Date | null; deviceType: string }>;
+  twoFactorEnabled: boolean;
   initialTab: "overview" | "case-studies" | "settings";
   saved: boolean;
   errorMessage?: string;
 };
 
 const passwordInit: PasswordState = { ok: false };
+const twoFactorInit: TwoFactorState = { ok: false };
 
-export const AdminDashboard = ({ csrfToken, projects, sessions, initialTab, saved, errorMessage }: Props): React.JSX.Element => {
+export const AdminDashboard = ({ csrfToken, projects, sessions, passkeys, twoFactorEnabled, initialTab, saved, errorMessage }: Props): React.JSX.Element => {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [tab, setTab] = useState<"overview" | "case-studies" | "settings">(initialTab);
   const [pwState, pwAction, pwPending] = useActionState(changePassword, passwordInit);
+  const [twoFactorState, twoFactorSetupAction, twoFactorSetupPending] = useActionState(startTwoFactorSetup, twoFactorInit);
+  const [twoFactorConfirmState, twoFactorConfirmAction, twoFactorConfirmPending] = useActionState(confirmTwoFactorSetup, twoFactorInit);
+  const [passkeyPending, setPasskeyPending] = useState(false);
+  const [passkeyError, setPasskeyError] = useState<string | null>(null);
   const visibleProjects = projects.filter((project) => project.visible).length;
   const hiddenProjects = projects.length - visibleProjects;
   const withImage = projects.filter((project) => Boolean(project.imageUrl)).length;
+
+  const registerPasskey = async (): Promise<void> => {
+    setPasskeyPending(true);
+    setPasskeyError(null);
+    try {
+      const optionsResponse = await fetch("/api/admin/passkeys/register/options", { method: "POST" });
+      if (!optionsResponse.ok) {
+        const payload = (await optionsResponse.json()) as { error?: string };
+        throw new Error(payload.error ?? "Failed to start passkey registration.");
+      }
+      const options = (await optionsResponse.json()) as Parameters<typeof startRegistration>[0];
+      const registrationResponse = await startRegistration(options);
+      const verifyResponse = await fetch("/api/admin/passkeys/register/verify", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ response: registrationResponse })
+      });
+      if (!verifyResponse.ok) {
+        const payload = (await verifyResponse.json()) as { error?: string };
+        throw new Error(payload.error ?? "Passkey verification failed.");
+      }
+      window.location.reload();
+    } catch (error) {
+      setPasskeyError(error instanceof Error ? error.message : "Passkey registration failed.");
+    } finally {
+      setPasskeyPending(false);
+    }
+  };
 
   return (
     <main className="min-h-screen bg-black text-white">
@@ -190,9 +226,78 @@ export const AdminDashboard = ({ csrfToken, projects, sessions, initialTab, save
               <section className="border border-white/15 bg-[#070707] p-4 md:p-5">
                 <h2 className="font-inria text-xl md:text-2xl">Security</h2>
                 <p className="mt-1 text-sm text-white/70">Passkeys and 2FA controls.</p>
-                <div className="mt-4 grid gap-3 md:grid-cols-2">
-                  <Button type="button" className="justify-start border border-white/20 bg-transparent"><KeyRound className="mr-2 size-4" />Register Passkey</Button>
-                  <Button type="button" className="justify-start border border-white/20 bg-transparent"><ShieldCheck className="mr-2 size-4" />Manage 2FA</Button>
+                <div className="mt-4 space-y-4">
+                  <div className="border border-white/10 p-3">
+                    <div className="mb-3 flex items-center justify-between">
+                      <h3 className="font-inria text-lg">Passkeys</h3>
+                      <Button type="button" onClick={registerPasskey} disabled={passkeyPending} className="justify-start border border-white/20 bg-transparent">
+                        <KeyRound className="mr-2 size-4" />
+                        {passkeyPending ? "Registering..." : "Register Passkey"}
+                      </Button>
+                    </div>
+                    {passkeyError ? <p className="mb-3 text-sm text-[#E35B5B]">{passkeyError}</p> : null}
+                    <div className="space-y-2">
+                      {passkeys.length === 0 ? (
+                        <p className="text-sm text-white/65">No passkeys registered yet.</p>
+                      ) : (
+                        passkeys.map((passkey) => (
+                          <form key={passkey.id} action={deletePasskey} className="flex flex-wrap items-center justify-between gap-3 border border-white/10 p-3">
+                            <input type="hidden" name="csrf" value={csrfToken} />
+                            <input type="hidden" name="authenticatorId" value={passkey.id} />
+                            <div className="text-sm">
+                              <p>{passkey.deviceType}</p>
+                              <p className="text-white/65">Created: {new Date(passkey.createdAt).toLocaleString("de-DE")}</p>
+                              <p className="text-white/65">Last used: {passkey.lastUsedAt ? new Date(passkey.lastUsedAt).toLocaleString("de-DE") : "Never"}</p>
+                            </div>
+                            <Button className="border border-[#E35B5B] bg-[rgba(227,91,91,0.1)] text-[#E35B5B]">Delete</Button>
+                          </form>
+                        ))
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="border border-white/10 p-3">
+                    <div className="mb-3 flex items-center justify-between">
+                      <h3 className="font-inria text-lg">Two-Factor Auth (TOTP)</h3>
+                      {twoFactorEnabled ? (
+                        <form action={disableTwoFactor}>
+                          <input type="hidden" name="csrf" value={csrfToken} />
+                          <Button className="border border-[#E35B5B] bg-[rgba(227,91,91,0.1)] text-[#E35B5B]">
+                            <ShieldCheck className="mr-2 size-4" />
+                            Disable 2FA
+                          </Button>
+                        </form>
+                      ) : (
+                        <form action={twoFactorSetupAction}>
+                          <input type="hidden" name="csrf" value={csrfToken} />
+                          <Button disabled={twoFactorSetupPending} className="justify-start border border-white/20 bg-transparent">
+                            <ShieldCheck className="mr-2 size-4" />
+                            {twoFactorSetupPending ? "Preparing..." : "Setup 2FA"}
+                          </Button>
+                        </form>
+                      )}
+                    </div>
+
+                    {twoFactorEnabled ? <p className="text-sm text-[#5BE38B]">2FA is currently enabled.</p> : null}
+                    {twoFactorState.error ? <p className="text-sm text-[#E35B5B]">{twoFactorState.error}</p> : null}
+                    {twoFactorState.message ? <p className="text-sm text-[#5BE38B]">{twoFactorState.message}</p> : null}
+
+                    {twoFactorState.qrDataUrl ? (
+                      <div className="mt-3 space-y-3">
+                        <Image src={twoFactorState.qrDataUrl} alt="2FA QR Code" width={180} height={180} className="border border-white/15 bg-white p-2" unoptimized />
+                        <p className="break-all text-xs text-white/70">Secret: {twoFactorState.secret}</p>
+                        <form action={twoFactorConfirmAction} className="flex flex-wrap items-center gap-2">
+                          <input type="hidden" name="csrf" value={csrfToken} />
+                          <input name="code" placeholder="123456" inputMode="numeric" className="border border-white/20 bg-black px-3 py-2" />
+                          <Button disabled={twoFactorConfirmPending} className="border border-[#5BE38B] bg-[rgba(91,227,139,0.1)] text-[#5BE38B]">
+                            {twoFactorConfirmPending ? "Verifying..." : "Enable 2FA"}
+                          </Button>
+                        </form>
+                        {twoFactorConfirmState.error ? <p className="text-sm text-[#E35B5B]">{twoFactorConfirmState.error}</p> : null}
+                        {twoFactorConfirmState.message ? <p className="text-sm text-[#5BE38B]">{twoFactorConfirmState.message}</p> : null}
+                      </div>
+                    ) : null}
+                  </div>
                 </div>
               </section>
 

@@ -39,7 +39,7 @@ export const Homepage = async (): Promise<React.JSX.Element> => {
     EMAIL: "mailto:me@juliusgrimm.dev",
     WhatsApp: "tel:+4917661028522",
     Matrix: "https://matrix.to/#/@levostudio:chat.orbitaly.de",
-    LinkedIn: "https://linkedin.com/in/julius-grimm",
+    LinkedIn: "https://linkedin.com/in/julius-gr/",
     Instagram: "https://instagram.com/julius_gr_",
     GitHub: "https://github.com/justthatrandomcoder"
   };
