@@ -24,7 +24,7 @@ export const CaseStudyAnimations = (): null => {
           scrollTrigger: {
             trigger: element,
             start: "top 90%",
-            toggleActions: "play none none reverse"
+            toggleActions: "play none none none"
           }
         });
       });
@@ -39,7 +39,7 @@ export const CaseStudyAnimations = (): null => {
         scrollTrigger: {
           trigger: "[data-tech-tag]",
           start: "top 92%",
-          toggleActions: "play none none reverse"
+          toggleActions: "play none none none"
         }
       });
 

@@ -39,52 +39,52 @@ export const HomeAnimations = (): null => {
           scrollTrigger: {
             trigger: element,
             start: "top 92%",
-            toggleActions: "play none none reverse",
+            toggleActions: "play none none none",
             invalidateOnRefresh: true,
             fastScrollEnd: true
           }
         });
       });
 
-      gsap.fromTo(
-        "[data-tech-tag]",
-        { opacity: 0.4, y: 10 },
-        {
-          opacity: 1,
-          y: 0,
-          stagger: touchMode ? 0.02 : 0.045,
-          duration: touchMode ? 0.26 : 0.42,
-          ease: "power2.out",
-          scrollTrigger: {
-            trigger: "[data-tech-wrap]",
-            start: "top 90%",
-            toggleActions: "play none none reverse",
-            invalidateOnRefresh: true,
-            fastScrollEnd: true
-          },
-          clearProps: "opacity,transform"
+      ScrollTrigger.create({
+        trigger: "[data-tech-wrap]",
+        start: "top 92%",
+        once: true,
+        onEnter: () => {
+          gsap.fromTo(
+            "[data-tech-tag]",
+            { opacity: 0.5, y: 8 },
+            {
+              opacity: 1,
+              y: 0,
+              stagger: touchMode ? 0.014 : 0.03,
+              duration: touchMode ? 0.2 : 0.32,
+              ease: "power2.out",
+              clearProps: "opacity,transform"
+            }
+          );
         }
-      );
+      });
 
-      gsap.fromTo(
-        "[data-contact-card]",
-        { opacity: 0.42, y: 12 },
-        {
-          opacity: 1,
-          y: 0,
-          stagger: touchMode ? 0.02 : 0.05,
-          duration: touchMode ? 0.28 : 0.45,
-          ease: "power2.out",
-          scrollTrigger: {
-            trigger: "[data-contact-wrap]",
-            start: "top 90%",
-            toggleActions: "play none none reverse",
-            invalidateOnRefresh: true,
-            fastScrollEnd: true
-          },
-          clearProps: "opacity,transform"
+      ScrollTrigger.create({
+        trigger: "[data-contact-wrap]",
+        start: "top 92%",
+        once: true,
+        onEnter: () => {
+          gsap.fromTo(
+            "[data-contact-card]",
+            { opacity: 0.5, y: 8 },
+            {
+              opacity: 1,
+              y: 0,
+              stagger: touchMode ? 0.02 : 0.04,
+              duration: touchMode ? 0.22 : 0.34,
+              ease: "power2.out",
+              clearProps: "opacity,transform"
+            }
+          );
         }
-      );
+      });
 
       gsap.fromTo(
         "[data-footer-wrap]",
@@ -97,7 +97,7 @@ export const HomeAnimations = (): null => {
           scrollTrigger: {
             trigger: "[data-footer-wrap]",
             start: "top 92%",
-            toggleActions: "play none none reverse",
+            toggleActions: "play none none none",
             invalidateOnRefresh: true,
             fastScrollEnd: true
           },
