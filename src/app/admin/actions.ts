@@ -141,6 +141,13 @@ const projectSchema = z.object({
   csrf: z.string().optional()
 });
 
+const projectLinkSchema = z.object({
+  label: z.string().min(1).max(80),
+  url: z.string().url(),
+  visible: z.boolean(),
+  sortOrder: z.number().int().min(0)
+});
+
 export const upsertProject = async (formData: FormData): Promise<void> => {
   const user = await getSessionUser();
   const rawId = String(formData.get("id") ?? "");
@@ -173,6 +180,37 @@ export const upsertProject = async (formData: FormData): Promise<void> => {
       updatedAt: new Date()
     })
     .where(eq(projects.id, parsed.data.id));
+
+  const linkLabels = formData.getAll("linkLabel");
+  const linkUrls = formData.getAll("linkUrl");
+  const linkVisible = formData.getAll("linkVisible");
+  const linkSort = formData.getAll("linkSortOrder");
+
+  const rawLinks = linkLabels.map((_, index) => ({
+    label: String(linkLabels[index] ?? "").trim(),
+    url: String(linkUrls[index] ?? "").trim(),
+    visible: String(linkVisible[index] ?? "true") === "true",
+    sortOrder: Number(String(linkSort[index] ?? index + 1))
+  }));
+
+  const parsedLinks = rawLinks
+    .filter((item) => item.label.length > 0 && item.url.length > 0)
+    .map((item) => projectLinkSchema.safeParse(item))
+    .filter((result): result is { success: true; data: z.infer<typeof projectLinkSchema> } => result.success)
+    .map((result) => result.data);
+
+  await db.delete(projectLinks).where(eq(projectLinks.projectId, parsed.data.id));
+  if (parsedLinks.length > 0) {
+    await db.insert(projectLinks).values(
+      parsedLinks.map((item, index) => ({
+        projectId: parsed.data.id as string,
+        label: item.label,
+        url: item.url,
+        visible: item.visible,
+        sortOrder: Number.isFinite(item.sortOrder) ? item.sortOrder : index + 1
+      }))
+    );
+  }
 
   await audit({ userId: user.id, action: parsed.data.visible === "true" ? "project_edit" : "project_hide_show", entityType: "project", entityId: parsed.data.id });
   revalidatePath("/");

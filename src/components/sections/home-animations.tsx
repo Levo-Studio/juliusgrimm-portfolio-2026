@@ -30,23 +30,20 @@ export const HomeAnimations = (): null => {
       );
 
       gsap.utils.toArray<HTMLElement>("[data-reveal], [data-card]").forEach((element) => {
-        gsap.fromTo(
-          element,
-          { opacity: 0.34 },
-          {
-            opacity: 1,
-            ease: "none",
-            immediateRender: false,
-            scrollTrigger: {
-              trigger: element,
-              start: "top 95%",
-              end: "top 68%",
-              scrub: touchMode ? 0.38 : 1.15,
-              invalidateOnRefresh: true,
-              fastScrollEnd: true
-            }
+        gsap.from(element, {
+          opacity: 0.34,
+          y: 10,
+          duration: touchMode ? 0.25 : 0.4,
+          ease: "power2.out",
+          immediateRender: false,
+          scrollTrigger: {
+            trigger: element,
+            start: "top 92%",
+            toggleActions: "play none none reverse",
+            invalidateOnRefresh: true,
+            fastScrollEnd: true
           }
-        );
+        });
       });
 
       gsap.fromTo(
@@ -172,14 +169,8 @@ export const HomeAnimations = (): null => {
           .from(thumb, { opacity: 0, scale: 0.97, duration: reduce ? 0.25 : 0.42, ease: "power2.out" }, "-=0.34")
           .from(title, { opacity: 0, x: -14, duration: reduce ? 0.22 : 0.35, ease: "power2.out" }, "-=0.3")
           .from(subtitle, { opacity: 0, x: -10, duration: reduce ? 0.2 : 0.34, ease: "power2.out" }, "-=0.28");
-
-        if (!coarse) {
-          card.addEventListener("mouseenter", () => gsap.to(card, { y: -8, scale: 1.012, duration: 0.24, ease: "power2.out", overwrite: "auto" }));
-          card.addEventListener("mouseleave", () => gsap.to(card, { y: 0, scale: 1, duration: 0.24, ease: "power2.out", overwrite: "auto" }));
-        }
       });
 
-      if (!coarse) ScrollTrigger.normalizeScroll(true);
       ScrollTrigger.refresh();
     });
 

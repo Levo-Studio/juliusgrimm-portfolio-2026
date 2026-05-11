@@ -73,7 +73,7 @@ export const Homepage = async (): Promise<React.JSX.Element> => {
             </h2>
             <div className="grid max-w-[1020px] grid-cols-1 gap-x-4 gap-y-14 md:grid-cols-2 md:gap-y-20">
               {projects.map((project) => (
-                <Link key={project.id} href={`/projects/${project.slug}`} className="group" data-card>
+                <Link key={project.id} href={`/projects/${project.slug}`} className="group transition-transform duration-200 ease-out hover:scale-[1.01]" data-card>
                   <div data-card-thumb>
                     <ProjectThumb title={project.title} imageUrl={project.imageUrl} />
                   </div>

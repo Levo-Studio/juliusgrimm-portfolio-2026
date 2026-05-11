@@ -15,34 +15,18 @@ export const CaseStudyAnimations = (): null => {
     const ctx = gsap.context(() => {
       gsap.utils.toArray<HTMLElement>("[data-case-heading], [data-case-body], [data-case-back]").forEach((element, index) => {
         gsap.from(element, {
-          opacity: 0,
+          opacity: 0.2,
           y: 18,
           immediateRender: false,
-          duration: 0.65,
+          duration: coarse ? 0.42 : 0.58,
           delay: index * 0.05,
           ease: "power2.out",
           scrollTrigger: {
             trigger: element,
-            start: "top 86%",
+            start: "top 90%",
             toggleActions: "play none none reverse"
           }
         });
-
-        gsap.fromTo(
-          element,
-          { opacity: 0.36 },
-          {
-            opacity: 1,
-            ease: "none",
-            immediateRender: false,
-            scrollTrigger: {
-              trigger: element,
-              start: "top 92%",
-              end: "top 62%",
-              scrub: coarse ? 0.28 : 0.55
-            }
-          }
-        );
       });
 
       gsap.from("[data-tech-tag]", {

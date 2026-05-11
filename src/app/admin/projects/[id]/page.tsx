@@ -2,12 +2,13 @@ import Link from "next/link";
 import Image from "next/image";
 import { notFound } from "next/navigation";
 import { cookies } from "next/headers";
-import { eq } from "drizzle-orm";
+import { asc, eq } from "drizzle-orm";
 import { db } from "@/server/db/client";
-import { projects } from "@/server/db/schema";
+import { projectLinks, projects } from "@/server/db/schema";
 import { getSessionUser } from "@/server/auth";
 import { Button } from "@/components/ui/button";
 import { upsertProject } from "@/app/admin/actions";
+import { ProjectLinksEditor } from "@/app/admin/projects/project-links-editor";
 
 type Props = { params: Promise<{ id: string }> };
 
@@ -23,6 +24,7 @@ export default async function AdminProjectEditPage({ params, searchParams }: Pro
   const sp = await searchParams;
   const [project] = await db.select().from(projects).where(eq(projects.id, id)).limit(1);
   if (!project) notFound();
+  const links = await db.select().from(projectLinks).where(eq(projectLinks.projectId, project.id)).orderBy(asc(projectLinks.sortOrder));
   const csrfToken = (await cookies()).get("admin_csrf")?.value ?? "";
   const error =
     sp.error === "csrf"
@@ -74,6 +76,15 @@ export default async function AdminProjectEditPage({ params, searchParams }: Pro
 
           <label className="text-sm text-white/70">Sort order</label>
           <input name="sortOrder" type="number" defaultValue={project.sortOrder} className="border border-white/20 bg-black px-3 py-2" />
+
+          <ProjectLinksEditor
+            initialLinks={links.map((link) => ({
+              label: link.label,
+              url: link.url,
+              visible: link.visible,
+              sortOrder: link.sortOrder
+            }))}
+          />
 
           <input type="hidden" name="visible" value="false" />
           <label className="inline-flex items-center gap-3 text-sm">
