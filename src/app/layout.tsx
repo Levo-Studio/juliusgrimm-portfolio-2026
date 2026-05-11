@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Script from "next/script";
 import "./globals.css";
 import { inriaSans, instrumentSerif } from "@/lib/fonts";
 
@@ -31,7 +32,14 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>): React.JSX.Element {
   return (
     <html lang="en" className={`${inriaSans.variable} ${instrumentSerif.variable}`}>
-      <body>{children}</body>
+      <body>
+        {children}
+        <Script
+          src="https://analytics.levo-studio.com/script.js"
+          data-website-id="8b3afaca-7d36-46a4-bc69-989ff1e1638f"
+          strategy="afterInteractive"
+        />
+      </body>
     </html>
   );
 }
