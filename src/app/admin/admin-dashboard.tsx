@@ -7,7 +7,7 @@ import { startRegistration } from "@simplewebauthn/browser";
 import { Menu, PanelLeftClose, ShieldCheck, FileText, Settings, Eye, EyeOff, Monitor, Smartphone, KeyRound, LogOut, ImageIcon, LayoutDashboard, Globe, FolderOpen, BarChart3 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import type { PasswordState, TwoFactorState } from "@/app/admin/actions";
-import { changePassword, confirmTwoFactorSetup, createOrbitalyCaseStudy, deletePasskey, disableTwoFactor, logoutAdmin, revokeSession, startTwoFactorSetup, toggleProjectVisibility } from "@/app/admin/actions";
+import { changePassword, confirmTwoFactorSetup, deletePasskey, disableTwoFactor, logoutAdmin, revokeSession, startTwoFactorSetup, toggleProjectVisibility } from "@/app/admin/actions";
 
 type ProjectItem = {
   id: string;
@@ -179,12 +179,11 @@ export const AdminDashboard = ({ csrfToken, projects, sessions, passkeys, twoFac
                   <h2 className="font-inria text-xl">Case Studies</h2>
                   <p className="text-sm text-white/65">Create and manage your projects.</p>
                 </div>
-                <form action={createOrbitalyCaseStudy}>
-                  <input type="hidden" name="csrf" value={csrfToken} />
+                <Link href="/admin/projects/new">
                   <Button className="border border-[#5BE38B] bg-[rgba(91,227,139,0.1)] text-[#5BE38B] transition hover:bg-[rgba(91,227,139,0.2)]">
-                    + Add Orbitaly Case Study
+                    + Add Case Study
                   </Button>
-                </form>
+                </Link>
               </div>
 
               <div className="grid gap-4 xl:grid-cols-2">
