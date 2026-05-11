@@ -148,6 +148,12 @@ const projectLinkSchema = z.object({
   sortOrder: z.number().int().min(0)
 });
 
+const projectTechSchema = z.object({
+  label: z.string().min(1).max(80),
+  colorCategory: z.enum(["green", "orange", "red", "blue"]),
+  sortOrder: z.number().int().min(0)
+});
+
 export const upsertProject = async (formData: FormData): Promise<void> => {
   const user = await getSessionUser();
   const rawId = String(formData.get("id") ?? "");
@@ -212,6 +218,31 @@ export const upsertProject = async (formData: FormData): Promise<void> => {
     );
   }
 
+  const techLabels = formData.getAll("techLabel");
+  const techColors = formData.getAll("techColorCategory");
+  const techSort = formData.getAll("techSortOrder");
+  const rawTech = techLabels.map((_, index) => ({
+    label: String(techLabels[index] ?? "").trim(),
+    colorCategory: String(techColors[index] ?? "green"),
+    sortOrder: Number(String(techSort[index] ?? index + 1))
+  }));
+  const parsedTech = rawTech
+    .filter((item) => item.label.length > 0)
+    .map((item) => projectTechSchema.safeParse(item))
+    .filter((result): result is { success: true; data: z.infer<typeof projectTechSchema> } => result.success)
+    .map((result) => result.data);
+  await db.delete(projectTechStack).where(eq(projectTechStack.projectId, parsed.data.id));
+  if (parsedTech.length > 0) {
+    await db.insert(projectTechStack).values(
+      parsedTech.map((item, index) => ({
+        projectId: parsed.data.id as string,
+        label: item.label,
+        colorCategory: item.colorCategory,
+        sortOrder: Number.isFinite(item.sortOrder) ? item.sortOrder : index + 1
+      }))
+    );
+  }
+
   await audit({ userId: user.id, action: parsed.data.visible === "true" ? "project_edit" : "project_hide_show", entityType: "project", entityId: parsed.data.id });
   revalidatePath("/");
   revalidatePath("/admin");
@@ -271,6 +302,30 @@ export const createProject = async (formData: FormData): Promise<void> => {
           label: item.label,
           url: item.url,
           visible: item.visible,
+          sortOrder: Number.isFinite(item.sortOrder) ? item.sortOrder : index + 1
+        }))
+      );
+    }
+
+    const techLabels = formData.getAll("techLabel");
+    const techColors = formData.getAll("techColorCategory");
+    const techSort = formData.getAll("techSortOrder");
+    const rawTech = techLabels.map((_, index) => ({
+      label: String(techLabels[index] ?? "").trim(),
+      colorCategory: String(techColors[index] ?? "green"),
+      sortOrder: Number(String(techSort[index] ?? index + 1))
+    }));
+    const parsedTech = rawTech
+      .filter((item) => item.label.length > 0)
+      .map((item) => projectTechSchema.safeParse(item))
+      .filter((result): result is { success: true; data: z.infer<typeof projectTechSchema> } => result.success)
+      .map((result) => result.data);
+    if (parsedTech.length > 0) {
+      await db.insert(projectTechStack).values(
+        parsedTech.map((item, index) => ({
+          projectId: created.id,
+          label: item.label,
+          colorCategory: item.colorCategory,
           sortOrder: Number.isFinite(item.sortOrder) ? item.sortOrder : index + 1
         }))
       );

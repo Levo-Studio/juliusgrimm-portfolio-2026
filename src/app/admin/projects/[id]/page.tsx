@@ -4,11 +4,12 @@ import { notFound } from "next/navigation";
 import { cookies } from "next/headers";
 import { asc, eq } from "drizzle-orm";
 import { db } from "@/server/db/client";
-import { projectLinks, projects } from "@/server/db/schema";
+import { projectLinks, projects, projectTechStack } from "@/server/db/schema";
 import { getSessionUser } from "@/server/auth";
 import { Button } from "@/components/ui/button";
 import { upsertProject } from "@/app/admin/actions";
 import { ProjectLinksEditor } from "@/app/admin/projects/project-links-editor";
+import { ProjectTechEditor } from "@/app/admin/projects/project-tech-editor";
 
 type Props = { params: Promise<{ id: string }> };
 
@@ -25,6 +26,7 @@ export default async function AdminProjectEditPage({ params, searchParams }: Pro
   const [project] = await db.select().from(projects).where(eq(projects.id, id)).limit(1);
   if (!project) notFound();
   const links = await db.select().from(projectLinks).where(eq(projectLinks.projectId, project.id)).orderBy(asc(projectLinks.sortOrder));
+  const tech = await db.select().from(projectTechStack).where(eq(projectTechStack.projectId, project.id)).orderBy(asc(projectTechStack.sortOrder));
   const csrfToken = (await cookies()).get("admin_csrf")?.value ?? "";
   const error =
     sp.error === "csrf"
@@ -83,6 +85,13 @@ export default async function AdminProjectEditPage({ params, searchParams }: Pro
               url: link.url,
               visible: link.visible,
               sortOrder: link.sortOrder
+            }))}
+          />
+          <ProjectTechEditor
+            initialTech={tech.map((item) => ({
+              label: item.label,
+              colorCategory: (item.colorCategory as "green" | "orange" | "red" | "blue") ?? "green",
+              sortOrder: item.sortOrder
             }))}
           />
 

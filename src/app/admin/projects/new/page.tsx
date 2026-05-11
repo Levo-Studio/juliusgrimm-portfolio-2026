@@ -5,6 +5,7 @@ import { getSessionUser } from "@/server/auth";
 import { Button } from "@/components/ui/button";
 import { createProject } from "@/app/admin/actions";
 import { ProjectLinksEditor } from "@/app/admin/projects/project-links-editor";
+import { ProjectTechEditor } from "@/app/admin/projects/project-tech-editor";
 
 type Search = {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
@@ -68,6 +69,7 @@ export default async function AdminProjectCreatePage({ searchParams }: Search): 
           </label>
 
           <ProjectLinksEditor initialLinks={[]} />
+          <ProjectTechEditor initialTech={[]} />
 
           <Button className="justify-self-start border border-[#5BE38B] bg-[rgba(91,227,139,0.1)] text-[#5BE38B] transition hover:bg-[rgba(91,227,139,0.2)]">Create case study</Button>
         </form>
@@ -75,4 +77,3 @@ export default async function AdminProjectCreatePage({ searchParams }: Search): 
     </main>
   );
 }
-
