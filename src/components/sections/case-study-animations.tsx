@@ -9,6 +9,7 @@ gsap.registerPlugin(ScrollTrigger);
 export const CaseStudyAnimations = (): null => {
   useEffect(() => {
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const coarse = window.matchMedia("(pointer: coarse)").matches;
     if (reduce) return;
 
     const ctx = gsap.context(() => {
@@ -38,7 +39,7 @@ export const CaseStudyAnimations = (): null => {
               trigger: element,
               start: "top 92%",
               end: "top 62%",
-              scrub: 0.55
+              scrub: coarse ? 0.28 : 0.55
             }
           }
         );
@@ -58,13 +59,15 @@ export const CaseStudyAnimations = (): null => {
         }
       });
 
-      gsap.to("[data-case-back]", {
-        x: 4,
-        duration: 0.9,
-        ease: "sine.inOut",
-        repeat: -1,
-        yoyo: true
-      });
+      if (!coarse) {
+        gsap.to("[data-case-back]", {
+          x: 4,
+          duration: 0.9,
+          ease: "sine.inOut",
+          repeat: -1,
+          yoyo: true
+        });
+      }
     });
 
     return () => ctx.revert();

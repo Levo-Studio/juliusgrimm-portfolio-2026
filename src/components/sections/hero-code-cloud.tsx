@@ -37,8 +37,9 @@ export const HeroCodeCloud = (): React.JSX.Element => {
   useEffect(() => {
     setRows(createRows());
     const media = window.matchMedia("(prefers-reduced-motion: reduce)");
-    if (media.matches) return;
-    const intervalId = window.setInterval(() => setRows(createRows()), 1800);
+    const coarse = window.matchMedia("(pointer: coarse)").matches;
+    if (media.matches || coarse) return;
+    const intervalId = window.setInterval(() => setRows(createRows()), 2600);
     return () => window.clearInterval(intervalId);
   }, []);
 
