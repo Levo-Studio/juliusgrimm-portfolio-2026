@@ -6,6 +6,7 @@ import { SectionShell } from "@/components/shared/section-shell";
 import { ColorTag } from "@/components/shared/color-tag";
 import { CaseStudyAnimations } from "@/components/sections/case-study-animations";
 import { getProjectBySlug } from "@/server/projects";
+import { getProjectMonthLabel } from "@/lib/project-meta";
 
 export const dynamic = "force-dynamic";
 
@@ -20,7 +21,8 @@ const accentBySlug: Record<string, string[]> = {
   "levo-studio-tickets": ["quick changes", "support chaos into structured chaos"],
   "levo-studio-db-controller": ["self-hosted Neon/Supabase-style control panel", "SSH into production and pray"],
   "levo-studio-finance": ["painful realization that business is mostly admin", "without pretending Excel is a lifestyle"],
-  orbitaly: ["trusting random messenger stacks felt reckless", "secure Matrix client onboarding as easy as possible"]
+  orbitaly: ["trusting random messenger stacks felt reckless", "secure Matrix client onboarding as easy as possible"],
+  "juliusgrimm-portfolio-2025": ["React and Vite", "animated social links", "modern, responsive design"]
 };
 
 const withAccent = (text: string, accents: string[]): React.ReactNode => {
@@ -44,13 +46,6 @@ export default async function ProjectDetailPage({ params }: Props): Promise<Reac
   const project = await getProjectBySlug(slug);
   if (!project) notFound();
   const accents = accentBySlug[project.slug] ?? [];
-  const projectDateBySlug: Record<string, string> = {
-    "levo-studio-tickets": "March 2026",
-    "levo-studio-db-controller": "April 2026",
-    "levo-studio-finance": "April 2026",
-    vibevote: "April 2026",
-    orbitaly: "April 2026"
-  };
 
   return (
     <main className="min-h-screen bg-black px-7 pb-36 pt-14 text-white md:flex md:items-center md:px-16 md:py-16 lg:px-[64px]">
@@ -66,7 +61,7 @@ export default async function ProjectDetailPage({ params }: Props): Promise<Reac
             {project.title} <span className="text-[#5BE38B]">{project.subtitle}</span>
           </h1>
           <p className="mt-3 font-inria text-[12px] uppercase tracking-[0.06em] text-white/60 md:text-[13px]">
-            {projectDateBySlug[project.slug] ?? "April 2026"}
+            {getProjectMonthLabel(project.slug)}
           </p>
           <p data-case-body className="mt-9 max-w-[1080px] font-instrument text-[20px] leading-[1.14] md:text-[34px]">
             {withAccent(project.description, accents)}

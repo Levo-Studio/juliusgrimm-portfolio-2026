@@ -3,8 +3,34 @@ import { db } from "@/server/db/client";
 import { projectLinks, projects, projectTechStack } from "@/server/db/schema";
 import type { Project } from "@/types/project";
 import type { ColorCategory } from "@/types/project";
+import { getProjectMonthSortKey } from "@/lib/project-meta";
 
 const fallbackProjects: Project[] = [
+  {
+    id: "fallback-0",
+    slug: "juliusgrimm-portfolio-2025",
+    title: "Julius Grimm Portfolio 2025",
+    subtitle: "The old one, before this one became a full-time obsession.",
+    description:
+      "My 2025 portfolio showcasing projects, case studies, and design philosophy. Built as a fast React/Vite experience with animated social links, rich media sections, and responsive layouts.",
+    whyBuilt:
+      "I wanted a clean place to show my work without the usual template noise, so I built a portfolio that mixed UI/UX presentation with developer-level control over performance and motion.",
+    imageUrl: null,
+    visible: true,
+    sortOrder: 0,
+    techStack: [
+      { id: "f0t1", label: "React", colorCategory: "green", sortOrder: 1 },
+      { id: "f0t2", label: "Vite", colorCategory: "green", sortOrder: 2 },
+      { id: "f0t3", label: "React Router", colorCategory: "green", sortOrder: 3 },
+      { id: "f0t4", label: "Framer Motion", colorCategory: "blue", sortOrder: 4 },
+      { id: "f0t5", label: "CSS Modules", colorCategory: "orange", sortOrder: 5 },
+      { id: "f0t6", label: "ESLint", colorCategory: "orange", sortOrder: 6 }
+    ],
+    links: [
+      { id: "f0l1", label: "2025.juliusgrimm.dev", url: "https://2025.juliusgrimm.dev", visible: true, sortOrder: 1 },
+      { id: "f0l2", label: "GitHub", url: "https://github.com/Levo-Studio/juliusgrimm-portfolio-2025-2", visible: true, sortOrder: 2 }
+    ]
+  },
   {
     id: "fallback-1",
     slug: "levo-studio-tickets",
@@ -113,11 +139,21 @@ const fallbackProjects: Project[] = [
 ];
 
 export const getVisibleProjects = async (): Promise<Project[]> => {
+  const sortByTimeline = (items: Project[]): Project[] =>
+    [...items].sort((a, b) => {
+      const dateA = getProjectMonthSortKey(a.slug);
+      const dateB = getProjectMonthSortKey(b.slug);
+      if (dateA !== dateB) return dateB - dateA;
+      return a.title.localeCompare(b.title, "en", { sensitivity: "base" });
+    });
+
   try {
     const rows = await db.select().from(projects).where(eq(projects.visible, true)).orderBy(asc(projects.sortOrder));
-    return Promise.all(rows.map((row) => getProjectBySlug(row.slug))).then((items) => items.filter((item): item is Project => item !== null));
+    return Promise.all(rows.map((row) => getProjectBySlug(row.slug))).then((items) =>
+      sortByTimeline(items.filter((item): item is Project => item !== null))
+    );
   } catch {
-    return fallbackProjects;
+    return sortByTimeline(fallbackProjects);
   }
 };
 

@@ -4,6 +4,21 @@ import { eq } from "drizzle-orm";
 
 const seedProjects = [
   {
+    slug: "juliusgrimm-portfolio-2025",
+    title: "Julius Grimm Portfolio 2025",
+    subtitle: "The old one, before this one became a full-time obsession.",
+    description:
+      "My 2025 portfolio website showcasing selected work, skills, and design philosophy as a developer and UI/UX designer. Built for speed and modern UX with rich case-study style storytelling.",
+    whyBuilt:
+      "I wanted one place that felt personal and fast, so I built it with React and Vite, added smooth motion, and turned static project showcases into a more narrative portfolio experience.",
+    sortOrder: 6,
+    tech: ["React", "Vite", "React Router", "Framer Motion", "CSS Modules", "Custom CSS", "ESLint"],
+    links: [
+      { label: "2025.juliusgrimm.dev", url: "https://2025.juliusgrimm.dev", visible: true },
+      { label: "GitHub", url: "https://github.com/Levo-Studio/juliusgrimm-portfolio-2025-2", visible: true }
+    ]
+  },
+  {
     slug: "levo-studio-tickets",
     title: "Levo Studio Tickets",
     subtitle: "Slightly overengineered customer support.",

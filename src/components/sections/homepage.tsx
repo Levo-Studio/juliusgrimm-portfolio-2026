@@ -10,6 +10,7 @@ import { ProjectThumb } from "@/components/shared/project-thumb";
 import { HeroTypewriter } from "@/components/sections/hero-typewriter";
 import { contactItems, survivalTags } from "@/lib/content";
 import { getVisibleProjects } from "@/server/projects";
+import { getProjectMonthLabel } from "@/lib/project-meta";
 
 const getGitHubLastUpdate = async (): Promise<string> => {
   const formatDate = (value: Date): string =>
@@ -42,14 +43,6 @@ export const Homepage = async (): Promise<React.JSX.Element> => {
     LinkedIn: "https://linkedin.com/in/julius-gr/",
     Instagram: "https://instagram.com/julius_gr_",
     GitHub: "https://github.com/justthatrandomcoder"
-  };
-
-  const projectDateBySlug: Record<string, string> = {
-    "levo-studio-tickets": "March 2026",
-    "levo-studio-db-controller": "April 2026",
-    "levo-studio-finance": "April 2026",
-    vibevote: "April 2026",
-    orbitaly: "April 2026"
   };
 
   return (
@@ -85,7 +78,7 @@ export const Homepage = async (): Promise<React.JSX.Element> => {
                     <ProjectThumb title={project.title} imageUrl={project.imageUrl} />
                   </div>
                   <p className="mt-5 font-inria text-[12px] uppercase tracking-[0.05em] text-white/60 md:text-[11px]">
-                    {projectDateBySlug[project.slug] ?? "April 2026"}
+                    {getProjectMonthLabel(project.slug)}
                   </p>
                   <h3 data-card-title className="mt-1 font-inria text-[24px] md:text-[20px]">{project.title}</h3>
                   <p data-card-subtitle className="font-instrument text-[26px] leading-[1.08] text-[#5BE38B] md:text-[22px]">{project.subtitle}</p>
