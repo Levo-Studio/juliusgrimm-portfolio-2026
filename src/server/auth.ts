@@ -137,6 +137,21 @@ export const verifyCsrfToken = async (token: string): Promise<boolean> => {
   return cookieStore.get(CSRF_COOKIE)?.value === token;
 };
 
+export const verifyMutationRequest = async (csrfToken?: string): Promise<boolean> => {
+  if (csrfToken && (await verifyCsrfToken(csrfToken))) return true;
+
+  const headerBag = await headers();
+  const origin = headerBag.get("origin");
+  const host = headerBag.get("x-forwarded-host") ?? headerBag.get("host");
+  if (!origin || !host) return false;
+
+  try {
+    return new URL(origin).host === host;
+  } catch {
+    return false;
+  }
+};
+
 export const audit = async (params: {
   userId?: string;
   action: string;

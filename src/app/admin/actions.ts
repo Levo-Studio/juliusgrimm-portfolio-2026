@@ -19,7 +19,7 @@ import {
   getSessionUser,
   hashPassword,
   rateLimitAuth,
-  verifyCsrfToken,
+  verifyMutationRequest,
   verifyPassword
 } from "@/server/auth";
 import { env } from "@/lib/env";
@@ -152,7 +152,7 @@ export const upsertProject = async (formData: FormData): Promise<void> => {
   if (!parsed.success) {
     redirect(`/admin/projects/${rawId}?error=invalid-form`);
   }
-  if (parsed.data.csrf && !(await verifyCsrfToken(parsed.data.csrf))) {
+  if (!(await verifyMutationRequest(parsed.data.csrf))) {
     redirect(`/admin/projects/${rawId}?error=csrf`);
   }
   if (!parsed.data.id) {
@@ -181,13 +181,13 @@ export const upsertProject = async (formData: FormData): Promise<void> => {
   redirect("/admin?tab=case-studies&saved=1");
 };
 
-const toggleSchema = z.object({ id: z.string().uuid(), visible: z.enum(["true", "false"]), csrf: z.string().min(8) });
+const toggleSchema = z.object({ id: z.string().uuid(), visible: z.enum(["true", "false"]), csrf: z.string().optional() });
 
 export const toggleProjectVisibility = async (formData: FormData): Promise<void> => {
   const user = await getSessionUser();
   if (!user) return;
   const parsed = toggleSchema.safeParse(Object.fromEntries(formData.entries()));
-  if (!parsed.success || !(await verifyCsrfToken(parsed.data.csrf))) return;
+  if (!parsed.success || !(await verifyMutationRequest(parsed.data.csrf))) return;
 
   const visible = parsed.data.visible === "true";
   await db.update(projects).set({ visible, updatedAt: new Date() }).where(eq(projects.id, parsed.data.id));
@@ -201,7 +201,7 @@ export const createOrbitalyCaseStudy = async (formData: FormData): Promise<void>
   if (!user) redirect("/admin");
 
   const csrf = String(formData.get("csrf") ?? "");
-  if (csrf && !(await verifyCsrfToken(csrf))) redirect("/admin?tab=case-studies&error=csrf");
+  if (!(await verifyMutationRequest(csrf || undefined))) redirect("/admin?tab=case-studies&error=csrf");
 
   const [project] = await db
     .insert(projects)
@@ -255,20 +255,20 @@ export const createOrbitalyCaseStudy = async (formData: FormData): Promise<void>
   redirect("/admin?tab=case-studies&saved=1");
 };
 
-const sessionSchema = z.object({ sessionId: z.string().uuid(), csrf: z.string().min(8) });
+const sessionSchema = z.object({ sessionId: z.string().uuid(), csrf: z.string().optional() });
 
 export const revokeSession = async (formData: FormData): Promise<void> => {
   const user = await getSessionUser();
   if (!user) return;
   const parsed = sessionSchema.safeParse(Object.fromEntries(formData.entries()));
-  if (!parsed.success || !(await verifyCsrfToken(parsed.data.csrf))) return;
+  if (!parsed.success || !(await verifyMutationRequest(parsed.data.csrf))) return;
 
   await db.update(adminSessions).set({ revokedAt: new Date() }).where(and(eq(adminSessions.id, parsed.data.sessionId), isNull(adminSessions.revokedAt)));
   await audit({ userId: user.id, action: "session_revoke", entityType: "session", entityId: parsed.data.sessionId });
   revalidatePath("/admin");
 };
 
-const passwordSchema = z.object({ currentPassword: z.string().min(12), newPassword: z.string().min(12), confirmPassword: z.string().min(12), csrf: z.string().min(8) });
+const passwordSchema = z.object({ currentPassword: z.string().min(12), newPassword: z.string().min(12), confirmPassword: z.string().min(12), csrf: z.string().optional() });
 
 export type PasswordState = { ok: boolean; error?: string; message?: string };
 export type TwoFactorState = {
@@ -285,7 +285,7 @@ export const changePassword = async (_prev: PasswordState, formData: FormData): 
   if (!user) return { ok: false, error: "Not authenticated." };
 
   const parsed = passwordSchema.safeParse(Object.fromEntries(formData.entries()));
-  if (!parsed.success || !(await verifyCsrfToken(parsed.data.csrf))) return { ok: false, error: "Invalid form submission." };
+  if (!parsed.success || !(await verifyMutationRequest(parsed.data.csrf))) return { ok: false, error: "Invalid form submission." };
   if (parsed.data.newPassword !== parsed.data.confirmPassword) return { ok: false, error: "New passwords do not match." };
 
   const [dbUser] = await db.select().from(adminUsers).where(eq(adminUsers.id, user.id)).limit(1);
@@ -297,17 +297,17 @@ export const changePassword = async (_prev: PasswordState, formData: FormData): 
   return { ok: true, message: "Password updated." };
 };
 
-const twoFactorSetupSchema = z.object({ csrf: z.string().min(8) });
-const twoFactorConfirmSchema = z.object({ csrf: z.string().min(8), code: z.string().min(6) });
-const twoFactorDisableSchema = z.object({ csrf: z.string().min(8) });
-const deletePasskeySchema = z.object({ csrf: z.string().min(8), authenticatorId: z.string().uuid() });
+const twoFactorSetupSchema = z.object({ csrf: z.string().optional() });
+const twoFactorConfirmSchema = z.object({ csrf: z.string().optional(), code: z.string().min(6) });
+const twoFactorDisableSchema = z.object({ csrf: z.string().optional() });
+const deletePasskeySchema = z.object({ csrf: z.string().optional(), authenticatorId: z.string().uuid() });
 
 export const startTwoFactorSetup = async (_prev: TwoFactorState, formData: FormData): Promise<TwoFactorState> => {
   const user = await getSessionUser();
   if (!user) return { ok: false, error: "Not authenticated." };
 
   const parsed = twoFactorSetupSchema.safeParse(Object.fromEntries(formData.entries()));
-  if (!parsed.success || !(await verifyCsrfToken(parsed.data.csrf))) return { ok: false, error: "Invalid form submission." };
+  if (!parsed.success || !(await verifyMutationRequest(parsed.data.csrf))) return { ok: false, error: "Invalid form submission." };
 
   let [secretRow] = await db.select().from(adminTwoFactorSecrets).where(eq(adminTwoFactorSecrets.userId, user.id)).limit(1);
   if (!secretRow) {
@@ -333,7 +333,7 @@ export const confirmTwoFactorSetup = async (_prev: TwoFactorState, formData: For
   if (!user) return { ok: false, error: "Not authenticated." };
 
   const parsed = twoFactorConfirmSchema.safeParse(Object.fromEntries(formData.entries()));
-  if (!parsed.success || !(await verifyCsrfToken(parsed.data.csrf))) return { ok: false, error: "Invalid form submission." };
+  if (!parsed.success || !(await verifyMutationRequest(parsed.data.csrf))) return { ok: false, error: "Invalid form submission." };
 
   const code = parsed.data.code.replace(/\D/g, "");
   if (code.length !== 6) return { ok: false, error: "Please enter a valid 6-digit code." };
@@ -353,7 +353,7 @@ export const disableTwoFactor = async (formData: FormData): Promise<void> => {
   if (!user) return;
 
   const parsed = twoFactorDisableSchema.safeParse(Object.fromEntries(formData.entries()));
-  if (!parsed.success || !(await verifyCsrfToken(parsed.data.csrf))) return;
+  if (!parsed.success || !(await verifyMutationRequest(parsed.data.csrf))) return;
 
   await db.update(adminUsers).set({ twoFactorEnabled: false, updatedAt: new Date() }).where(eq(adminUsers.id, user.id));
   await db.delete(adminTwoFactorSecrets).where(eq(adminTwoFactorSecrets.userId, user.id));
@@ -365,7 +365,7 @@ export const deletePasskey = async (formData: FormData): Promise<void> => {
   const user = await getSessionUser();
   if (!user) return;
   const parsed = deletePasskeySchema.safeParse(Object.fromEntries(formData.entries()));
-  if (!parsed.success || !(await verifyCsrfToken(parsed.data.csrf))) return;
+  if (!parsed.success || !(await verifyMutationRequest(parsed.data.csrf))) return;
 
   await db.delete(adminAuthenticators).where(and(eq(adminAuthenticators.id, parsed.data.authenticatorId), eq(adminAuthenticators.userId, user.id)));
   await audit({ userId: user.id, action: "passkey_deleted", entityType: "authenticator", entityId: parsed.data.authenticatorId });
