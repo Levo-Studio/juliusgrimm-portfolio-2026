@@ -16,7 +16,7 @@
 
 <p align="center">
   <a href="https://instagram.com/julius_gr_"><img alt="Instagram" src="https://img.shields.io/badge/Instagram-@julius__gr_-E35B5B?style=flat-square&labelColor=000000"></a>
-  <a href="https://linkedin.com/in/julius-grimm"><img alt="LinkedIn" src="https://img.shields.io/badge/LinkedIn-julius--grimm-5B76E3?style=flat-square&labelColor=000000"></a>
+  <a href="https://linkedin.com/in/julius-gr/"><img alt="LinkedIn" src="https://img.shields.io/badge/LinkedIn-@julius--gr-5B76E3?style=flat-square&labelColor=000000"></a>
   <a href="mailto:me@juliusgrimm.dev"><img alt="Email" src="https://img.shields.io/badge/Email-me@juliusgrimm.dev-E3AD5B?style=flat-square&labelColor=000000"></a>
 </p>
 

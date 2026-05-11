@@ -28,7 +28,7 @@ export const contactItems = [
   { title: "EMAIL", value: "me@juliusgrimm.dev", note: "Ancient technology. Surprisingly reliable." },
   { title: "WhatsApp", value: "+49 176 61028522", note: "Convenient. Mildly concerning." },
   { title: "Matrix", value: "@levostudio:chat.orbitaly.de", note: "Running on my own servers because trust issues." },
-  { title: "LinkedIn", value: "@julius_gr", note: "Pretending to be professional." },
+  { title: "LinkedIn", value: "@julius-gr", note: "Pretending to be professional." },
   { title: "Instagram", value: "@julius_gr_", note: "Building things publicly instead of sleeping." },
   { title: "GitHub", value: "@justthatrandomcoder", note: "Version-controlled overengineering." }
 ] as const;
