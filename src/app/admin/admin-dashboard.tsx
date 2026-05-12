@@ -7,7 +7,7 @@ import { startRegistration } from "@simplewebauthn/browser";
 import { Menu, PanelLeftClose, ShieldCheck, FileText, Settings, Eye, EyeOff, Monitor, Smartphone, KeyRound, LogOut, ImageIcon, LayoutDashboard, Globe, FolderOpen, BarChart3 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import type { PasswordState, TwoFactorState } from "@/app/admin/actions";
-import { changePassword, confirmTwoFactorSetup, deletePasskey, disableTwoFactor, logoutAdmin, revokeSession, startTwoFactorSetup, toggleProjectVisibility } from "@/app/admin/actions";
+import { changePassword, confirmTwoFactorSetup, deletePasskey, deleteProject, disableTwoFactor, logoutAdmin, revokeSession, startTwoFactorSetup, toggleProjectVisibility } from "@/app/admin/actions";
 
 type ProjectItem = {
   id: string;
@@ -35,13 +35,14 @@ type Props = {
   twoFactorEnabled: boolean;
   initialTab: "overview" | "case-studies" | "settings";
   saved: boolean;
+  deleted: boolean;
   errorMessage?: string;
 };
 
 const passwordInit: PasswordState = { ok: false };
 const twoFactorInit: TwoFactorState = { ok: false };
 
-export const AdminDashboard = ({ csrfToken, projects, sessions, passkeys, twoFactorEnabled, initialTab, saved, errorMessage }: Props): React.JSX.Element => {
+export const AdminDashboard = ({ csrfToken, projects, sessions, passkeys, twoFactorEnabled, initialTab, saved, deleted, errorMessage }: Props): React.JSX.Element => {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [tab, setTab] = useState<"overview" | "case-studies" | "settings">(initialTab);
   const [pwState, pwAction, pwPending] = useActionState(changePassword, passwordInit);
@@ -108,6 +109,7 @@ export const AdminDashboard = ({ csrfToken, projects, sessions, passkeys, twoFac
           </div>
 
           {saved ? <div className="mb-4 border border-[#5BE38B] bg-[rgba(91,227,139,0.1)] px-4 py-3 text-sm text-[#5BE38B]">Case study saved successfully.</div> : null}
+          {deleted ? <div className="mb-4 border border-[#5BE38B] bg-[rgba(91,227,139,0.1)] px-4 py-3 text-sm text-[#5BE38B]">Case study deleted successfully.</div> : null}
           {errorMessage ? <div className="mb-4 border border-[#E35B5B] bg-[rgba(227,91,91,0.1)] px-4 py-3 text-sm text-[#E35B5B]">{errorMessage}</div> : null}
 
           {mobileOpen ? (
@@ -214,6 +216,11 @@ export const AdminDashboard = ({ csrfToken, projects, sessions, passkeys, twoFac
                         </Button>
                       </form>
                       <Link href={`/admin/projects/${project.id}`}><Button className="border border-white/25 transition hover:border-[#5BE38B] hover:text-[#5BE38B]">Edit Case Study</Button></Link>
+                      <form action={deleteProject}>
+                        <input type="hidden" name="csrf" value={csrfToken} />
+                        <input type="hidden" name="id" value={project.id} />
+                        <Button className="border border-[#E35B5B] bg-[rgba(227,91,91,0.1)] text-[#E35B5B] transition hover:bg-[rgba(227,91,91,0.2)]">Delete</Button>
+                      </form>
                     </div>
                   </div>
                 </article>

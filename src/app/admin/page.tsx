@@ -33,6 +33,7 @@ export default async function AdminPage({ searchParams }: Props): Promise<React.
     .orderBy(desc(adminAuthenticators.createdAt));
   const initialTab = params.tab === "settings" ? "settings" : params.tab === "overview" ? "overview" : "case-studies";
   const saved = params.saved === "1";
+  const deleted = params.deleted === "1";
   const errorParam = typeof params.error === "string" ? params.error : "";
   const errorMessage =
     errorParam === "csrf"
@@ -52,6 +53,7 @@ export default async function AdminPage({ searchParams }: Props): Promise<React.
       twoFactorEnabled={adminUser?.twoFactorEnabled ?? false}
       initialTab={initialTab}
       saved={saved}
+      deleted={deleted}
       errorMessage={errorMessage}
     />
   );

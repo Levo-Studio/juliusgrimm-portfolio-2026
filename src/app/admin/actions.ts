@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { isRedirectError } from "next/dist/client/components/redirect-error";
 import { headers } from "next/headers";
 import { z } from "zod";
 import { and, count, eq, isNull } from "drizzle-orm";
@@ -170,10 +171,10 @@ const projectSchema = z.object({
 });
 const projectCreateSchema = z.object({
   slug: z.string().optional().default(""),
-  title: z.string().min(2),
-  subtitle: z.string().optional().default(""),
-  description: z.string().optional().default(""),
-  whyBuilt: z.string().optional().default(""),
+  title: z.string().trim().min(2).max(160),
+  subtitle: z.string().trim().min(2),
+  description: z.string().trim().min(10),
+  whyBuilt: z.string().trim().min(10),
   imageUrl: z.string().url().optional().or(z.literal("")),
   visible: z.enum(["true", "false"]),
   sortOrder: z.coerce.number().int(),
@@ -380,9 +381,33 @@ export const createProject = async (formData: FormData): Promise<void> => {
     revalidatePath(`/projects/${created.slug}`);
     redirect("/admin?tab=case-studies&saved=1");
   } catch (error) {
+    if (isRedirectError(error)) throw error;
+
     console.error("Create project failed:", error);
+    const message = error instanceof Error ? error.message.toLowerCase() : "";
+    const isUniqueViolation = message.includes("unique") || message.includes("duplicate key") || message.includes("projects_slug_idx") || message.includes("projects_slug_key");
+    if (isUniqueViolation) {
+      redirect("/admin/projects/new?error=slug-conflict");
+    }
     redirect("/admin/projects/new?error=create-failed");
   }
+};
+
+
+const deleteProjectSchema = z.object({ id: z.string().uuid(), csrf: z.string().optional() });
+
+export const deleteProject = async (formData: FormData): Promise<void> => {
+  const user = await getSessionUser();
+  if (!user) return;
+
+  const parsed = deleteProjectSchema.safeParse(Object.fromEntries(formData.entries()));
+  if (!parsed.success || !(await verifyMutationRequest(parsed.data.csrf))) return;
+
+  await db.delete(projects).where(eq(projects.id, parsed.data.id));
+  await audit({ userId: user.id, action: "project_delete", entityType: "project", entityId: parsed.data.id });
+  revalidatePath("/");
+  revalidatePath("/admin");
+  redirect("/admin?tab=case-studies&deleted=1");
 };
 
 const toggleSchema = z.object({ id: z.string().uuid(), visible: z.enum(["true", "false"]), csrf: z.string().optional() });
@@ -398,6 +423,7 @@ export const toggleProjectVisibility = async (formData: FormData): Promise<void>
   await audit({ userId: user.id, action: "project_hide_show", entityType: "project", entityId: parsed.data.id, metadata: visible ? "visible" : "hidden" });
   revalidatePath("/");
   revalidatePath("/admin");
+  redirect("/admin?tab=case-studies&deleted=1");
 };
 
 export const createOrbitalyCaseStudy = async (formData: FormData): Promise<void> => {
