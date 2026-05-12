@@ -128,9 +128,31 @@ export const logoutAdmin = async (): Promise<void> => {
   redirect("/admin");
 };
 
+
+const slugify = (value: string): string =>
+  value
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9\s-]/g, "")
+    .replace(/\s+/g, "-")
+    .replace(/-+/g, "-")
+    .replace(/^-|-$/g, "");
+
+const getUniqueProjectSlug = async (baseValue: string, projectId?: string): Promise<string> => {
+  const baseSlug = slugify(baseValue) || "case-study";
+  let candidate = baseSlug;
+  let suffix = 2;
+
+  while (true) {
+    const existing = await db.select({ id: projects.id }).from(projects).where(eq(projects.slug, candidate)).limit(1);
+    if (existing.length === 0 || (projectId && existing[0]?.id === projectId)) return candidate;
+    candidate = `${baseSlug}-${suffix}`;
+    suffix += 1;
+  }
+};
 const projectSchema = z.object({
   id: z.string().uuid().optional(),
-  slug: z.string().min(2),
+  slug: z.string().optional().default(""),
   title: z.string().min(2),
   subtitle: z.string().min(2),
   description: z.string().min(10),
@@ -172,10 +194,12 @@ export const upsertProject = async (formData: FormData): Promise<void> => {
     redirect("/admin?tab=case-studies&error=missing-id");
   }
 
+  const projectSlug = await getUniqueProjectSlug(parsed.data.slug || parsed.data.title, parsed.data.id);
+
   await db
     .update(projects)
     .set({
-      slug: parsed.data.slug,
+      slug: projectSlug,
       title: parsed.data.title,
       subtitle: parsed.data.subtitle,
       description: parsed.data.description,
@@ -246,7 +270,7 @@ export const upsertProject = async (formData: FormData): Promise<void> => {
   await audit({ userId: user.id, action: parsed.data.visible === "true" ? "project_edit" : "project_hide_show", entityType: "project", entityId: parsed.data.id });
   revalidatePath("/");
   revalidatePath("/admin");
-  revalidatePath(`/projects/${parsed.data.slug}`);
+  revalidatePath(`/projects/${projectSlug}`);
   redirect("/admin?tab=case-studies&saved=1");
 };
 
@@ -263,10 +287,12 @@ export const createProject = async (formData: FormData): Promise<void> => {
   }
 
   try {
+    const projectSlug = await getUniqueProjectSlug(parsed.data.slug || parsed.data.title);
+
     const [created] = await db
       .insert(projects)
       .values({
-        slug: parsed.data.slug,
+        slug: projectSlug,
         title: parsed.data.title,
         subtitle: parsed.data.subtitle,
         description: parsed.data.description,

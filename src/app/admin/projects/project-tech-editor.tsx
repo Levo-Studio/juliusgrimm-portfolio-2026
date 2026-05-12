@@ -38,6 +38,7 @@ const emptyRow = (sortOrder: number): TechItem => ({ label: "", colorCategory: "
 
 export const ProjectTechEditor = ({ initialTech }: Props): React.JSX.Element => {
   const [tech, setTech] = useState<TechItem[]>(initialTech.length > 0 ? initialTech : [emptyRow(1)]);
+  const [feedback, setFeedback] = useState<string>("");
 
   const updateRow = (index: number, patch: Partial<TechItem>): void => {
     setTech((prev) => {
@@ -49,6 +50,7 @@ export const ProjectTechEditor = ({ initialTech }: Props): React.JSX.Element => 
 
   const addRow = (): void => {
     setTech((prev) => [...prev, emptyRow(prev.length + 1)]);
+    setFeedback("Added a new tool/framework row.");
   };
 
   const removeRow = (index: number): void => {
@@ -67,6 +69,9 @@ export const ProjectTechEditor = ({ initialTech }: Props): React.JSX.Element => 
       if (prev.some((item) => item.label.toLowerCase() === label.toLowerCase())) return prev;
       return [...prev, { label, colorCategory, sortOrder: prev.length + 1 }];
     });
+
+    const alreadyExists = tech.some((item) => item.label.toLowerCase() === label.toLowerCase());
+    setFeedback(alreadyExists ? `${label} is already in the list.` : `Added ${label}.`);
   };
 
   return (
@@ -90,6 +95,8 @@ export const ProjectTechEditor = ({ initialTech }: Props): React.JSX.Element => 
           </button>
         ))}
       </div>
+
+      {feedback ? <p className="text-xs text-[#5BE38B]">{feedback}</p> : null}
 
       {tech.map((item, index) => (
         <div key={`tech-${index}`} className="grid gap-2 border border-white/15 bg-[#060606] p-3 md:grid-cols-[1.3fr_160px_90px_90px]">
