@@ -150,6 +150,12 @@ const getUniqueProjectSlug = async (baseValue: string, projectId?: string): Prom
     suffix += 1;
   }
 };
+
+const resolveSlugSource = (slugInput: string, titleInput: string): string => {
+  const normalizedSlug = slugify(slugInput);
+  if (normalizedSlug.length > 0) return normalizedSlug;
+  return titleInput;
+};
 const projectSchema = z.object({
   id: z.string().uuid().optional(),
   slug: z.string().optional().default(""),
@@ -157,6 +163,17 @@ const projectSchema = z.object({
   subtitle: z.string().min(2),
   description: z.string().min(10),
   whyBuilt: z.string().min(10),
+  imageUrl: z.string().url().optional().or(z.literal("")),
+  visible: z.enum(["true", "false"]),
+  sortOrder: z.coerce.number().int(),
+  csrf: z.string().optional()
+});
+const projectCreateSchema = z.object({
+  slug: z.string().optional().default(""),
+  title: z.string().min(2),
+  subtitle: z.string().optional().default(""),
+  description: z.string().optional().default(""),
+  whyBuilt: z.string().optional().default(""),
   imageUrl: z.string().url().optional().or(z.literal("")),
   visible: z.enum(["true", "false"]),
   sortOrder: z.coerce.number().int(),
@@ -194,7 +211,7 @@ export const upsertProject = async (formData: FormData): Promise<void> => {
     redirect("/admin?tab=case-studies&error=missing-id");
   }
 
-  const projectSlug = await getUniqueProjectSlug(parsed.data.slug || parsed.data.title, parsed.data.id);
+  const projectSlug = await getUniqueProjectSlug(resolveSlugSource(parsed.data.slug, parsed.data.title), parsed.data.id);
 
   await db
     .update(projects)
@@ -278,7 +295,7 @@ export const createProject = async (formData: FormData): Promise<void> => {
   const user = await getSessionUser();
   if (!user) redirect("/admin");
 
-  const parsed = projectSchema.safeParse(Object.fromEntries(formData.entries()));
+  const parsed = projectCreateSchema.safeParse(Object.fromEntries(formData.entries()));
   if (!parsed.success) {
     redirect("/admin/projects/new?error=invalid-form");
   }
@@ -287,16 +304,16 @@ export const createProject = async (formData: FormData): Promise<void> => {
   }
 
   try {
-    const projectSlug = await getUniqueProjectSlug(parsed.data.slug || parsed.data.title);
+    const projectSlug = await getUniqueProjectSlug(resolveSlugSource(parsed.data.slug, parsed.data.title));
 
     const [created] = await db
       .insert(projects)
       .values({
         slug: projectSlug,
-        title: parsed.data.title,
-        subtitle: parsed.data.subtitle,
-        description: parsed.data.description,
-        whyBuilt: parsed.data.whyBuilt,
+        title: parsed.data.title.trim(),
+        subtitle: parsed.data.subtitle.trim(),
+        description: parsed.data.description.trim(),
+        whyBuilt: parsed.data.whyBuilt.trim(),
         imageUrl: parsed.data.imageUrl || null,
         visible: parsed.data.visible === "true",
         sortOrder: parsed.data.sortOrder
