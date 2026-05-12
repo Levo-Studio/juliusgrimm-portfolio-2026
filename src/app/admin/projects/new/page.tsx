@@ -21,10 +21,12 @@ export default async function AdminProjectCreatePage({ searchParams }: Search): 
     sp.error === "csrf"
       ? "Session expired. Please go back and try again."
       : sp.error === "invalid-form"
-        ? "Please check all required fields."
-        : sp.error === "create-failed"
-          ? "Could not create case study. Check slug uniqueness and form fields."
-          : undefined;
+        ? "Please check all required fields. Title, subtitle, description and why-built text are required."
+        : sp.error === "slug-conflict"
+          ? "Could not create case study because the slug already exists. Please try a different slug."
+          : sp.error === "create-failed"
+            ? "Could not create case study due to a server/database error. Please retry in a moment."
+            : undefined;
 
   return (
     <main className="min-h-screen bg-black p-6 text-white md:p-8">
