@@ -170,10 +170,10 @@ const projectSchema = z.object({
 });
 const projectCreateSchema = z.object({
   slug: z.string().optional().default(""),
-  title: z.string().min(2),
-  subtitle: z.string().optional().default(""),
-  description: z.string().optional().default(""),
-  whyBuilt: z.string().optional().default(""),
+  title: z.string().trim().min(2).max(160),
+  subtitle: z.string().trim().min(2),
+  description: z.string().trim().min(10),
+  whyBuilt: z.string().trim().min(10),
   imageUrl: z.string().url().optional().or(z.literal("")),
   visible: z.enum(["true", "false"]),
   sortOrder: z.coerce.number().int(),
@@ -381,6 +381,11 @@ export const createProject = async (formData: FormData): Promise<void> => {
     redirect("/admin?tab=case-studies&saved=1");
   } catch (error) {
     console.error("Create project failed:", error);
+    const message = error instanceof Error ? error.message.toLowerCase() : "";
+    const isUniqueViolation = message.includes("unique") || message.includes("duplicate key") || message.includes("projects_slug_idx") || message.includes("projects_slug_key");
+    if (isUniqueViolation) {
+      redirect("/admin/projects/new?error=slug-conflict");
+    }
     redirect("/admin/projects/new?error=create-failed");
   }
 };
