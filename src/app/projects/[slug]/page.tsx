@@ -99,7 +99,7 @@ export default async function ProjectDetailPage({ params }: Props): Promise<Reac
             {project.title} <span className="text-[#5BE38B]">{project.subtitle}</span>
           </h1>
           <p className="mt-3 font-inria text-[12px] uppercase tracking-[0.06em] text-white/60 md:text-[13px]">
-            {getProjectMonthLabel(project.slug)}
+            {getProjectMonthLabel(project.createdAt)}
           </p>
           <p data-case-body className="mt-9 max-w-[1080px] font-instrument text-[20px] leading-[1.14] md:text-[34px]">
             {withAccent(project.description, accents)}

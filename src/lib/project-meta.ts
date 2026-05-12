@@ -1,23 +1,52 @@
-export const projectMonthBySlug: Record<string, string> = {
-  "levo-studio-tickets": "2026-03-01",
-  "levo-studio-db-controller": "2026-04-01",
-  "levo-studio-finance": "2026-04-01",
-  vibevote: "2026-04-01",
-  orbitaly: "2026-04-01",
-  "juliusgrimm-portfolio-2025": "2025-01-01"
-};
-
 const formatter = new Intl.DateTimeFormat("en-US", { month: "long", year: "numeric", timeZone: "UTC" });
 
-export const getProjectMonthLabel = (slug: string): string => {
-  const iso = projectMonthBySlug[slug];
-  if (!iso) return "April 2026";
-  return formatter.format(new Date(`${iso}T00:00:00.000Z`));
+const monthMap: Record<string, number> = {
+  january: 0,
+  february: 1,
+  march: 2,
+  april: 3,
+  may: 4,
+  june: 5,
+  july: 6,
+  august: 7,
+  september: 8,
+  october: 9,
+  november: 10,
+  december: 11
 };
 
-export const getProjectMonthSortKey = (slug: string): number => {
-  const iso = projectMonthBySlug[slug];
-  if (!iso) return 0;
-  return new Date(`${iso}T00:00:00.000Z`).getTime();
+export const parseProjectMonthInput = (value: string | undefined): Date | null => {
+  if (!value) return null;
+  const trimmed = value.trim();
+  if (trimmed.length === 0) return null;
+
+  const monthYearMatch = trimmed.match(/^([A-Za-z]+)\s+(\d{4})$/);
+  if (monthYearMatch) {
+    const [, rawMonth, rawYear] = monthYearMatch;
+    const monthIndex = monthMap[rawMonth.toLowerCase()];
+    if (monthIndex === undefined) return null;
+    return new Date(Date.UTC(Number(rawYear), monthIndex, 1, 0, 0, 0, 0));
+  }
+
+  const isoDateMatch = trimmed.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  if (isoDateMatch) {
+    const [, rawYear, rawMonth, rawDay] = isoDateMatch;
+    return new Date(Date.UTC(Number(rawYear), Number(rawMonth) - 1, Number(rawDay), 0, 0, 0, 0));
+  }
+
+  const isoTimestampMatch = trimmed.match(/^\d{4}-\d{2}-\d{2}T/);
+  if (isoTimestampMatch) {
+    const parsed = new Date(trimmed);
+    if (Number.isNaN(parsed.getTime())) return null;
+    return parsed;
+  }
+
+  return null;
 };
 
+export const getProjectMonthLabel = (value: Date | string | null | undefined): string => {
+  if (!value) return "April 2026";
+  const parsed = value instanceof Date ? value : new Date(value);
+  if (Number.isNaN(parsed.getTime())) return "April 2026";
+  return formatter.format(parsed);
+};

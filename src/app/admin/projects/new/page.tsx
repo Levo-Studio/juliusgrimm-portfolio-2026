@@ -61,8 +61,8 @@ export default async function AdminProjectCreatePage({ searchParams }: Search): 
           <label className="text-sm text-white/70">Title image URL (shown on homepage cards)</label>
           <input name="imageUrl" placeholder="https://..." className="border border-white/20 bg-black px-3 py-2" />
 
-          <label className="text-sm text-white/70">Sort order</label>
-          <input name="sortOrder" type="number" defaultValue={99} className="border border-white/20 bg-black px-3 py-2" />
+          <label className="text-sm text-white/70">Month / year</label>
+          <input name="createdAt" placeholder="May 2026" className="border border-white/20 bg-black px-3 py-2" />
 
           <input type="hidden" name="visible" value="false" />
           <label className="inline-flex items-center gap-3 text-sm">

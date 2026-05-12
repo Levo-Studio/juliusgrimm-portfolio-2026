@@ -78,7 +78,7 @@ export const Homepage = async (): Promise<React.JSX.Element> => {
                     <ProjectThumb title={project.title} imageUrl={project.imageUrl} />
                   </div>
                   <p className="mt-5 font-inria text-[12px] uppercase tracking-[0.05em] text-white/60 md:text-[11px]">
-                    {getProjectMonthLabel(project.slug)}
+                    {getProjectMonthLabel(project.createdAt)}
                   </p>
                   <h3 data-card-title className="mt-1 font-inria text-[24px] md:text-[20px]">{project.title}</h3>
                   <p data-card-subtitle className="font-instrument text-[26px] leading-[1.08] text-[#5BE38B] md:text-[22px]">{project.subtitle}</p>

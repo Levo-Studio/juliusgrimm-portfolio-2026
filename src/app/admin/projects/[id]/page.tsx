@@ -76,8 +76,13 @@ export default async function AdminProjectEditPage({ params, searchParams }: Pro
             )}
           </div>
 
-          <label className="text-sm text-white/70">Sort order</label>
-          <input name="sortOrder" type="number" defaultValue={project.sortOrder} className="border border-white/20 bg-black px-3 py-2" />
+          <label className="text-sm text-white/70">Month / year</label>
+          <input
+            name="createdAt"
+            defaultValue={project.createdAt.toLocaleDateString("en-US", { month: "long", year: "numeric", timeZone: "UTC" })}
+            placeholder="May 2026"
+            className="border border-white/20 bg-black px-3 py-2"
+          />
 
           <ProjectLinksEditor
             initialLinks={links.map((link) => ({

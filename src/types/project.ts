@@ -24,7 +24,7 @@ export type Project = {
   whyBuilt: string;
   imageUrl: string | null;
   visible: boolean;
-  sortOrder: number;
+  createdAt?: Date;
   techStack: ProjectTech[];
   links: ProjectLink[];
 };

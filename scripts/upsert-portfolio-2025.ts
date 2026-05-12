@@ -13,7 +13,7 @@ const main = async (): Promise<void> => {
         "My 2025 portfolio website showcasing selected work, skills, and design philosophy as a developer and UI/UX designer. Built for speed and modern UX with rich case-study style storytelling.",
       whyBuilt:
         "I wanted one place that felt personal and fast, so I built it with React and Vite, added smooth motion, and turned static project showcases into a more narrative portfolio experience.",
-      sortOrder: 6,
+      createdAt: new Date("2025-01-01T00:00:00.000Z"),
       visible: true
     })
     .onConflictDoUpdate({
@@ -25,7 +25,7 @@ const main = async (): Promise<void> => {
           "My 2025 portfolio website showcasing selected work, skills, and design philosophy as a developer and UI/UX designer. Built for speed and modern UX with rich case-study style storytelling.",
         whyBuilt:
           "I wanted one place that felt personal and fast, so I built it with React and Vite, added smooth motion, and turned static project showcases into a more narrative portfolio experience.",
-        sortOrder: 6,
+        createdAt: new Date("2025-01-01T00:00:00.000Z"),
         visible: true,
         updatedAt: new Date()
       }
@@ -59,4 +59,3 @@ main()
     console.error(error);
     process.exit(1);
   });
-

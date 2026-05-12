@@ -1,7 +1,7 @@
 import type { MetadataRoute } from "next";
-import { projectMonthBySlug } from "@/lib/project-meta";
 
 const baseUrl = "https://juliusgrimm.dev";
+const projectSlugs = ["levo-studio-tickets", "levo-studio-db-controller", "levo-studio-finance", "vibevote", "orbitaly", "juliusgrimm-portfolio-2025"];
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const now = new Date();
@@ -19,11 +19,11 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: "yearly",
       priority: 0.2
     },
-    ...Object.entries(projectMonthBySlug).map(([slug, month]) => ({
+    ...projectSlugs.map((slug) => ({
       url: `${baseUrl}/projects/${slug}`,
       lastModified: now,
       changeFrequency: "monthly" as const,
-      priority: month.startsWith("2026") ? 0.8 : 0.6
+      priority: slug === "juliusgrimm-portfolio-2025" ? 0.6 : 0.8
     }))
   ];
 }

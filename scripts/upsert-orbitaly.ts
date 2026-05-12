@@ -15,7 +15,7 @@ async function run(): Promise<void> {
         "I was paranoid about messenger encryption and onboarding complexity, so I built Orbitaly to make secure Matrix client onboarding as easy as possible while keeping everything under my own control.",
       imageUrl: "https://orbitaly.de/orbitaly-og-image.png",
       visible: true,
-      sortOrder: 5
+      createdAt: new Date("2026-04-01T00:00:00.000Z")
     })
     .onConflictDoUpdate({
       target: projects.slug,
@@ -28,7 +28,7 @@ async function run(): Promise<void> {
           "I was paranoid about messenger encryption and onboarding complexity, so I built Orbitaly to make secure Matrix client onboarding as easy as possible while keeping everything under my own control.",
         imageUrl: "https://orbitaly.de/orbitaly-og-image.png",
         visible: true,
-        sortOrder: 5,
+        createdAt: new Date("2026-04-01T00:00:00.000Z"),
         updatedAt: new Date()
       }
     })

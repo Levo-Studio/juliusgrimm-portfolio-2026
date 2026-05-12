@@ -11,7 +11,7 @@ const seedProjects = [
       "My 2025 portfolio website showcasing selected work, skills, and design philosophy as a developer and UI/UX designer. Built for speed and modern UX with rich case-study style storytelling.",
     whyBuilt:
       "I wanted one place that felt personal and fast, so I built it with React and Vite, added smooth motion, and turned static project showcases into a more narrative portfolio experience.",
-    sortOrder: 6,
+    createdAt: new Date("2025-01-01T00:00:00.000Z"),
     tech: ["React", "Vite", "React Router", "Framer Motion", "CSS Modules", "Custom CSS", "ESLint"],
     links: [
       { label: "2025.juliusgrimm.dev", url: "https://2025.juliusgrimm.dev", visible: true },
@@ -26,7 +26,7 @@ const seedProjects = [
       "A modern ticketing and client support platform built for handling projects, requests, and the kind of \"quick changes\" that are never actually quick. Designed to keep communication organized without feeling like enterprise software from 2009.",
     whyBuilt:
       "Client communication can turn into a mess fast when everything lives in emails, DMs, and random notes. I built this to turn support chaos into structured chaos, with tickets, statuses, and a workflow that does not make me want to disappear.",
-    sortOrder: 1,
+    createdAt: new Date("2026-03-01T00:00:00.000Z"),
     tech: ["Next.js", "TypeScript", "PostgreSQL", "Docker"],
     links: [] as { label: string; url: string; visible: boolean }[]
   },
@@ -38,7 +38,7 @@ const seedProjects = [
       "An internal database management tool built to create, manage, and monitor project databases from one clean dashboard. Basically a tiny self-hosted Neon/Supabase-style control panel, because manually touching PostgreSQL forever sounded painful.",
     whyBuilt:
       "Levo Studio runs multiple projects on self-hosted infrastructure, and managing databases manually gets annoying very quickly. So I built a controller that makes database setup faster, cleaner, and slightly less SSH into production and pray.",
-    sortOrder: 2,
+    createdAt: new Date("2026-04-01T00:00:00.000Z"),
     tech: ["Next.js", "TypeScript", "PostgreSQL", "Docker", "Coolify"],
     links: []
   },
@@ -50,7 +50,7 @@ const seedProjects = [
       "A simple internal finance dashboard for tracking invoices, retainers, revenue, expenses, and the painful realization that business is mostly admin with nicer charts.",
     whyBuilt:
       "Spreadsheets work until they start feeling personal. I wanted one clean place to understand revenue, recurring clients, expenses, and cashflow without pretending Excel is a lifestyle.",
-    sortOrder: 3,
+    createdAt: new Date("2026-04-01T00:00:00.000Z"),
     tech: ["Next.js", "TypeScript", "PostgreSQL", "Tailwind"],
     links: []
   },
@@ -62,7 +62,7 @@ const seedProjects = [
       "A modern Spotify requesting platform built to replace paper song requests, chaotic aux handovers, and the social disaster of letting one person control the music all night.",
     whyBuilt:
       "Most party request systems still somehow involve paper lists, screenshots, or passing around a phone every three minutes. That felt primitive, so I built a system that turns live music requests into something fast, collaborative, and slightly less emotionally damaging.",
-    sortOrder: 4,
+    createdAt: new Date("2026-04-01T00:00:00.000Z"),
     tech: ["React", "TypeScript", "Next.js", "PostgreSQL"],
     links: [{ label: "vibevote.de", url: "https://vibevote.de", visible: true }]
   },
@@ -74,7 +74,7 @@ const seedProjects = [
       "A self-hosted Matrix onboarding platform built because trusting random messenger stacks felt reckless. Orbitaly turns Matrix client setup into a flow that normal people can finish without rage quitting.",
     whyBuilt:
       "I was paranoid about messenger encryption and onboarding complexity, so I built Orbitaly to make secure Matrix client onboarding as easy as possible while keeping everything under my own control.",
-    sortOrder: 5,
+    createdAt: new Date("2026-04-01T00:00:00.000Z"),
     tech: ["Next.js", "TypeScript", "PostgreSQL", "Matrix", "Docker"],
     links: [
       { label: "orbitaly.de", url: "https://orbitaly.de", visible: true },
@@ -93,7 +93,7 @@ const main = async (): Promise<void> => {
         subtitle: project.subtitle,
         description: project.description,
         whyBuilt: project.whyBuilt,
-        sortOrder: project.sortOrder,
+        createdAt: project.createdAt,
         visible: true
       })
       .onConflictDoUpdate({
@@ -103,7 +103,7 @@ const main = async (): Promise<void> => {
           subtitle: project.subtitle,
           description: project.description,
           whyBuilt: project.whyBuilt,
-          sortOrder: project.sortOrder,
+          createdAt: project.createdAt,
           updatedAt: new Date()
         }
       })

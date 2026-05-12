@@ -24,6 +24,7 @@ import {
   verifyPassword
 } from "@/server/auth";
 import { env } from "@/lib/env";
+import { parseProjectMonthInput } from "@/lib/project-meta";
 
 const loginSchema = z.object({
   email: z.string(),
@@ -157,6 +158,7 @@ const resolveSlugSource = (slugInput: string, titleInput: string): string => {
   if (normalizedSlug.length > 0) return normalizedSlug;
   return titleInput;
 };
+
 const projectSchema = z.object({
   id: z.string().uuid().optional(),
   slug: z.string().optional().default(""),
@@ -165,8 +167,8 @@ const projectSchema = z.object({
   description: z.string().min(10),
   whyBuilt: z.string().min(10),
   imageUrl: z.string().url().optional().or(z.literal("")),
+  createdAt: z.string().optional().default(""),
   visible: z.enum(["true", "false"]),
-  sortOrder: z.coerce.number().int(),
   csrf: z.string().optional()
 });
 const projectCreateSchema = z.object({
@@ -176,8 +178,8 @@ const projectCreateSchema = z.object({
   description: z.string().trim().min(10),
   whyBuilt: z.string().trim().min(10),
   imageUrl: z.string().url().optional().or(z.literal("")),
+  createdAt: z.string().optional().default(""),
   visible: z.enum(["true", "false"]),
-  sortOrder: z.coerce.number().int(),
   csrf: z.string().optional()
 });
 
@@ -211,6 +213,10 @@ export const upsertProject = async (formData: FormData): Promise<void> => {
   if (!parsed.data.id) {
     redirect("/admin?tab=case-studies&error=missing-id");
   }
+  const parsedCreatedAt = parseProjectMonthInput(parsed.data.createdAt);
+  if (parsed.data.createdAt.trim().length > 0 && !parsedCreatedAt) {
+    redirect(`/admin/projects/${rawId}?error=invalid-form`);
+  }
 
   const projectSlug = await getUniqueProjectSlug(resolveSlugSource(parsed.data.slug, parsed.data.title), parsed.data.id);
 
@@ -223,8 +229,8 @@ export const upsertProject = async (formData: FormData): Promise<void> => {
       description: parsed.data.description,
       whyBuilt: parsed.data.whyBuilt,
       imageUrl: parsed.data.imageUrl || null,
+      createdAt: parsedCreatedAt ?? undefined,
       visible: parsed.data.visible === "true",
-      sortOrder: parsed.data.sortOrder,
       updatedAt: new Date()
     })
     .where(eq(projects.id, parsed.data.id));
@@ -303,6 +309,10 @@ export const createProject = async (formData: FormData): Promise<void> => {
   if (!(await verifyMutationRequest(parsed.data.csrf))) {
     redirect("/admin/projects/new?error=csrf");
   }
+  const parsedCreatedAt = parseProjectMonthInput(parsed.data.createdAt);
+  if (parsed.data.createdAt.trim().length > 0 && !parsedCreatedAt) {
+    redirect("/admin/projects/new?error=invalid-form");
+  }
 
   try {
     const projectSlug = await getUniqueProjectSlug(resolveSlugSource(parsed.data.slug, parsed.data.title));
@@ -316,8 +326,8 @@ export const createProject = async (formData: FormData): Promise<void> => {
         description: parsed.data.description.trim(),
         whyBuilt: parsed.data.whyBuilt.trim(),
         imageUrl: parsed.data.imageUrl || null,
-        visible: parsed.data.visible === "true",
-        sortOrder: parsed.data.sortOrder
+        createdAt: parsedCreatedAt ?? undefined,
+        visible: parsed.data.visible === "true"
       })
       .returning();
 
@@ -442,7 +452,7 @@ export const createOrbitalyCaseStudy = async (formData: FormData): Promise<void>
       whyBuilt:
         "I was paranoid about messenger encryption and onboarding complexity, so I built Orbitaly to make secure Matrix client onboarding as easy as possible while keeping everything under my own control.",
       visible: true,
-      sortOrder: 5
+      createdAt: new Date("2026-04-01T00:00:00.000Z")
     })
     .onConflictDoUpdate({
       target: projects.slug,
@@ -454,7 +464,7 @@ export const createOrbitalyCaseStudy = async (formData: FormData): Promise<void>
         whyBuilt:
           "I was paranoid about messenger encryption and onboarding complexity, so I built Orbitaly to make secure Matrix client onboarding as easy as possible while keeping everything under my own control.",
         visible: true,
-        sortOrder: 5,
+        createdAt: new Date("2026-04-01T00:00:00.000Z"),
         updatedAt: new Date()
       }
     })

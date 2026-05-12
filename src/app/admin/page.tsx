@@ -23,7 +23,7 @@ export default async function AdminPage({ searchParams }: Props): Promise<React.
     );
   }
 
-  const allProjects = await db.select().from(projects).orderBy(projects.sortOrder);
+  const allProjects = await db.select().from(projects).orderBy(projects.createdAt);
   const sessions = await db.select().from(adminSessions).orderBy(desc(adminSessions.createdAt));
   const [adminUser] = await db.select().from(adminUsers).where(eq(adminUsers.id, user.id)).limit(1);
   const passkeys = await db

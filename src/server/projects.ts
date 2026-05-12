@@ -3,7 +3,6 @@ import { db } from "@/server/db/client";
 import { projectLinks, projects, projectTechStack } from "@/server/db/schema";
 import type { Project } from "@/types/project";
 import type { ColorCategory } from "@/types/project";
-import { getProjectMonthSortKey } from "@/lib/project-meta";
 
 const fallbackProjects: Project[] = [
   {
@@ -17,7 +16,7 @@ const fallbackProjects: Project[] = [
       "I wanted a clean place to show my work without the usual template noise, so I built a portfolio that mixed UI/UX presentation with developer-level control over performance and motion.",
     imageUrl: null,
     visible: true,
-    sortOrder: 0,
+    createdAt: new Date("2025-01-01T00:00:00.000Z"),
     techStack: [
       { id: "f0t1", label: "React", colorCategory: "green", sortOrder: 1 },
       { id: "f0t2", label: "Vite", colorCategory: "green", sortOrder: 2 },
@@ -42,7 +41,7 @@ const fallbackProjects: Project[] = [
       "Client communication turns chaotic fast when everything lives in email threads and DMs. I built this so support chaos stays structured, searchable, and less painful.",
     imageUrl: null,
     visible: true,
-    sortOrder: 1,
+    createdAt: new Date("2026-03-01T00:00:00.000Z"),
     techStack: [
       { id: "f1t1", label: "Next.js", colorCategory: "green", sortOrder: 1 },
       { id: "f1t2", label: "TypeScript", colorCategory: "green", sortOrder: 2 },
@@ -62,7 +61,7 @@ const fallbackProjects: Project[] = [
       "Managing multiple self-hosted databases manually gets annoying fast. This controller turns repetitive setup into buttons instead of late-night SSH rituals.",
     imageUrl: null,
     visible: true,
-    sortOrder: 2,
+    createdAt: new Date("2026-04-01T00:00:00.000Z"),
     techStack: [
       { id: "f2t1", label: "Next.js", colorCategory: "green", sortOrder: 1 },
       { id: "f2t2", label: "TypeScript", colorCategory: "green", sortOrder: 2 },
@@ -83,7 +82,7 @@ const fallbackProjects: Project[] = [
       "Spreadsheets are fine until they become a second job. I wanted one place that shows cashflow reality without pretending Excel is a personality.",
     imageUrl: null,
     visible: true,
-    sortOrder: 3,
+    createdAt: new Date("2026-04-01T00:00:00.000Z"),
     techStack: [
       { id: "f3t1", label: "Next.js", colorCategory: "green", sortOrder: 1 },
       { id: "f3t2", label: "TypeScript", colorCategory: "green", sortOrder: 2 },
@@ -103,7 +102,7 @@ const fallbackProjects: Project[] = [
       "Most party request systems still involve paper or passing around phones. I built this to make requests fast, collaborative, and slightly less emotionally damaging.",
     imageUrl: null,
     visible: true,
-    sortOrder: 4,
+    createdAt: new Date("2026-04-01T00:00:00.000Z"),
     techStack: [
       { id: "f4t1", label: "React", colorCategory: "green", sortOrder: 1 },
       { id: "f4t2", label: "TypeScript", colorCategory: "green", sortOrder: 2 },
@@ -123,7 +122,7 @@ const fallbackProjects: Project[] = [
       "I was paranoid about messenger encryption and onboarding complexity, so I built Orbitaly to make secure Matrix client onboarding as easy as possible while keeping everything under my own control.",
     imageUrl: null,
     visible: true,
-    sortOrder: 5,
+    createdAt: new Date("2026-04-01T00:00:00.000Z"),
     techStack: [
       { id: "f5t1", label: "Next.js", colorCategory: "green", sortOrder: 1 },
       { id: "f5t2", label: "TypeScript", colorCategory: "green", sortOrder: 2 },
@@ -139,21 +138,21 @@ const fallbackProjects: Project[] = [
 ];
 
 export const getVisibleProjects = async (): Promise<Project[]> => {
-  const sortByTimeline = (items: Project[]): Project[] =>
+  const sortByCreatedAtAsc = (items: Project[]): Project[] =>
     [...items].sort((a, b) => {
-      const dateA = getProjectMonthSortKey(a.slug);
-      const dateB = getProjectMonthSortKey(b.slug);
-      if (dateA !== dateB) return dateB - dateA;
+      const dateA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+      const dateB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+      if (dateA !== dateB) return dateA - dateB;
       return a.title.localeCompare(b.title, "en", { sensitivity: "base" });
     });
 
   try {
-    const rows = await db.select().from(projects).where(eq(projects.visible, true)).orderBy(asc(projects.sortOrder));
+    const rows = await db.select().from(projects).where(eq(projects.visible, true)).orderBy(asc(projects.createdAt));
     return Promise.all(rows.map((row) => getProjectBySlug(row.slug))).then((items) =>
-      sortByTimeline(items.filter((item): item is Project => item !== null))
+      sortByCreatedAtAsc(items.filter((item): item is Project => item !== null))
     );
   } catch {
-    return sortByTimeline(fallbackProjects);
+    return sortByCreatedAtAsc(fallbackProjects);
   }
 };
 

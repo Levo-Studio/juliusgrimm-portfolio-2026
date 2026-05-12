@@ -12,13 +12,12 @@ export const projects = pgTable(
     whyBuilt: text("why_built").notNull(),
     imageUrl: text("image_url"),
     visible: boolean("visible").notNull().default(true),
-    sortOrder: integer("sort_order").notNull().default(0),
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
     updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow()
   },
   (table) => ({
     slugIdx: index("projects_slug_idx").on(table.slug),
-    visibleSortIdx: index("projects_visible_sort_idx").on(table.visible, table.sortOrder)
+    visibleCreatedIdx: index("projects_visible_created_idx").on(table.visible, table.createdAt)
   })
 );
 
