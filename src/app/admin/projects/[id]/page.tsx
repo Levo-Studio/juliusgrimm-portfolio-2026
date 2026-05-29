@@ -1,5 +1,4 @@
 import Link from "next/link";
-import Image from "next/image";
 import { notFound } from "next/navigation";
 import { cookies } from "next/headers";
 import { asc, eq } from "drizzle-orm";
@@ -7,6 +6,7 @@ import { db } from "@/server/db/client";
 import { projectLinks, projects, projectTechStack } from "@/server/db/schema";
 import { getSessionUser } from "@/server/auth";
 import { Button } from "@/components/ui/button";
+import { DirectProjectImage } from "@/components/shared/direct-project-image";
 import { upsertProject } from "@/app/admin/actions";
 import { ProjectLinksEditor } from "@/app/admin/projects/project-links-editor";
 import { ProjectTechEditor } from "@/app/admin/projects/project-tech-editor";
@@ -70,7 +70,7 @@ export default async function AdminProjectEditPage({ params, searchParams }: Pro
           <input name="imageUrl" defaultValue={project.imageUrl ?? ""} className="border border-white/20 bg-black px-3 py-2" />
           <div className="relative mt-1 aspect-[1200/630] w-full overflow-hidden border border-white/15 bg-[#151618]">
             {project.imageUrl ? (
-              <Image src={project.imageUrl} alt={`${project.title} title image preview`} fill className="object-cover" sizes="(max-width: 980px) 100vw, 60vw" />
+              <DirectProjectImage src={project.imageUrl} alt={`${project.title} title image preview`} />
             ) : (
               <div className="absolute inset-0 flex items-center justify-center text-sm text-white/50">No title image yet</div>
             )}

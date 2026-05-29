@@ -6,6 +6,7 @@ import { useActionState, useState } from "react";
 import { startRegistration } from "@simplewebauthn/browser";
 import { Menu, PanelLeftClose, ShieldCheck, FileText, Settings, Eye, EyeOff, Monitor, Smartphone, KeyRound, LogOut, ImageIcon, LayoutDashboard, Globe, FolderOpen, BarChart3 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { DirectProjectImage } from "@/components/shared/direct-project-image";
 import type { PasswordState, TwoFactorState } from "@/app/admin/actions";
 import { changePassword, confirmTwoFactorSetup, deletePasskey, deleteProject, disableTwoFactor, logoutAdmin, revokeSession, startTwoFactorSetup, toggleProjectVisibility } from "@/app/admin/actions";
 
@@ -192,7 +193,7 @@ export const AdminDashboard = ({ csrfToken, projects, sessions, passkeys, twoFac
                   <div className="grid gap-4">
                     <div className="relative aspect-[1200/630] w-full overflow-hidden border border-white/10 bg-[#151618]">
                       {project.imageUrl ? (
-                        <Image src={project.imageUrl} alt={`${project.title} title image`} fill className="object-cover" sizes="(max-width: 1280px) 100vw, 40vw" />
+                        <DirectProjectImage src={project.imageUrl} alt={`${project.title} title image`} />
                       ) : (
                         <div className="absolute inset-0 flex items-center justify-center text-sm text-white/45"><ImageIcon className="mr-2 size-4" />No title image</div>
                       )}

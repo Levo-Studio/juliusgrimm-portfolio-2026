@@ -1,10 +1,10 @@
 import Link from "next/link";
-import Image from "next/image";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { ArrowUpRight, Globe } from "lucide-react";
 import { SectionShell } from "@/components/shared/section-shell";
 import { ColorTag } from "@/components/shared/color-tag";
+import { DirectProjectImage } from "@/components/shared/direct-project-image";
 import { CaseStudyAnimations } from "@/components/sections/case-study-animations";
 import { getProjectBySlug } from "@/server/projects";
 import { getProjectMonthLabel } from "@/lib/project-meta";
@@ -86,7 +86,7 @@ export default async function ProjectDetailPage({ params }: Props): Promise<Reac
         <SectionShell label="DESCRIPTION">
           {project.imageUrl ? (
             <div className="mb-8 relative aspect-[1200/630] w-full max-w-[980px] overflow-hidden border border-white/15 bg-[#151618]">
-              <Image src={project.imageUrl} alt={`${project.title} OG preview`} fill className="object-cover" sizes="(max-width: 1200px) 100vw, 60vw" />
+              <DirectProjectImage src={project.imageUrl} alt={`${project.title} OG preview`} />
             </div>
           ) : (
             <div className="crt-loader mb-8 relative aspect-[1200/630] w-full max-w-[980px] overflow-hidden border border-white/15 bg-[#151618]">
