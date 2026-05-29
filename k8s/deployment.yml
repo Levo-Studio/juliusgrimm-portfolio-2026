@@ -1,0 +1,68 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: juliusgrimm-portfolio-2026
+  namespace: apps-internal
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: juliusgrimm-portfolio-2026
+  template:
+    metadata:
+      labels:
+        app: juliusgrimm-portfolio-2026
+    spec:
+      imagePullSecrets:
+        - name: ghcr-secret
+      containers:
+        - name: juliusgrimm-portfolio-2026
+          image: ghcr.io/levo-studio/juliusgrimm-portfolio-2026:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 3000
+          env:
+            - name: NODE_ENV
+              value: production
+          envFrom:
+            - secretRef:
+                name: juliusgrimm-portfolio-2026-env
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: juliusgrimm-portfolio-2026
+  namespace: apps-internal
+spec:
+  type: ClusterIP
+  selector:
+    app: juliusgrimm-portfolio-2026
+  ports:
+    - name: http
+      port: 80
+      targetPort: 3000
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: juliusgrimm-portfolio-2026
+  namespace: apps-internal
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-http
+spec:
+  ingressClassName: traefik
+  tls:
+    - hosts:
+        - juliusgrimm.dev
+      secretName: juliusgrimm-dev-tls
+  rules:
+    - host: juliusgrimm.dev
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: juliusgrimm-portfolio-2026
+                port:
+                  number: 80

@@ -23,7 +23,7 @@ WORKDIR /app
 
 ENV NODE_ENV=production
 ENV HOSTNAME=0.0.0.0
-ENV PORT=3017
+ENV PORT=3000
 
 RUN addgroup -S nextjs && adduser -S nextjs -G nextjs
 
@@ -36,6 +36,6 @@ RUN chown -R nextjs:nextjs /app
 
 USER nextjs
 
-EXPOSE 3017
+EXPOSE 3000
 
-CMD ["sh", "-c", "pnpm exec next start --port ${PORT:-3017} --hostname 0.0.0.0"]
+CMD ["sh", "-c", "pnpm exec next start --port ${PORT:-3000} --hostname 0.0.0.0"]
