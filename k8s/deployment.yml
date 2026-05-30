@@ -17,7 +17,7 @@ spec:
         - name: ghcr-secret
       containers:
         - name: juliusgrimm-portfolio-2026
-          image: ghcr.io/levo-studio/juliusgrimm-portfolio-2026:build-23 # {"$imagepolicy": "flux-system:juliusgrimm-portfolio-2026"}
+          image: ghcr.io/levo-studio/juliusgrimm-portfolio-2026:build-24 # {"$imagepolicy": "flux-system:juliusgrimm-portfolio-2026"}
           imagePullPolicy: Always
           ports:
             - containerPort: 3000
