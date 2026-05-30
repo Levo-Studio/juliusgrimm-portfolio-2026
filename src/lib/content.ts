@@ -10,7 +10,7 @@ export const survivalTags: SurvivalTag[] = [
   { label: "CSS", color: "green" },
   { label: "Tailwind", color: "green" },
   { label: "Docker", color: "orange" },
-  { label: "Coolify", color: "orange" },
+  { label: "Kubernetes", color: "orange" },
   { label: "Zed", color: "orange" },
   { label: "Figma", color: "orange" },
   { label: "MacOS", color: "red" },

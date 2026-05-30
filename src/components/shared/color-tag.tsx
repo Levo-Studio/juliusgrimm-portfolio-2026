@@ -36,6 +36,7 @@ const iconByLabel: Record<string, React.ComponentType<{ className?: string }>> =
   CSS: Palette,
   Tailwind: Wind,
   Docker: Box,
+  Kubernetes: Server,
   Coolify: Spline,
   Zed: Binary,
   Figma: PenTool,
