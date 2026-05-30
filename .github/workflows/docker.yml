@@ -34,3 +34,4 @@ jobs:
           tags: |
             ghcr.io/levo-studio/juliusgrimm-portfolio-2026:latest
             ghcr.io/levo-studio/juliusgrimm-portfolio-2026:${{ github.sha }}
+            ghcr.io/levo-studio/juliusgrimm-portfolio-2026:build-${{ github.run_number }}
