@@ -32,6 +32,3 @@ jobs:
           build-args: |
             DATABASE_URL=postgresql://build:build@localhost:5432/build
           tags: ghcr.io/levo-studio/juliusgrimm-portfolio-2026:latest
-
-      - name: Trigger Portainer redeploy
-        run: curl -X POST "${{ secrets.PORTAINER_WEBHOOK }}"
