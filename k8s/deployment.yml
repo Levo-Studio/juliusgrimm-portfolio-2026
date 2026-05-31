@@ -4,7 +4,7 @@ metadata:
   name: juliusgrimm-portfolio-2026
   namespace: apps-private
 spec:
-  replicas: 1
+  replicas: 2
   selector:
     matchLabels:
       app: juliusgrimm-portfolio-2026
