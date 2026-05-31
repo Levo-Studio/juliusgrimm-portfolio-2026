@@ -40,4 +40,4 @@ USER nextjs
 
 EXPOSE 3000
 
-CMD ["sh", "-c", "pnpm exec next start --port ${PORT:-3000} --hostname 0.0.0.0"]
+CMD ["sh", "-c", "./node_modules/.bin/next start --port ${PORT:-3000} --hostname 0.0.0.0"]
