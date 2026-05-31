@@ -1,5 +1,6 @@
 name: Build and Push Docker Image
 
+# k8s-only updates are ignored so Flux image automation does not retrigger builds.
 on:
   push:
     branches:
