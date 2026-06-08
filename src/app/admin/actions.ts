@@ -93,6 +93,7 @@ export const loginAdmin = async (_prevState: LoginState, formData: FormData): Pr
     revalidatePath("/admin");
     redirect("/admin");
   } catch (error) {
+    if (isRedirectError(error)) throw error;
     console.error("Admin login/create failed:", error);
     return { ok: false, error: "Could not create/login admin user. Check database permissions and schema." };
   }
