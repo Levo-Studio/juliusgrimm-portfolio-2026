@@ -6,7 +6,7 @@ on:
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_NAME: ${{ github.repository }}
+  IMAGE_NAME: levo-studio/juliusgrimm-portfolio-2026
 
 jobs:
   build-and-push:
@@ -32,7 +32,8 @@ jobs:
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
           tags: |
-            type=raw,value={{branch}}-{{sha,short}}-{{date 'X'}}
+            type=raw,value=build-${{ github.run_number }}
+            type=sha,prefix={{branch}}-,format=short
             type=raw,value=latest,enable={{is_default_branch}}
 
       - name: Build and push Docker image
@@ -40,5 +41,35 @@ jobs:
         with:
           context: .
           push: true
+          pull: true
+          no-cache: true
+          build-args: |
+            GIT_SHA=${{ github.sha }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
+
+      - name: Verify latest image revision
+        run: |
+          IMAGE="${REGISTRY}/${IMAGE_NAME}:latest"
+          docker pull "$IMAGE"
+          REVISION="$(docker image inspect "$IMAGE" --format '{{ index .Config.Labels "org.opencontainers.image.revision" }}')"
+
+          if [ "$REVISION" != "$GITHUB_SHA" ]; then
+            echo "latest points to $REVISION, expected $GITHUB_SHA"
+            exit 1
+          fi
+
+          echo "latest points to $REVISION"
+
+      - name: Trigger deployment webhook
+        env:
+          DEPLOY_WEBHOOK_URL: ${{ secrets.DEPLOY_WEBHOOK_URL }}
+        run: |
+          if [ -z "$DEPLOY_WEBHOOK_URL" ]; then
+            echo "DEPLOY_WEBHOOK_URL is not configured; skipping webhook."
+            exit 0
+          fi
+
+          echo "Triggering deployment webhook..."
+          curl --fail --show-error --silent --retry 5 --retry-delay 5 --retry-all-errors "$DEPLOY_WEBHOOK_URL"
+          echo "Deployment webhook completed."
