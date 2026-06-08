@@ -159,11 +159,15 @@ export const audit = async (params: {
   entityId?: string;
   metadata?: string;
 }): Promise<void> => {
-  await db.insert(auditLogs).values({
-    userId: params.userId,
-    action: params.action,
-    entityType: params.entityType,
-    entityId: params.entityId,
-    metadata: params.metadata
-  });
+  try {
+    await db.insert(auditLogs).values({
+      userId: params.userId,
+      action: params.action,
+      entityType: params.entityType,
+      entityId: params.entityId,
+      metadata: params.metadata
+    });
+  } catch (error) {
+    console.error("Audit log write failed:", error);
+  }
 };

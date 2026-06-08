@@ -37,6 +37,7 @@ jobs:
             type=raw,value=latest,enable={{is_default_branch}}
 
       - name: Build and push Docker image
+        id: build
         uses: docker/build-push-action@v5
         with:
           context: .
@@ -47,6 +48,12 @@ jobs:
             GIT_SHA=${{ github.sha }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
+
+      - name: Verify pushed image digest
+        run: |
+          IMAGE="${REGISTRY}/${IMAGE_NAME}@${{ steps.build.outputs.digest }}"
+          docker buildx imagetools inspect "$IMAGE" >/dev/null
+          echo "pushed image digest is available: $IMAGE"
 
       - name: Verify latest image revision
         run: |
