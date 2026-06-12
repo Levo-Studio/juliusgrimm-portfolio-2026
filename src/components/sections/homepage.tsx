@@ -8,8 +8,9 @@ import { HomeReloadFix } from "@/components/sections/home-reload-fix";
 import { AboutReveal } from "@/components/sections/about-reveal";
 import { ProjectThumb } from "@/components/shared/project-thumb";
 import { HeroTypewriter } from "@/components/sections/hero-typewriter";
-import { contactItems, survivalTags } from "@/lib/content";
+import { contactItems } from "@/lib/content";
 import { getVisibleProjects } from "@/server/projects";
+import { getSurvivalKitTags } from "@/server/survival-kit";
 import { getProjectMonthLabel } from "@/lib/project-meta";
 
 const getGitHubLastUpdate = async (): Promise<string> => {
@@ -34,12 +35,12 @@ const getGitHubLastUpdate = async (): Promise<string> => {
 
 export const Homepage = async (): Promise<React.JSX.Element> => {
   const projects = await getVisibleProjects();
+  const survivalTags = await getSurvivalKitTags();
   const lastUpdated = await getGitHubLastUpdate();
   const currentYear = new Date().getFullYear();
   const contactLinks: Record<string, string> = {
     EMAIL: "mailto:me@juliusgrimm.dev",
     WhatsApp: "tel:+4917661028522",
-    Matrix: "https://matrix.to/#/@levostudio:chat.orbitaly.de",
     LinkedIn: "https://linkedin.com/in/julius-gr/",
     Instagram: "https://instagram.com/julius_gr_",
     GitHub: "https://github.com/justthatrandomcoder"
@@ -87,7 +88,7 @@ export const Homepage = async (): Promise<React.JSX.Element> => {
             </div>
           </SectionShell>
 
-          <SectionShell label="TECH STACK" className="md:mt-8">
+          <SectionShell id="tech-stack" label="TECH STACK" className="md:mt-8">
             <h2 className="mb-7 font-instrument text-[38px] leading-[1.08] md:text-[52px]">
               My current <span className="text-[#5BE38B]">survival kit.</span>
             </h2>

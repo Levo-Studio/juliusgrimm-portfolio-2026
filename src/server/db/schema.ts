@@ -52,6 +52,21 @@ export const projectLinks = pgTable(
   })
 );
 
+export const survivalKitTags = pgTable(
+  "survival_kit_tags",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    label: varchar("label", { length: 80 }).notNull(),
+    colorCategory: varchar("color_category", { length: 16 }).notNull(),
+    sortOrder: integer("sort_order").notNull().default(0),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow()
+  },
+  (table) => ({
+    sortIdx: index("survival_kit_tags_sort_idx").on(table.sortOrder)
+  })
+);
+
 export const adminUsers = pgTable("admin_users", {
   id: uuid("id").defaultRandom().primaryKey(),
   email: varchar("email", { length: 255 }).notNull().unique(),

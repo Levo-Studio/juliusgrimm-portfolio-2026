@@ -3,6 +3,7 @@ import { desc, eq } from "drizzle-orm";
 import { db } from "@/server/db/client";
 import { adminAuthenticators, adminSessions, adminUsers, projects } from "@/server/db/schema";
 import { getSessionUser } from "@/server/auth";
+import { getSurvivalKitTags } from "@/server/survival-kit";
 import { AdminLoginForm } from "./admin-login-form";
 import { AdminDashboard } from "./admin-dashboard";
 
@@ -24,6 +25,7 @@ export default async function AdminPage({ searchParams }: Props): Promise<React.
   }
 
   const allProjects = await db.select().from(projects).orderBy(projects.createdAt);
+  const survivalTags = await getSurvivalKitTags();
   const sessions = await db.select().from(adminSessions).orderBy(desc(adminSessions.createdAt));
   const [adminUser] = await db.select().from(adminUsers).where(eq(adminUsers.id, user.id)).limit(1);
   const passkeys = await db
@@ -31,7 +33,7 @@ export default async function AdminPage({ searchParams }: Props): Promise<React.
     .from(adminAuthenticators)
     .where(eq(adminAuthenticators.userId, user.id))
     .orderBy(desc(adminAuthenticators.createdAt));
-  const initialTab = params.tab === "settings" ? "settings" : params.tab === "overview" ? "overview" : "case-studies";
+  const initialTab = params.tab === "settings" ? "settings" : params.tab === "overview" ? "overview" : params.tab === "survival-kit" ? "survival-kit" : "case-studies";
   const saved = params.saved === "1";
   const errorParam = typeof params.error === "string" ? params.error : "";
   const errorMessage =
@@ -47,6 +49,7 @@ export default async function AdminPage({ searchParams }: Props): Promise<React.
     <AdminDashboard
       csrfToken={csrfToken}
       projects={allProjects}
+      survivalTags={survivalTags}
       sessions={sessions}
       passkeys={passkeys}
       twoFactorEnabled={adminUser?.twoFactorEnabled ?? false}

@@ -9,7 +9,7 @@ import { and, count, eq, isNull } from "drizzle-orm";
 import { authenticator } from "otplib";
 import QRCode from "qrcode";
 import { db } from "@/server/db/client";
-import { adminAuthenticators, adminSessions, adminTwoFactorSecrets, adminUsers, projectLinks, projects, projectTechStack } from "@/server/db/schema";
+import { adminAuthenticators, adminSessions, adminTwoFactorSecrets, adminUsers, projectLinks, projects, projectTechStack, survivalKitTags } from "@/server/db/schema";
 import {
   audit,
   clearPendingTwoFactor,
@@ -25,6 +25,7 @@ import {
 } from "@/server/auth";
 import { env } from "@/lib/env";
 import { parseProjectMonthInput } from "@/lib/project-meta";
+import { ensureSurvivalKitTags } from "@/server/survival-kit";
 
 const loginSchema = z.object({
   email: z.string(),
@@ -196,6 +197,52 @@ const projectTechSchema = z.object({
   colorCategory: z.enum(["green", "orange", "red", "blue"]),
   sortOrder: z.number().int().min(0)
 });
+
+const survivalTagSchema = z.object({
+  label: z.string().min(1).max(80),
+  colorCategory: z.enum(["green", "orange", "red", "blue"]),
+  sortOrder: z.number().int().min(0)
+});
+
+export const saveSurvivalKitTags = async (formData: FormData): Promise<void> => {
+  const user = await getSessionUser();
+  if (!user) redirect("/admin");
+
+  const csrf = String(formData.get("csrf") ?? "");
+  if (!(await verifyMutationRequest(csrf || undefined))) redirect("/admin?tab=survival-kit&error=csrf");
+
+  const tagLabels = formData.getAll("tagLabel");
+  const tagColors = formData.getAll("tagColorCategory");
+  const tagSort = formData.getAll("tagSortOrder");
+  const rawTags = tagLabels.map((_, index) => ({
+    label: String(tagLabels[index] ?? "").trim(),
+    colorCategory: String(tagColors[index] ?? "green"),
+    sortOrder: Number(String(tagSort[index] ?? index + 1))
+  }));
+  const parsedTags = rawTags
+    .filter((item) => item.label.length > 0)
+    .map((item) => survivalTagSchema.safeParse(item))
+    .filter((result): result is { success: true; data: z.infer<typeof survivalTagSchema> } => result.success)
+    .map((result) => result.data);
+
+  await ensureSurvivalKitTags();
+  await db.delete(survivalKitTags);
+  if (parsedTags.length > 0) {
+    await db.insert(survivalKitTags).values(
+      parsedTags.map((tag, index) => ({
+        label: tag.label,
+        colorCategory: tag.colorCategory,
+        sortOrder: Number.isFinite(tag.sortOrder) ? tag.sortOrder : index + 1,
+        updatedAt: new Date()
+      }))
+    );
+  }
+
+  await audit({ userId: user.id, action: "survival_tags_edit", entityType: "content", metadata: `${parsedTags.length} tags` });
+  revalidatePath("/");
+  revalidatePath("/admin");
+  redirect("/admin?tab=survival-kit&saved=1");
+};
 
 export const upsertProject = async (formData: FormData): Promise<void> => {
   const user = await getSessionUser();

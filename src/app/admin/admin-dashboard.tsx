@@ -4,11 +4,13 @@ import Link from "next/link";
 import Image from "next/image";
 import { useActionState, useState } from "react";
 import { startRegistration } from "@simplewebauthn/browser";
-import { Menu, PanelLeftClose, ShieldCheck, FileText, Settings, Eye, EyeOff, Monitor, Smartphone, KeyRound, LogOut, ImageIcon, LayoutDashboard, Globe, FolderOpen, BarChart3 } from "lucide-react";
+import { Menu, PanelLeftClose, ShieldCheck, FileText, Settings, Eye, EyeOff, Monitor, Smartphone, KeyRound, LogOut, ImageIcon, LayoutDashboard, Globe, FolderOpen, Tags } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { DirectProjectImage } from "@/components/shared/direct-project-image";
 import type { PasswordState, TwoFactorState } from "@/app/admin/actions";
-import { changePassword, confirmTwoFactorSetup, deletePasskey, deleteProject, disableTwoFactor, logoutAdmin, revokeSession, startTwoFactorSetup, toggleProjectVisibility } from "@/app/admin/actions";
+import { changePassword, confirmTwoFactorSetup, deletePasskey, deleteProject, disableTwoFactor, logoutAdmin, revokeSession, saveSurvivalKitTags, startTwoFactorSetup, toggleProjectVisibility } from "@/app/admin/actions";
+import { SurvivalKitTagEditor } from "@/app/admin/survival-kit-tag-editor";
+import type { ColorCategory } from "@/types/project";
 
 type ProjectItem = {
   id: string;
@@ -28,13 +30,21 @@ type SessionItem = {
   revokedAt: Date | null;
 };
 
+type SurvivalTagItem = {
+  label: string;
+  color: ColorCategory;
+};
+
+type AdminTab = "overview" | "case-studies" | "survival-kit" | "settings";
+
 type Props = {
   csrfToken: string;
   projects: ProjectItem[];
+  survivalTags: SurvivalTagItem[];
   sessions: SessionItem[];
   passkeys: Array<{ id: string; createdAt: Date; lastUsedAt: Date | null; deviceType: string }>;
   twoFactorEnabled: boolean;
-  initialTab: "overview" | "case-studies" | "settings";
+  initialTab: AdminTab;
   saved: boolean;
   errorMessage?: string;
 };
@@ -42,9 +52,9 @@ type Props = {
 const passwordInit: PasswordState = { ok: false };
 const twoFactorInit: TwoFactorState = { ok: false };
 
-export const AdminDashboard = ({ csrfToken, projects, sessions, passkeys, twoFactorEnabled, initialTab, saved, errorMessage }: Props): React.JSX.Element => {
+export const AdminDashboard = ({ csrfToken, projects, survivalTags, sessions, passkeys, twoFactorEnabled, initialTab, saved, errorMessage }: Props): React.JSX.Element => {
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [tab, setTab] = useState<"overview" | "case-studies" | "settings">(initialTab);
+  const [tab, setTab] = useState<AdminTab>(initialTab);
   const [pwState, pwAction, pwPending] = useActionState(changePassword, passwordInit);
   const [twoFactorState, twoFactorSetupAction, twoFactorSetupPending] = useActionState(startTwoFactorSetup, twoFactorInit);
   const [twoFactorConfirmState, twoFactorConfirmAction, twoFactorConfirmPending] = useActionState(confirmTwoFactorSetup, twoFactorInit);
@@ -93,6 +103,9 @@ export const AdminDashboard = ({ csrfToken, projects, sessions, passkeys, twoFac
             <button onClick={() => setTab("case-studies")} className={`flex w-full items-center gap-3 border px-4 py-3 text-left ${tab === "case-studies" ? "border-[#5BE38B] bg-[rgba(91,227,139,0.12)] text-[#5BE38B]" : "border-white/15"}`}>
               <FileText className="size-4" /> Case Studies
             </button>
+            <button onClick={() => setTab("survival-kit")} className={`flex w-full items-center gap-3 border px-4 py-3 text-left ${tab === "survival-kit" ? "border-[#5BE38B] bg-[rgba(91,227,139,0.12)] text-[#5BE38B]" : "border-white/15"}`}>
+              <Tags className="size-4" /> Survival Kit
+            </button>
             <button onClick={() => setTab("settings")} className={`flex w-full items-center gap-3 border px-4 py-3 text-left ${tab === "settings" ? "border-[#5BE38B] bg-[rgba(91,227,139,0.12)] text-[#5BE38B]" : "border-white/15"}`}>
               <Settings className="size-4" /> Settings
             </button>
@@ -108,7 +121,7 @@ export const AdminDashboard = ({ csrfToken, projects, sessions, passkeys, twoFac
             <form action={logoutAdmin}><Button variant="ghost" className="border border-white/15"><LogOut className="mr-2 size-4" />Logout</Button></form>
           </div>
 
-          {saved ? <div className="mb-4 border border-[#5BE38B] bg-[rgba(91,227,139,0.1)] px-4 py-3 text-sm text-[#5BE38B]">Case study saved successfully.</div> : null}
+          {saved ? <div className="mb-4 border border-[#5BE38B] bg-[rgba(91,227,139,0.1)] px-4 py-3 text-sm text-[#5BE38B]">Saved successfully.</div> : null}
           {errorMessage ? <div className="mb-4 border border-[#E35B5B] bg-[rgba(227,91,91,0.1)] px-4 py-3 text-sm text-[#E35B5B]">{errorMessage}</div> : null}
 
           {mobileOpen ? (
@@ -117,6 +130,7 @@ export const AdminDashboard = ({ csrfToken, projects, sessions, passkeys, twoFac
               <div className="space-y-2">
                 <button onClick={() => { setTab("overview"); setMobileOpen(false); }} className="flex w-full items-center gap-2 border border-white/20 p-3 text-left"><LayoutDashboard className="size-4" />Overview</button>
                 <button onClick={() => { setTab("case-studies"); setMobileOpen(false); }} className="flex w-full items-center gap-2 border border-white/20 p-3 text-left"><FileText className="size-4" />Case Studies</button>
+                <button onClick={() => { setTab("survival-kit"); setMobileOpen(false); }} className="flex w-full items-center gap-2 border border-white/20 p-3 text-left"><Tags className="size-4" />Survival Kit</button>
                 <button onClick={() => { setTab("settings"); setMobileOpen(false); }} className="flex w-full items-center gap-2 border border-white/20 p-3 text-left"><Settings className="size-4" />Settings</button>
               </div>
             </div>
@@ -225,6 +239,25 @@ export const AdminDashboard = ({ csrfToken, projects, sessions, passkeys, twoFac
                 </article>
               ))}
               </div>
+            </div>
+          ) : tab === "survival-kit" ? (
+            <div className="space-y-4">
+              <section className="border border-white/15 bg-[#070707] p-4 md:p-5">
+                <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
+                  <div>
+                    <h2 className="flex items-center gap-2 font-inria text-xl md:text-2xl"><Tags className="size-5" /> Survival Kit Tags</h2>
+                    <p className="mt-1 text-sm text-white/65">Manage the tags shown in the TECH STACK section.</p>
+                  </div>
+                  <Link href="/#tech-stack" className="text-sm text-[#5BE38B] underline">View homepage</Link>
+                </div>
+                <form action={saveSurvivalKitTags} className="space-y-5">
+                  <input type="hidden" name="csrf" value={csrfToken} />
+                  <SurvivalKitTagEditor initialTags={survivalTags.map((tag, index) => ({ ...tag, sortOrder: index + 1 }))} />
+                  <Button className="border border-[#5BE38B] bg-[rgba(91,227,139,0.1)] text-[#5BE38B] transition hover:bg-[rgba(91,227,139,0.2)]">
+                    Save tags
+                  </Button>
+                </form>
+              </section>
             </div>
           ) : (
             <div className="space-y-8">
