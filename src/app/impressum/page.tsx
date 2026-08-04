@@ -1,6 +1,33 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { SectionShell } from "@/components/shared/section-shell";
 import { ImpressumAnimations } from "@/components/sections/impressum-animations";
+
+const title = "Impressum";
+const description = "Legal notice (Impressum) and contact details for juliusgrimm.dev, provided in accordance with German law (§ 5 DDG).";
+
+export const metadata: Metadata = {
+  title,
+  description,
+  alternates: {
+    canonical: "/impressum"
+  },
+  openGraph: {
+    title: `${title} | Julius Grimm`,
+    description,
+    url: "/impressum",
+    siteName: "Julius Grimm",
+    type: "website",
+    locale: "en_US",
+    images: [{ url: "/jg_badge.png", width: 1200, height: 630, alt: "Julius Grimm Portfolio Badge" }]
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: `${title} | Julius Grimm`,
+    description,
+    images: ["/jg_badge.png"]
+  }
+};
 
 export default function ImpressumPage(): React.JSX.Element {
   return (
