@@ -5,6 +5,7 @@ import { ArrowUpRight, Globe } from "lucide-react";
 import { SectionShell } from "@/components/shared/section-shell";
 import { ColorTag } from "@/components/shared/color-tag";
 import { DirectProjectImage } from "@/components/shared/direct-project-image";
+import { JsonLd } from "@/components/shared/json-ld";
 import { CaseStudyAnimations } from "@/components/sections/case-study-animations";
 import { getProjectBySlug } from "@/server/projects";
 import { getProjectMonthLabel } from "@/lib/project-meta";
@@ -79,8 +80,29 @@ export default async function ProjectDetailPage({ params }: Props): Promise<Reac
   if (!project) notFound();
   const accents = accentBySlug[project.slug] ?? [];
 
+  const rawImage = project.imageUrl ?? "/jg_badge.png";
+  const schemaImage = rawImage.startsWith("http") ? rawImage : `https://juliusgrimm.dev${rawImage}`;
+
+  const projectSchema = {
+    "@context": "https://schema.org",
+    "@type": "CreativeWork",
+    name: project.title,
+    headline: `${project.title} — ${project.subtitle}`,
+    description: project.description,
+    url: `https://juliusgrimm.dev/projects/${project.slug}`,
+    image: schemaImage,
+    ...(project.createdAt ? { dateCreated: new Date(project.createdAt).toISOString() } : {}),
+    keywords: project.techStack.map((tech) => tech.label).join(", "),
+    author: {
+      "@type": "Person",
+      name: "Julius Grimm",
+      url: "https://juliusgrimm.dev"
+    }
+  };
+
   return (
     <main className="min-h-screen bg-black px-7 pb-36 pt-14 text-white md:flex md:items-center md:px-16 md:py-16 lg:px-[64px]">
+      <JsonLd data={projectSchema} />
       <CaseStudyAnimations />
       <div className="mx-auto w-full max-w-[1320px] space-y-16">
         <SectionShell label="DESCRIPTION">
