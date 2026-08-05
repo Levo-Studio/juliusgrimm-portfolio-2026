@@ -46,7 +46,15 @@ Field rules:
 - subtitle: ONE short punchy joke-line about the motivation. Examples: "Accounting, but slightly less depressing." / "Messenger encryption paranoia, so I built my own." / "Slightly overengineered customer support."
 - description: about two sentences. First says what it factually is (wrapped in personality); second says what it does for the user with a twist.
 - whyBuilt: one to two first-person sentences about the frustration that triggered it, ending on a jab.
-- techStack: 3-6 tags inferred from the description. colorCategory mapping: green = languages/frameworks/core stack (React, TypeScript, Next.js, PostgreSQL), orange = tooling/devops (Docker, Kubernetes, Coolify, Figma), red = OS/hardware/security, blue = anything special or side-quest-ish (Matrix, GSAP, Framer Motion). If unsure, use green.
+- techStack: 4-7 tags. FIRST decide what kind of project this is, then pick the realistic stack Julius actually uses:
+  - Web app / SaaS / dashboard / platform: Next.js, React, TypeScript, PostgreSQL, Tailwind (all green). Add Docker (orange) if it's self-hosted or containerised.
+  - Self-hosted service / infra / internal tool: Next.js + TypeScript + PostgreSQL (green) plus Docker (orange).
+  - Mobile app: React Native + TypeScript (green).
+  - CLI / script / library: TypeScript or Node.js (green), Docker if relevant (orange).
+  - API / backend: Next.js or Node.js, TypeScript, PostgreSQL (green), Docker (orange).
+  Anything special or protocol-ish (Matrix, Spotify API, WebAuthn, GSAP, Framer Motion) is blue. OS/hardware/security topics are red. Only include tools that genuinely fit what the project does; do not pad with unrelated tech.
+  Never include Coolify. Never include Kubernetes unless the description explicitly mentions Kubernetes.
+  colorCategory mapping: green = languages/frameworks/core stack, orange = tooling/devops, red = OS/hardware/security, blue = special/protocol/side-quest. If unsure, use green.
 
 Examples of the voice (subtitle | description | whyBuilt):
 - "Slightly overengineered customer support." | "A modern ticketing and client support platform built for handling projects, requests, and the kind of quick changes that are never actually quick." | "Client communication turns chaotic fast when everything lives in email threads and DMs. I built this so support chaos stays structured, searchable, and less painful."
