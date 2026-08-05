@@ -50,7 +50,7 @@ export const generateMetadata = async ({ params }: Props): Promise<Metadata> => 
 
   const title = `${project.title} Case Study`;
   const description = project.description.length > 155 ? `${project.description.slice(0, 152).trim()}...` : project.description;
-  const image = project.imageUrl ?? "/jg_badge.png";
+  const image = project.imageUrl?.trim() ? project.imageUrl : "/jg_badge.png";
 
   return {
     title,
