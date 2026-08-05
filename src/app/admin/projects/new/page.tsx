@@ -38,8 +38,8 @@ export default async function AdminProjectCreatePage({ searchParams }: Search): 
         <div className="flex items-center justify-between">
           <h1 className="font-inria text-3xl">Add Case Study</h1>
           <div className="flex items-center gap-2">
-            <CreateSubmitButton className="border border-[#5BE38B] bg-[rgba(91,227,139,0.1)] text-[#5BE38B] hover:bg-[rgba(91,227,139,0.2)]">Create case study</CreateSubmitButton>
             <Link href="/admin?tab=case-studies"><Button className="border border-white/25">Back</Button></Link>
+            <CreateSubmitButton className="border border-[#5BE38B] bg-[rgba(91,227,139,0.1)] text-[#5BE38B] hover:bg-[rgba(91,227,139,0.2)]">Create case study</CreateSubmitButton>
           </div>
         </div>
         {error ? <div className="border border-[#E35B5B] bg-[rgba(227,91,91,0.1)] px-4 py-3 text-sm text-[#E35B5B]">{error}</div> : null}
