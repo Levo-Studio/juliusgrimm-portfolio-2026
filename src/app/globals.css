@@ -71,3 +71,54 @@ body {
   70% { opacity: 0.9; }
   100% { opacity: 0.84; }
 }
+
+.ai-shimmer {
+  background: linear-gradient(90deg, rgba(91, 227, 139, 0) 0%, rgba(91, 227, 139, 0.85) 50%, rgba(91, 227, 139, 0) 100%);
+  background-size: 200% 100%;
+  animation: ai-shimmer-move 1.1s linear infinite;
+}
+
+@keyframes ai-shimmer-move {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+.ai-dots::after {
+  content: "";
+  animation: ai-dots 1.2s steps(4, end) infinite;
+}
+
+@keyframes ai-dots {
+  0% { content: ""; }
+  25% { content: "."; }
+  50% { content: ".."; }
+  75% { content: "..."; }
+  100% { content: ""; }
+}
+
+.dialog-overlay {
+  animation: dialog-fade 0.18s ease-out;
+}
+
+.dialog-content {
+  animation: dialog-pop 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes dialog-fade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes dialog-pop {
+  from { opacity: 0; transform: translate(-50%, -48%) scale(0.96); }
+  to { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ai-shimmer,
+  .ai-dots::after,
+  .dialog-overlay,
+  .dialog-content {
+    animation: none;
+  }
+}

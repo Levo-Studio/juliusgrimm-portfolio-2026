@@ -6,7 +6,6 @@ import { isRedirectError } from "next/dist/client/components/redirect-error";
 import { headers } from "next/headers";
 import { z } from "zod";
 import { and, count, eq, isNull } from "drizzle-orm";
-import { authenticator } from "otplib";
 import QRCode from "qrcode";
 import { db } from "@/server/db/client";
 import { adminAuthenticators, adminSessions, adminTwoFactorSecrets, adminUsers, projectLinks, projects, projectTechStack, survivalKitTags } from "@/server/db/schema";
@@ -20,12 +19,15 @@ import {
   getSessionUser,
   hashPassword,
   rateLimitAuth,
+  revokeOtherSessions,
   verifyMutationRequest,
   verifyPassword
 } from "@/server/auth";
 import { env } from "@/lib/env";
 import { parseProjectMonthInput } from "@/lib/project-meta";
 import { ensureSurvivalKitTags } from "@/server/survival-kit";
+import { CaseStudyGenerationError, generateCaseStudy, type CaseStudyDraft } from "@/server/ai/case-study";
+import { authenticator } from "@/server/totp";
 
 const loginSchema = z.object({
   email: z.string(),
@@ -111,17 +113,23 @@ export const verifyTwoFactorLogin = async (_prevState: TwoFactorLoginState, form
   const code = parsed.data.code.replace(/\D/g, "");
   if (code.length !== 6) return { ok: false, error: "Enter a valid 6-digit code." };
 
-  const [secret] = await db.select().from(adminTwoFactorSecrets).where(eq(adminTwoFactorSecrets.userId, userId)).limit(1);
-  if (!secret || !authenticator.check(code, secret.secretEncrypted)) {
-    await audit({ userId, action: "failed_login_2fa", entityType: "auth" });
-    return { ok: false, error: "Invalid 2FA code." };
-  }
+  try {
+    const [secret] = await db.select().from(adminTwoFactorSecrets).where(eq(adminTwoFactorSecrets.userId, userId)).limit(1);
+    if (!secret || !authenticator.check(code, secret.secretEncrypted)) {
+      await audit({ userId, action: "failed_login_2fa", entityType: "auth" });
+      return { ok: false, error: "Invalid 2FA code." };
+    }
 
-  await clearPendingTwoFactor();
-  await createSession(userId);
-  await audit({ userId, action: "login", entityType: "auth" });
-  revalidatePath("/admin");
-  redirect("/admin");
+    await clearPendingTwoFactor();
+    await createSession(userId);
+    await audit({ userId, action: "login", entityType: "auth" });
+    revalidatePath("/admin");
+    redirect("/admin");
+  } catch (error) {
+    if (isRedirectError(error)) throw error;
+    console.error("2FA verification failed:", error);
+    return { ok: false, error: "Could not verify the code. Please try again." };
+  }
 };
 
 export const logoutAdmin = async (): Promise<void> => {
@@ -452,6 +460,35 @@ export const createProject = async (formData: FormData): Promise<void> => {
 };
 
 
+export type GenerateCaseStudyState = { ok: boolean; error?: string; draft?: CaseStudyDraft };
+
+const generateCaseStudySchema = z.object({
+  prompt: z.string().trim().min(10, "Please describe the case study in a bit more detail first.").max(2000),
+  csrf: z.string().optional()
+});
+
+export const generateCaseStudyDraft = async (input: { prompt: string; csrf?: string }): Promise<GenerateCaseStudyState> => {
+  const user = await getSessionUser();
+  if (!user) return { ok: false, error: "Not authenticated." };
+
+  const parsed = generateCaseStudySchema.safeParse(input);
+  if (!parsed.success) {
+    return { ok: false, error: parsed.error.issues[0]?.message ?? "Invalid request." };
+  }
+  if (!(await verifyMutationRequest(parsed.data.csrf))) {
+    return { ok: false, error: "Session expired. Reload the page and try again." };
+  }
+
+  try {
+    const draft = await generateCaseStudy(parsed.data.prompt);
+    await audit({ userId: user.id, action: "case_study_ai_generate", entityType: "project", metadata: parsed.data.prompt.slice(0, 120) });
+    return { ok: true, draft };
+  } catch (error) {
+    const message = error instanceof CaseStudyGenerationError ? error.message : "Generation failed. Please retry in a moment.";
+    return { ok: false, error: message };
+  }
+};
+
 const deleteProjectSchema = z.object({ id: z.string().uuid(), csrf: z.string().optional() });
 
 export const deleteProject = async (formData: FormData): Promise<void> => {
@@ -551,6 +588,17 @@ export const revokeSession = async (formData: FormData): Promise<void> => {
 
   await db.update(adminSessions).set({ revokedAt: new Date() }).where(and(eq(adminSessions.id, parsed.data.sessionId), isNull(adminSessions.revokedAt)));
   await audit({ userId: user.id, action: "session_revoke", entityType: "session", entityId: parsed.data.sessionId });
+  revalidatePath("/admin");
+};
+
+export const logoutOtherDevices = async (formData: FormData): Promise<void> => {
+  const user = await getSessionUser();
+  if (!user) return;
+  const csrf = String(formData.get("csrf") ?? "");
+  if (!(await verifyMutationRequest(csrf || undefined))) return;
+
+  await revokeOtherSessions(user.id);
+  await audit({ userId: user.id, action: "sessions_revoke_others", entityType: "session" });
   revalidatePath("/admin");
 };
 

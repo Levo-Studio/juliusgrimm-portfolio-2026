@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 
 type ColorCategory = "green" | "orange" | "red" | "blue";
@@ -39,6 +39,19 @@ const emptyRow = (sortOrder: number): TechItem => ({ label: "", colorCategory: "
 export const ProjectTechEditor = ({ initialTech }: Props): React.JSX.Element => {
   const [tech, setTech] = useState<TechItem[]>(initialTech.length > 0 ? initialTech : [emptyRow(1)]);
   const [feedback, setFeedback] = useState<string>("");
+
+  // Accept a tech stack pushed by the AI case study generator.
+  useEffect(() => {
+    const handler = (event: Event): void => {
+      const detail = (event as CustomEvent<{ techStack?: Array<{ label: string; colorCategory: ColorCategory }> }>).detail;
+      const stack = detail?.techStack;
+      if (!Array.isArray(stack) || stack.length === 0) return;
+      setTech(stack.map((item, index) => ({ label: item.label, colorCategory: item.colorCategory, sortOrder: index + 1 })));
+      setFeedback(`Filled ${stack.length} tech tags from the AI draft.`);
+    };
+    window.addEventListener("ai-case-study-draft", handler);
+    return () => window.removeEventListener("ai-case-study-draft", handler);
+  }, []);
 
   const updateRow = (index: number, patch: Partial<TechItem>): void => {
     setTech((prev) => {

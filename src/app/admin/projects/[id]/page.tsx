@@ -10,6 +10,7 @@ import { DirectProjectImage } from "@/components/shared/direct-project-image";
 import { upsertProject } from "@/app/admin/actions";
 import { ProjectLinksEditor } from "@/app/admin/projects/project-links-editor";
 import { ProjectTechEditor } from "@/app/admin/projects/project-tech-editor";
+import { AdminReveal } from "@/app/admin/admin-reveal";
 
 type Props = { params: Promise<{ id: string }> };
 
@@ -37,7 +38,7 @@ export default async function AdminProjectEditPage({ params, searchParams }: Pro
 
   return (
     <main className="min-h-screen bg-black p-6 text-white md:p-8">
-      <div className="mx-auto max-w-[980px] space-y-6">
+      <AdminReveal className="mx-auto max-w-[980px] space-y-6">
         <div className="flex items-center justify-between">
           <h1 className="font-inria text-3xl">Edit Case Study</h1>
           <div className="flex items-center gap-2">
@@ -108,7 +109,7 @@ export default async function AdminProjectEditPage({ params, searchParams }: Pro
 
           <Button className="justify-self-start border border-[#5BE38B] bg-[rgba(91,227,139,0.1)] text-[#5BE38B] transition hover:bg-[rgba(91,227,139,0.2)]">Save changes</Button>
         </form>
-      </div>
+      </AdminReveal>
     </main>
   );
 }
