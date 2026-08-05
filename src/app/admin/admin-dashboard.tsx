@@ -2,7 +2,8 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { useActionState, useState } from "react";
+import { useActionState, useEffect, useState } from "react";
+import gsap from "gsap";
 import { startRegistration } from "@simplewebauthn/browser";
 import { Menu, PanelLeftClose, ShieldCheck, FileText, Settings, Eye, EyeOff, Monitor, Smartphone, KeyRound, LogOut, ImageIcon, LayoutDashboard, Globe, FolderOpen, Tags } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -10,6 +11,7 @@ import { DirectProjectImage } from "@/components/shared/direct-project-image";
 import type { PasswordState, TwoFactorState } from "@/app/admin/actions";
 import { changePassword, confirmTwoFactorSetup, deletePasskey, deleteProject, disableTwoFactor, logoutAdmin, revokeSession, saveSurvivalKitTags, startTwoFactorSetup, toggleProjectVisibility } from "@/app/admin/actions";
 import { SurvivalKitTagEditor } from "@/app/admin/survival-kit-tag-editor";
+import { AdminReveal } from "@/app/admin/admin-reveal";
 import type { ColorCategory } from "@/types/project";
 
 type ProjectItem = {
@@ -64,6 +66,23 @@ export const AdminDashboard = ({ csrfToken, projects, survivalTags, sessions, pa
   const hiddenProjects = projects.length - visibleProjects;
   const withImage = projects.filter((project) => Boolean(project.imageUrl)).length;
 
+  useEffect(() => {
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const ctx = gsap.context(() => {
+      gsap.from("[data-admin-header]", { opacity: 0, y: reduce ? 0 : -12, duration: reduce ? 0.2 : 0.5, ease: "power2.out", clearProps: "opacity,transform" });
+      gsap.from("[data-admin-nav] > button", {
+        opacity: 0,
+        x: reduce ? 0 : -14,
+        duration: reduce ? 0.2 : 0.45,
+        stagger: reduce ? 0.02 : 0.06,
+        ease: "power2.out",
+        delay: 0.04,
+        clearProps: "opacity,transform"
+      });
+    });
+    return () => ctx.revert();
+  }, []);
+
   const registerPasskey = async (): Promise<void> => {
     setPasskeyPending(true);
     setPasskeyError(null);
@@ -96,7 +115,7 @@ export const AdminDashboard = ({ csrfToken, projects, survivalTags, sessions, pa
     <main className="min-h-screen bg-black text-white">
       <div className="mx-auto grid min-h-screen w-full max-w-[2300px] grid-cols-1 md:grid-cols-[280px_minmax(0,1fr)] xl:grid-cols-[340px_minmax(0,1fr)]">
         <aside className="hidden border-r border-white/10 bg-[#050505] p-6 md:block">
-          <nav className="space-y-2">
+          <nav data-admin-nav className="space-y-2">
             <button onClick={() => setTab("overview")} className={`flex w-full items-center gap-3 border px-4 py-3 text-left ${tab === "overview" ? "border-[#5BE38B] bg-[rgba(91,227,139,0.12)] text-[#5BE38B]" : "border-white/15"}`}>
               <LayoutDashboard className="size-4" /> Overview
             </button>
@@ -113,7 +132,7 @@ export const AdminDashboard = ({ csrfToken, projects, survivalTags, sessions, pa
         </aside>
 
         <section className="p-5 md:p-8 xl:p-10">
-          <div className="mb-6 flex items-center justify-between">
+          <div data-admin-header className="mb-6 flex items-center justify-between">
             <div className="flex items-center gap-2">
               <button onClick={() => setMobileOpen(true)} className="inline-flex border border-white/20 p-2 md:hidden"><Menu className="size-5" /></button>
               <h1 className="font-inria text-2xl md:text-3xl">Admin Dashboard</h1>
@@ -136,6 +155,7 @@ export const AdminDashboard = ({ csrfToken, projects, survivalTags, sessions, pa
             </div>
           ) : null}
 
+          <AdminReveal key={tab}>
           {tab === "overview" ? (
             <div className="space-y-5">
               <div className="grid gap-4 xl:grid-cols-4">
@@ -370,6 +390,7 @@ export const AdminDashboard = ({ csrfToken, projects, survivalTags, sessions, pa
               </section>
             </div>
           )}
+          </AdminReveal>
         </section>
       </div>
     </main>
