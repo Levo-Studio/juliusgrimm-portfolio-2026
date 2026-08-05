@@ -221,7 +221,7 @@ export const AdminDashboard = ({ csrfToken, projects, survivalTags, sessions, pa
                 </Link>
               </div>
 
-              <div className="grid gap-4 xl:grid-cols-2">
+              <div className="grid gap-4 md:grid-cols-2">
               {projects.map((project) => (
                 <article key={project.id} className="border border-white/15 bg-[#070707] p-4 md:p-5">
                   <div className="grid gap-4">
