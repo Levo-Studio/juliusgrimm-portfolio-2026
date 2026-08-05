@@ -1,12 +1,15 @@
 import type { MetadataRoute } from "next";
+import { getVisibleProjects } from "@/server/projects";
 
 const baseUrl = "https://juliusgrimm.dev";
-const projectSlugs = ["levo-studio-tickets", "levo-studio-db-controller", "levo-studio-finance", "vibevote", "orbitaly", "juliusgrimm-portfolio-2025"];
 
-export default function sitemap(): MetadataRoute.Sitemap {
+export const dynamic = "force-dynamic";
+
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const now = new Date();
+  const projects = await getVisibleProjects();
 
-  return [
+  const staticRoutes: MetadataRoute.Sitemap = [
     {
       url: baseUrl,
       lastModified: now,
@@ -18,12 +21,15 @@ export default function sitemap(): MetadataRoute.Sitemap {
       lastModified: now,
       changeFrequency: "yearly",
       priority: 0.2
-    },
-    ...projectSlugs.map((slug) => ({
-      url: `${baseUrl}/projects/${slug}`,
-      lastModified: now,
-      changeFrequency: "monthly" as const,
-      priority: slug === "juliusgrimm-portfolio-2025" ? 0.6 : 0.8
-    }))
+    }
   ];
+
+  const projectRoutes: MetadataRoute.Sitemap = projects.map((project) => ({
+    url: `${baseUrl}/projects/${project.slug}`,
+    lastModified: project.createdAt ? new Date(project.createdAt) : now,
+    changeFrequency: "monthly",
+    priority: project.slug === "juliusgrimm-portfolio-2025" ? 0.6 : 0.8
+  }));
+
+  return [...staticRoutes, ...projectRoutes];
 }
