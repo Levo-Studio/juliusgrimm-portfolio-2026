@@ -26,6 +26,7 @@ import {
 import { env } from "@/lib/env";
 import { parseProjectMonthInput } from "@/lib/project-meta";
 import { ensureSurvivalKitTags } from "@/server/survival-kit";
+import { CaseStudyGenerationError, generateCaseStudy, type CaseStudyDraft } from "@/server/ai/case-study";
 
 const loginSchema = z.object({
   email: z.string(),
@@ -451,6 +452,35 @@ export const createProject = async (formData: FormData): Promise<void> => {
   }
 };
 
+
+export type GenerateCaseStudyState = { ok: boolean; error?: string; draft?: CaseStudyDraft };
+
+const generateCaseStudySchema = z.object({
+  prompt: z.string().trim().min(10, "Please describe the case study in a bit more detail first.").max(2000),
+  csrf: z.string().optional()
+});
+
+export const generateCaseStudyDraft = async (input: { prompt: string; csrf?: string }): Promise<GenerateCaseStudyState> => {
+  const user = await getSessionUser();
+  if (!user) return { ok: false, error: "Not authenticated." };
+
+  const parsed = generateCaseStudySchema.safeParse(input);
+  if (!parsed.success) {
+    return { ok: false, error: parsed.error.issues[0]?.message ?? "Invalid request." };
+  }
+  if (!(await verifyMutationRequest(parsed.data.csrf))) {
+    return { ok: false, error: "Session expired. Reload the page and try again." };
+  }
+
+  try {
+    const draft = await generateCaseStudy(parsed.data.prompt);
+    await audit({ userId: user.id, action: "case_study_ai_generate", entityType: "project", metadata: parsed.data.prompt.slice(0, 120) });
+    return { ok: true, draft };
+  } catch (error) {
+    const message = error instanceof CaseStudyGenerationError ? error.message : "Generation failed. Please retry in a moment.";
+    return { ok: false, error: message };
+  }
+};
 
 const deleteProjectSchema = z.object({ id: z.string().uuid(), csrf: z.string().optional() });
 
