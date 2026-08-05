@@ -1,7 +1,7 @@
 import { createHash, createHmac, randomBytes, timingSafeEqual } from "crypto";
 import bcrypt from "bcryptjs";
 import { cookies, headers } from "next/headers";
-import { and, eq, isNull } from "drizzle-orm";
+import { and, eq, isNull, ne } from "drizzle-orm";
 import { db } from "@/server/db/client";
 import { adminSessions, adminUsers, auditLogs } from "@/server/db/schema";
 
@@ -71,6 +71,18 @@ export const getSessionUser = async (): Promise<{ id: string; email: string } | 
 export const clearSession = async (): Promise<void> => {
   const cookieStore = await cookies();
   cookieStore.delete(SESSION_COOKIE);
+};
+
+// Revokes every active session for the user except the one making this request.
+export const revokeOtherSessions = async (userId: string): Promise<void> => {
+  const cookieStore = await cookies();
+  const token = cookieStore.get(SESSION_COOKIE)?.value;
+  const currentHash = token ? hashToken(token) : "";
+
+  await db
+    .update(adminSessions)
+    .set({ revokedAt: new Date() })
+    .where(and(eq(adminSessions.userId, userId), isNull(adminSessions.revokedAt), ne(adminSessions.tokenHash, currentHash)));
 };
 
 const signingKey = (): Buffer => {

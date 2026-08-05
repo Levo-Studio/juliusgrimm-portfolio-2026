@@ -19,6 +19,7 @@ import {
   getSessionUser,
   hashPassword,
   rateLimitAuth,
+  revokeOtherSessions,
   verifyMutationRequest,
   verifyPassword
 } from "@/server/auth";
@@ -587,6 +588,17 @@ export const revokeSession = async (formData: FormData): Promise<void> => {
 
   await db.update(adminSessions).set({ revokedAt: new Date() }).where(and(eq(adminSessions.id, parsed.data.sessionId), isNull(adminSessions.revokedAt)));
   await audit({ userId: user.id, action: "session_revoke", entityType: "session", entityId: parsed.data.sessionId });
+  revalidatePath("/admin");
+};
+
+export const logoutOtherDevices = async (formData: FormData): Promise<void> => {
+  const user = await getSessionUser();
+  if (!user) return;
+  const csrf = String(formData.get("csrf") ?? "");
+  if (!(await verifyMutationRequest(csrf || undefined))) return;
+
+  await revokeOtherSessions(user.id);
+  await audit({ userId: user.id, action: "sessions_revoke_others", entityType: "session" });
   revalidatePath("/admin");
 };
 

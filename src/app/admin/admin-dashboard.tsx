@@ -9,7 +9,7 @@ import { Menu, PanelLeftClose, ShieldCheck, FileText, Settings, Eye, EyeOff, Mon
 import { Button } from "@/components/ui/button";
 import { DirectProjectImage } from "@/components/shared/direct-project-image";
 import type { PasswordState, TwoFactorState } from "@/app/admin/actions";
-import { changePassword, confirmTwoFactorSetup, deletePasskey, disableTwoFactor, logoutAdmin, revokeSession, saveSurvivalKitTags, startTwoFactorSetup, toggleProjectVisibility } from "@/app/admin/actions";
+import { changePassword, confirmTwoFactorSetup, deletePasskey, disableTwoFactor, logoutAdmin, logoutOtherDevices, revokeSession, saveSurvivalKitTags, startTwoFactorSetup, toggleProjectVisibility } from "@/app/admin/actions";
 import { SurvivalKitTagEditor } from "@/app/admin/survival-kit-tag-editor";
 import { AdminReveal } from "@/app/admin/admin-reveal";
 import { DeleteProjectDialog } from "@/app/admin/projects/delete-project-dialog";
@@ -370,7 +370,16 @@ export const AdminDashboard = ({ csrfToken, projects, survivalTags, sessions, pa
               </section>
 
               <section className="border border-white/15 bg-[#070707] p-4 md:p-5">
-                <h2 className="font-inria text-xl md:text-2xl">Sessions</h2>
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                  <h2 className="font-inria text-xl md:text-2xl">Sessions</h2>
+                  <form action={logoutOtherDevices}>
+                    <input type="hidden" name="csrf" value={csrfToken} />
+                    <Button className="border border-[#E35B5B] bg-[rgba(227,91,91,0.1)] text-[#E35B5B] transition hover:bg-[rgba(227,91,91,0.2)]">
+                      <LogOut className="mr-2 size-4" />
+                      Log out other devices
+                    </Button>
+                  </form>
+                </div>
                 <div className="mt-4 space-y-2">
                   {sessions.map((session) => (
                     <form key={session.id} action={revokeSession} className="flex flex-col justify-between gap-3 border border-white/15 p-3 md:flex-row md:items-center">
