@@ -96,9 +96,29 @@ body {
   100% { content: ""; }
 }
 
+.dialog-overlay {
+  animation: dialog-fade 0.18s ease-out;
+}
+
+.dialog-content {
+  animation: dialog-pop 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes dialog-fade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes dialog-pop {
+  from { opacity: 0; transform: translate(-50%, -48%) scale(0.96); }
+  to { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .ai-shimmer,
-  .ai-dots::after {
+  .ai-dots::after,
+  .dialog-overlay,
+  .dialog-content {
     animation: none;
   }
 }
