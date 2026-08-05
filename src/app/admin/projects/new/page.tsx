@@ -9,6 +9,7 @@ import { ProjectTechEditor } from "@/app/admin/projects/project-tech-editor";
 import { AiCaseStudyGenerator } from "@/app/admin/projects/ai-case-study-generator";
 import { CaseStudyFields } from "@/app/admin/projects/case-study-fields";
 import { CreateSubmitButton } from "@/app/admin/projects/create-submit-button";
+import { AdminReveal } from "@/app/admin/admin-reveal";
 
 type Search = {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
@@ -33,7 +34,7 @@ export default async function AdminProjectCreatePage({ searchParams }: Search): 
 
   return (
     <main className="min-h-screen bg-black p-6 text-white md:p-8">
-      <div className="mx-auto max-w-[980px] space-y-6">
+      <AdminReveal className="mx-auto max-w-[980px] space-y-6">
         <div className="flex items-center justify-between">
           <h1 className="font-inria text-3xl">Add Case Study</h1>
           <div className="flex items-center gap-2">
@@ -67,7 +68,7 @@ export default async function AdminProjectCreatePage({ searchParams }: Search): 
 
           <CreateSubmitButton className="justify-self-start border border-[#5BE38B] bg-[rgba(91,227,139,0.1)] text-[#5BE38B] hover:bg-[rgba(91,227,139,0.2)]">Create case study</CreateSubmitButton>
         </form>
-      </div>
+      </AdminReveal>
     </main>
   );
 }
