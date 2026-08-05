@@ -50,7 +50,6 @@ export const generateMetadata = async ({ params }: Props): Promise<Metadata> => 
 
   const title = `${project.title} Case Study`;
   const description = project.description.length > 155 ? `${project.description.slice(0, 152).trim()}...` : project.description;
-  const image = project.imageUrl ?? "/jg_badge.png";
 
   return {
     title,
@@ -62,14 +61,12 @@ export const generateMetadata = async ({ params }: Props): Promise<Metadata> => 
       title: `${title} | Julius Grimm`,
       description,
       url: `/projects/${project.slug}`,
-      type: "article",
-      images: [{ url: image, width: 1200, height: 630, alt: `${project.title} case study` }]
+      type: "article"
     },
     twitter: {
       card: "summary_large_image",
       title: `${title} | Julius Grimm`,
-      description,
-      images: [image]
+      description
     }
   };
 };
