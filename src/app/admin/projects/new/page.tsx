@@ -8,6 +8,7 @@ import { ProjectLinksEditor } from "@/app/admin/projects/project-links-editor";
 import { ProjectTechEditor } from "@/app/admin/projects/project-tech-editor";
 import { AiCaseStudyGenerator } from "@/app/admin/projects/ai-case-study-generator";
 import { CaseStudyFields } from "@/app/admin/projects/case-study-fields";
+import { CreateSubmitButton } from "@/app/admin/projects/create-submit-button";
 
 type Search = {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
@@ -36,7 +37,7 @@ export default async function AdminProjectCreatePage({ searchParams }: Search): 
         <div className="flex items-center justify-between">
           <h1 className="font-inria text-3xl">Add Case Study</h1>
           <div className="flex items-center gap-2">
-            <Button form="project-create-form" className="border border-[#5BE38B] bg-[rgba(91,227,139,0.1)] text-[#5BE38B] transition hover:bg-[rgba(91,227,139,0.2)]">Create case study</Button>
+            <CreateSubmitButton className="border border-[#5BE38B] bg-[rgba(91,227,139,0.1)] text-[#5BE38B] hover:bg-[rgba(91,227,139,0.2)]">Create case study</CreateSubmitButton>
             <Link href="/admin?tab=case-studies"><Button className="border border-white/25">Back</Button></Link>
           </div>
         </div>
@@ -64,7 +65,7 @@ export default async function AdminProjectCreatePage({ searchParams }: Search): 
           <ProjectLinksEditor initialLinks={[]} />
           <ProjectTechEditor initialTech={[]} />
 
-          <Button className="justify-self-start border border-[#5BE38B] bg-[rgba(91,227,139,0.1)] text-[#5BE38B] transition hover:bg-[rgba(91,227,139,0.2)]">Create case study</Button>
+          <CreateSubmitButton className="justify-self-start border border-[#5BE38B] bg-[rgba(91,227,139,0.1)] text-[#5BE38B] hover:bg-[rgba(91,227,139,0.2)]">Create case study</CreateSubmitButton>
         </form>
       </div>
     </main>

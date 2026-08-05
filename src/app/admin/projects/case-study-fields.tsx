@@ -58,6 +58,16 @@ export const CaseStudyFields = ({
     setSlugEdited(value.trim().length > 0);
   };
 
+  // Broadcast whether the required fields are complete so the submit buttons can enable/disable.
+  useEffect(() => {
+    const complete =
+      title.trim().length >= 2 &&
+      subtitle.trim().length >= 2 &&
+      description.trim().length >= 10 &&
+      whyBuilt.trim().length >= 10;
+    window.dispatchEvent(new CustomEvent("case-study-validity", { detail: { complete } }));
+  }, [title, subtitle, description, whyBuilt]);
+
   useEffect(() => {
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
