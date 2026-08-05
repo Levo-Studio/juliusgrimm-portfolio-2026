@@ -116,7 +116,7 @@ export const AdminDashboard = ({ csrfToken, projects, survivalTags, sessions, pa
   return (
     <main className="min-h-screen bg-black text-white">
       <div className="mx-auto grid min-h-screen w-full max-w-[2300px] grid-cols-1 md:grid-cols-[280px_minmax(0,1fr)] xl:grid-cols-[340px_minmax(0,1fr)]">
-        <aside className="hidden border-r border-white/10 bg-[#050505] p-6 md:block">
+        <aside className="hidden border-r border-white/10 bg-[#050505] p-6 md:block md:sticky md:top-0 md:h-screen md:self-start md:overflow-y-auto">
           <nav data-admin-nav className="space-y-2">
             <button onClick={() => setTab("overview")} className={`flex w-full items-center gap-3 border px-4 py-3 text-left ${tab === "overview" ? "border-[#5BE38B] bg-[rgba(91,227,139,0.12)] text-[#5BE38B]" : "border-white/15"}`}>
               <LayoutDashboard className="size-4" /> Overview
