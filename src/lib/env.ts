@@ -6,7 +6,9 @@ const envSchema = z.object({
   WEBAUTHN_RP_NAME: z.string().optional(),
   WEBAUTHN_ORIGIN: z.string().url().optional(),
   TOTP_ISSUER: z.string().optional(),
-  AUTH_URL: z.string().url().optional()
+  AUTH_URL: z.string().url().optional(),
+  MISTRAL_API_KEY: z.string().optional(),
+  MISTRAL_MODEL: z.string().optional()
 });
 
 const parsed = envSchema.safeParse(process.env);
