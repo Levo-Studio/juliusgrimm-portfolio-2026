@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { createProject } from "@/app/admin/actions";
 import { ProjectLinksEditor } from "@/app/admin/projects/project-links-editor";
 import { ProjectTechEditor } from "@/app/admin/projects/project-tech-editor";
+import { AiCaseStudyGenerator } from "@/app/admin/projects/ai-case-study-generator";
 
 type Search = {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
@@ -39,6 +40,8 @@ export default async function AdminProjectCreatePage({ searchParams }: Search): 
           </div>
         </div>
         {error ? <div className="border border-[#E35B5B] bg-[rgba(227,91,91,0.1)] px-4 py-3 text-sm text-[#E35B5B]">{error}</div> : null}
+
+        <AiCaseStudyGenerator csrf={csrfToken} formId="project-create-form" />
 
         <form id="project-create-form" action={createProject} className="grid gap-3 border border-white/15 bg-[#070707] p-5">
           <input type="hidden" name="csrf" value={csrfToken} />
