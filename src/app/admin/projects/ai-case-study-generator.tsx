@@ -6,52 +6,31 @@ import { generateCaseStudyDraft } from "@/app/admin/actions";
 
 type Props = {
   csrf: string;
-  formId: string;
 };
 
-export const AiCaseStudyGenerator = ({ csrf, formId }: Props): React.JSX.Element => {
+export const AiCaseStudyGenerator = ({ csrf }: Props): React.JSX.Element => {
   const [prompt, setPrompt] = useState<string>("");
   const [error, setError] = useState<string>("");
   const [notice, setNotice] = useState<string>("");
   const [pending, startTransition] = useTransition();
 
-  const applyDraft = (draft: {
-    title: string;
-    subtitle: string;
-    description: string;
-    whyBuilt: string;
-    techStack: Array<{ label: string; colorCategory: "green" | "orange" | "red" | "blue" }>;
-  }): void => {
-    const form = document.getElementById(formId) as HTMLFormElement | null;
-    if (!form) return;
-
-    const setField = (name: string, value: string): void => {
-      const field = form.querySelector<HTMLInputElement | HTMLTextAreaElement>(`[name="${name}"]`);
-      if (!field) return;
-      field.value = value;
-      field.dispatchEvent(new Event("input", { bubbles: true }));
-    };
-
-    setField("title", draft.title);
-    setField("subtitle", draft.subtitle);
-    setField("description", draft.description);
-    setField("whyBuilt", draft.whyBuilt);
-
-    // The tech stack editor is a controlled component, so hand it the tags via an event.
-    window.dispatchEvent(new CustomEvent("ai-case-study-tech", { detail: draft.techStack }));
-  };
-
   const onGenerate = (): void => {
     setError("");
     setNotice("");
+    // Controlled field components listen for these events to fill values and animate.
+    window.dispatchEvent(new Event("ai-generate-start"));
     startTransition(async () => {
-      const result = await generateCaseStudyDraft({ prompt, csrf });
-      if (!result.ok || !result.draft) {
-        setError(result.error ?? "Generation failed. Please retry.");
-        return;
+      try {
+        const result = await generateCaseStudyDraft({ prompt, csrf });
+        if (!result.ok || !result.draft) {
+          setError(result.error ?? "Generation failed. Please retry.");
+          return;
+        }
+        window.dispatchEvent(new CustomEvent("ai-case-study-draft", { detail: result.draft }));
+        setNotice("Draft generated. Review and tweak everything below before saving.");
+      } finally {
+        window.dispatchEvent(new Event("ai-generate-end"));
       }
-      applyDraft(result.draft);
-      setNotice("Draft generated. Review and tweak everything below before saving.");
     });
   };
 

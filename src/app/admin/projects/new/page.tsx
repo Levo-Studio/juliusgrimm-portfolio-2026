@@ -7,6 +7,7 @@ import { createProject } from "@/app/admin/actions";
 import { ProjectLinksEditor } from "@/app/admin/projects/project-links-editor";
 import { ProjectTechEditor } from "@/app/admin/projects/project-tech-editor";
 import { AiCaseStudyGenerator } from "@/app/admin/projects/ai-case-study-generator";
+import { CaseStudyFields } from "@/app/admin/projects/case-study-fields";
 
 type Search = {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
@@ -41,25 +42,12 @@ export default async function AdminProjectCreatePage({ searchParams }: Search): 
         </div>
         {error ? <div className="border border-[#E35B5B] bg-[rgba(227,91,91,0.1)] px-4 py-3 text-sm text-[#E35B5B]">{error}</div> : null}
 
-        <AiCaseStudyGenerator csrf={csrfToken} formId="project-create-form" />
+        <AiCaseStudyGenerator csrf={csrfToken} />
 
         <form id="project-create-form" action={createProject} className="grid gap-3 border border-white/15 bg-[#070707] p-5">
           <input type="hidden" name="csrf" value={csrfToken} />
 
-          <label className="text-sm text-white/70">Slug</label>
-          <input name="slug" placeholder="my-new-case-study" className="border border-white/20 bg-black px-3 py-2" />
-
-          <label className="text-sm text-white/70">Title</label>
-          <input name="title" placeholder="Case Study Title" className="border border-white/20 bg-black px-3 py-2" />
-
-          <label className="text-sm text-white/70">Subtitle</label>
-          <input name="subtitle" placeholder="Short subtitle in your style" className="border border-white/20 bg-black px-3 py-2" />
-
-          <label className="text-sm text-white/70">Description</label>
-          <textarea name="description" placeholder="Project description..." className="min-h-32 border border-white/20 bg-black px-3 py-2" />
-
-          <label className="text-sm text-white/70">Why built it</label>
-          <textarea name="whyBuilt" placeholder="Why you built it..." className="min-h-32 border border-white/20 bg-black px-3 py-2" />
+          <CaseStudyFields />
 
           <label className="text-sm text-white/70">Title image URL (shown on homepage cards)</label>
           <input name="imageUrl" placeholder="https://..." className="border border-white/20 bg-black px-3 py-2" />
