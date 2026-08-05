@@ -42,9 +42,9 @@ export const AiCaseStudyGenerator = ({ csrf }: Props): React.JSX.Element => {
           type="button"
           onClick={onGenerate}
           disabled={pending}
-          className="border border-[#5BE38B] bg-[rgba(91,227,139,0.1)] text-[#5BE38B] transition hover:bg-[rgba(91,227,139,0.2)] disabled:opacity-50"
+          className="border border-[#5BE38B] bg-[rgba(91,227,139,0.1)] text-[#5BE38B] transition hover:bg-[rgba(91,227,139,0.2)] disabled:opacity-70"
         >
-          {pending ? "Generating..." : "Generate with AI"}
+          {pending ? <span className="ai-dots">Generating</span> : "Generate with AI"}
         </Button>
       </div>
       <textarea
@@ -53,6 +53,9 @@ export const AiCaseStudyGenerator = ({ csrf }: Props): React.JSX.Element => {
         placeholder="e.g. VibeVote is an interactive song-requesting platform to replace paper requests and chaotic aux handovers at parties..."
         className="min-h-28 border border-white/20 bg-black px-3 py-2"
       />
+      <div className="h-0.5 w-full overflow-hidden bg-white/10" aria-hidden>
+        {pending ? <div className="ai-shimmer h-full w-full" /> : null}
+      </div>
       <p className="text-xs text-white/50">Fills in title, subtitle, description, why-built and tech stack in your voice. You can edit all of it before saving.</p>
       {error ? <p className="text-xs text-[#E35B5B]">{error}</p> : null}
       {notice ? <p className="text-xs text-[#5BE38B]">{notice}</p> : null}
