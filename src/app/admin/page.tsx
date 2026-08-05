@@ -1,5 +1,5 @@
 import { cookies } from "next/headers";
-import { desc, eq } from "drizzle-orm";
+import { and, desc, eq, gt, isNull } from "drizzle-orm";
 import { db } from "@/server/db/client";
 import { adminAuthenticators, adminSessions, adminUsers, projects } from "@/server/db/schema";
 import { getSessionUser } from "@/server/auth";
@@ -26,7 +26,11 @@ export default async function AdminPage({ searchParams }: Props): Promise<React.
 
   const allProjects = await db.select().from(projects).orderBy(projects.createdAt);
   const survivalTags = await getSurvivalKitTags();
-  const sessions = await db.select().from(adminSessions).orderBy(desc(adminSessions.createdAt));
+  const sessions = await db
+    .select()
+    .from(adminSessions)
+    .where(and(isNull(adminSessions.revokedAt), gt(adminSessions.expiresAt, new Date())))
+    .orderBy(desc(adminSessions.createdAt));
   const [adminUser] = await db.select().from(adminUsers).where(eq(adminUsers.id, user.id)).limit(1);
   const passkeys = await db
     .select({ id: adminAuthenticators.id, createdAt: adminAuthenticators.createdAt, lastUsedAt: adminAuthenticators.lastUsedAt, deviceType: adminAuthenticators.deviceType })
