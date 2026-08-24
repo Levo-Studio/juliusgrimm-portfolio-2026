@@ -26,19 +26,15 @@ export const getProjectSiteUrl = (links: ProjectLink[]): string | null => {
 };
 
 /**
- * The site's own favicon, read straight from its origin on each load. Deliberately
- * not routed through a third-party favicon service: no external dependency sits in
- * the render path, and nothing about the visitor is handed to another host.
- *
- * /favicon.ico is a convention, not a guarantee — a site that only declares its
- * icon via <link rel="icon"> will 404 here. Discovering that would mean fetching
- * and parsing the site's HTML server-side, so instead the miss is absorbed by the
- * caller's fallback tile.
+ * Points at the resolver route rather than guessing a path. /favicon.ico is only a
+ * convention — plenty of sites declare their icon somewhere else entirely — and the
+ * browser cannot read another origin's HTML to find out, so the lookup happens
+ * server-side and the result is cached hard on the way back.
  */
 export const getFaviconUrl = (siteUrl: string | null): string | null => {
   if (!siteUrl) return null;
   try {
-    return new URL("/favicon.ico", new URL(siteUrl).origin).toString();
+    return `/api/favicon?u=${encodeURIComponent(new URL(siteUrl).origin)}`;
   } catch {
     return null;
   }
