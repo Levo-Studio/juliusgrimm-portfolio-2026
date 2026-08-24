@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import Script from "next/script";
 import "./globals.css";
-import { inriaSans, instrumentSerif } from "@/lib/fonts";
+import { geistSans, geistMono } from "@/lib/fonts";
+import { ThemeScript } from "@/components/shared/theme-script";
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://juliusgrimm.dev"),
@@ -65,7 +66,10 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>): React.JSX.Element {
   return (
-    <html lang="en" className={`${inriaSans.variable} ${instrumentSerif.variable}`}>
+    <html lang="en" className={`${geistSans.variable} ${geistMono.variable}`} suppressHydrationWarning>
+      <head>
+        <ThemeScript />
+      </head>
       <body>
         {children}
         <Script
