@@ -7,6 +7,7 @@ import { createProject } from "@/app/admin/actions";
 import { ProjectLinksEditor } from "@/app/admin/projects/project-links-editor";
 import { ProjectTechEditor } from "@/app/admin/projects/project-tech-editor";
 import { AiCaseStudyGenerator } from "@/app/admin/projects/ai-case-study-generator";
+import { env } from "@/lib/env";
 import { CaseStudyFields } from "@/app/admin/projects/case-study-fields";
 import { CreateSubmitButton } from "@/app/admin/projects/create-submit-button";
 import { AdminReveal } from "@/app/admin/admin-reveal";
@@ -44,7 +45,7 @@ export default async function AdminProjectCreatePage({ searchParams }: Search): 
         </div>
         {error ? <div className="border border-danger bg-[color-mix(in_srgb,var(--danger)_10%,transparent)] px-4 py-3 text-sm text-danger">{error}</div> : null}
 
-        <AiCaseStudyGenerator csrf={csrfToken} />
+        <AiCaseStudyGenerator csrf={csrfToken} model={env.MISTRAL_MODEL ?? "mistral-large-latest"} />
 
         <form id="project-create-form" action={createProject} className="grid gap-3 border border-line-strong bg-[#070707] p-5">
           <input type="hidden" name="csrf" value={csrfToken} />
