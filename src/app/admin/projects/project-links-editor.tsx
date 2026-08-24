@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { Button } from "@/components/ui/button";
 
 type LinkItem = {
   label: string;
@@ -43,46 +42,55 @@ export const ProjectLinksEditor = ({ initialLinks }: Props): React.JSX.Element =
   };
 
   return (
-    <div className="space-y-3">
-      <div className="flex items-center justify-between">
-        <p className="text-sm text-fg-muted">Project Links</p>
-        <Button type="button" onClick={addLink} className="border border-accent bg-[color-mix(in_srgb,var(--accent)_10%,transparent)] text-accent">
-          Add link
-        </Button>
-      </div>
-
+    <div className="flex flex-col gap-2.5">
+      {/* Stacked rather than tabular: this lives in a 280px column, so a five-across
+          grid would force the whole sidebar wider than the layout allows. */}
       {links.map((link, index) => (
-        <div key={`link-${index}`} className="grid gap-2 border border-line-strong bg-[#060606] p-3 md:grid-cols-[1fr_1.6fr_120px_90px_90px]">
+        <div key={`link-${index}`} className="flex flex-col gap-1.5 rounded-[7px] border border-line p-2.5">
           <input type="hidden" name="linkSortOrder" value={link.sortOrder} />
           <input
             name="linkLabel"
             value={link.label}
             onChange={(event) => updateLink(index, { label: event.target.value })}
             placeholder="Label (e.g. GitHub)"
-            className="border border-line-strong bg-bg px-3 py-2"
+            className="w-full min-w-0 bg-transparent text-[13px] text-fg outline-none placeholder:text-fg-faint"
           />
           <input
             name="linkUrl"
             value={link.url}
             onChange={(event) => updateLink(index, { url: event.target.value })}
-            placeholder="https://..."
-            className="border border-line-strong bg-bg px-3 py-2"
+            placeholder="https://…"
+            className="w-full min-w-0 border-t border-line bg-transparent pt-1.5 font-mono text-[11px] text-fg-muted outline-none placeholder:text-fg-faint"
           />
-          <select
-            name="linkVisible"
-            value={link.visible ? "true" : "false"}
-            onChange={(event) => updateLink(index, { visible: event.target.value === "true" })}
-            className="border border-line-strong bg-bg px-3 py-2"
-          >
-            <option value="true">Visible</option>
-            <option value="false">Hidden</option>
-          </select>
-          <Button type="button" onClick={() => removeLink(index)} className="border border-danger bg-[color-mix(in_srgb,var(--danger)_10%,transparent)] text-danger">
-            Remove
-          </Button>
+          <div className="flex items-center justify-between gap-2 pt-0.5">
+            <label className="flex cursor-pointer items-center gap-1.5 text-[11px] text-fg-muted">
+              <input type="hidden" name="linkVisible" value={link.visible ? "true" : "false"} />
+              <input
+                type="checkbox"
+                checked={link.visible}
+                onChange={(event) => updateLink(index, { visible: event.target.checked })}
+                className="size-3 accent-[var(--accent)]"
+              />
+              Visible
+            </label>
+            <button
+              type="button"
+              onClick={() => removeLink(index)}
+              className="text-[11px] text-fg-muted transition-colors hover:text-danger"
+            >
+              Remove
+            </button>
+          </div>
         </div>
       ))}
+
+      <button
+        type="button"
+        onClick={addLink}
+        className="rounded-md border border-dashed border-line-field py-1.5 text-[11px] text-fg-muted transition-colors hover:border-accent hover:text-fg"
+      >
+        + Add link
+      </button>
     </div>
   );
 };
-

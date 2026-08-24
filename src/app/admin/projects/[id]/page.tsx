@@ -83,7 +83,7 @@ export default async function AdminProjectEditPage({ params, searchParams }: Pro
           ) : null}
 
           <div className="grid grid-cols-1 md:grid-cols-[minmax(0,1fr)_280px]">
-            <div className="flex flex-col gap-6 border-line px-5 py-7 md:border-r md:px-8">
+            <div className="flex min-w-0 flex-col gap-6 border-line px-5 py-7 md:border-r md:px-8">
               <div className="flex flex-col gap-2">
                 <label htmlFor="field-title" className="font-mono text-[10px] font-medium uppercase tracking-[0.14em] text-fg-muted">
                   Title
@@ -135,7 +135,7 @@ export default async function AdminProjectEditPage({ params, searchParams }: Pro
               </div>
             </div>
 
-            <aside className="flex flex-col gap-[22px] px-5 py-7 md:px-6">
+            <aside className="flex min-w-0 flex-col gap-[22px] px-5 py-7 md:px-6">
               <div className="flex flex-col gap-2">
                 <span className="font-mono text-[10px] font-medium uppercase tracking-[0.14em] text-fg-muted">
                   Project URL
