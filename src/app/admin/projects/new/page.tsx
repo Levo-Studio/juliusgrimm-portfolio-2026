@@ -71,13 +71,10 @@ export default async function AdminProjectCreatePage({ searchParams }: Search): 
             </div>
           ) : null}
 
-          {/* The generator sits above the form it fills, so the relationship between
-              the prompt and the fields below is visible rather than implied. */}
-          <div className="border-b border-line px-5 py-6 md:px-8">
-            <AiCaseStudyGenerator csrf={csrfToken} model={env.MISTRAL_MODEL ?? "mistral-large-latest"} />
-          </div>
-
           <CaseStudyFields
+            /* The generator leads the writing column rather than spanning the page,
+               so the sidebar starts level with it instead of below it. */
+            contentBefore={<AiCaseStudyGenerator csrf={csrfToken} model={env.MISTRAL_MODEL ?? "mistral-large-latest"} />}
             sidebarBefore={
               <div className="flex flex-col gap-2">
                 <span className={LABEL}>Project URL</span>

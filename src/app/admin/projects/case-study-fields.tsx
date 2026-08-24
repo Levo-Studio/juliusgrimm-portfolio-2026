@@ -16,6 +16,8 @@ type Props = {
   initialSubtitle?: string;
   initialDescription?: string;
   initialWhyBuilt?: string;
+  /** Leads the writing column — the generator that fills these fields. */
+  contentBefore?: React.ReactNode;
   /** Sidebar content above the slug (project links) and below it (date, stack, actions). */
   sidebarBefore?: React.ReactNode;
   sidebarAfter?: React.ReactNode;
@@ -37,6 +39,7 @@ export const CaseStudyFields = ({
   initialSubtitle = "",
   initialDescription = "",
   initialWhyBuilt = "",
+  contentBefore,
   sidebarBefore,
   sidebarAfter
 }: Props): React.JSX.Element => {
@@ -142,6 +145,8 @@ export const CaseStudyFields = ({
   return (
     <div ref={rootRef} className="grid grid-cols-1 md:grid-cols-[minmax(0,1fr)_280px]">
       <div className="flex min-w-0 flex-col gap-6 border-line px-5 py-7 md:border-r md:px-8">
+        {contentBefore}
+
         <div className="flex flex-col gap-2">
           <label htmlFor="new-title" className={label}>Title</label>
           <input
