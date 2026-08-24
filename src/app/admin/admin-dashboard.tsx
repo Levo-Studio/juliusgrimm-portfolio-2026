@@ -310,11 +310,11 @@ export const AdminDashboard = ({ csrfToken, projects, survivalTags, sessions, pa
 
                     {twoFactorState.qrDataUrl ? (
                       <div className="mt-3 space-y-3">
-                        <Image src={twoFactorState.qrDataUrl} alt="2FA QR Code" width={180} height={180} className="border border-line-strong bg-white p-2" unoptimized />
+                        <Image src={twoFactorState.qrDataUrl} alt="2FA QR Code" width={180} height={180} className="rounded-[7px] border border-line-strong bg-white p-2" unoptimized />
                         <p className="break-all text-xs text-fg-muted">Secret: {twoFactorState.secret}</p>
                         <form action={twoFactorConfirmAction} className="flex flex-wrap items-center gap-2">
                           <input type="hidden" name="csrf" value={csrfToken} />
-                          <input name="code" placeholder="123456" inputMode="numeric" className="border border-line-strong bg-bg px-3 py-2" />
+                          <input name="code" placeholder="123456" inputMode="numeric" className="rounded-[7px] border border-line-strong bg-bg px-3 py-2" />
                           <Button disabled={twoFactorConfirmPending} >
                             {twoFactorConfirmPending ? "Verifying..." : "Enable 2FA"}
                           </Button>
@@ -331,9 +331,9 @@ export const AdminDashboard = ({ csrfToken, projects, survivalTags, sessions, pa
                 <h2 className="m-0 text-[20px] font-light tracking-[-0.02em] md:text-[22px]">Change password</h2>
                 <form action={pwAction} className="mt-4 grid gap-3 md:max-w-xl">
                   <input type="hidden" name="csrf" value={csrfToken} />
-                  <input name="currentPassword" type="password" required placeholder="Current password" className="border border-line-strong bg-bg px-3 py-2" />
-                  <input name="newPassword" type="password" required placeholder="New password" className="border border-line-strong bg-bg px-3 py-2" />
-                  <input name="confirmPassword" type="password" required placeholder="Confirm new password" className="border border-line-strong bg-bg px-3 py-2" />
+                  <input name="currentPassword" type="password" required placeholder="Current password" className="rounded-[7px] border border-line-strong bg-bg px-3 py-2" />
+                  <input name="newPassword" type="password" required placeholder="New password" className="rounded-[7px] border border-line-strong bg-bg px-3 py-2" />
+                  <input name="confirmPassword" type="password" required placeholder="Confirm new password" className="rounded-[7px] border border-line-strong bg-bg px-3 py-2" />
                   {pwState.error ? <p className="text-[12px] text-danger">{pwState.error}</p> : null}
                   {pwState.message ? <p className="text-sm text-accent">{pwState.message}</p> : null}
                   <Button disabled={pwPending} className="justify-self-start">{pwPending ? "Saving…" : "Update password"}</Button>
@@ -347,7 +347,7 @@ export const AdminDashboard = ({ csrfToken, projects, survivalTags, sessions, pa
                 </div>
                 <div className="mt-4 space-y-2">
                   {sessions.map((session) => (
-                    <form key={session.id} action={revokeSession} className="flex flex-col justify-between gap-3 border border-line-strong p-3 md:flex-row md:items-center">
+                    <form key={session.id} action={revokeSession} className="flex flex-col justify-between gap-3 rounded-[7px] border border-line-strong p-3 md:flex-row md:items-center">
                       <input type="hidden" name="csrf" value={csrfToken} />
                       <input type="hidden" name="sessionId" value={session.id} />
                       <div className="text-[12px]">
