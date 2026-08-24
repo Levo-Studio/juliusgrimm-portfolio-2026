@@ -1,75 +1,226 @@
 @import "tailwindcss";
 
-:root {
-  --background: #000000;
-  --text: #ffffff;
-  --green: #5be38b;
-  --orange: #e3ad5b;
-  --red: #e35b5b;
-  --blue: #5b76e3;
-  --muted: #151618;
+/* ── Theme tokens ──────────────────────────────────────────────────────────
+   Dark is the default. Light darkens the accent (#5BE38B → #12915A) so it
+   keeps contrast on a near-white ground; every other token is a direct swap.
+   ────────────────────────────────────────────────────────────────────────── */
+
+:root,
+:root[data-theme="dark"] {
+  --bg: #070708;
+  --fg: #ffffff;
+  --fg-muted: #8a8a86;
+  --fg-faint: #5a5a58;
+  --fg-body: #e6e6e3;
+  --fg-field: #c9c9c6;
+  --accent: #5be38b;
+  --accent-fg: #070708;
+  --line: rgba(255, 255, 255, 0.07);
+  --line-strong: rgba(255, 255, 255, 0.1);
+  --line-field: rgba(255, 255, 255, 0.12);
+  --tint: rgba(255, 255, 255, 0.035);
+  --draft: #e8c05a;
+  --danger: #ff8b7a;
+  --rule: #2e2e30;
+  --surface: #0d0d0f;
+}
+
+:root[data-theme="light"] {
+  --bg: #fafafa;
+  --fg: #0e0e10;
+  --fg-muted: #6b6b68;
+  --fg-faint: #93938f;
+  --fg-body: #1c1c1e;
+  --fg-field: #3a3a3c;
+  --accent: #12915a;
+  --accent-fg: #fafafa;
+  --line: rgba(0, 0, 0, 0.09);
+  --line-strong: rgba(0, 0, 0, 0.12);
+  --line-field: rgba(0, 0, 0, 0.14);
+  --tint: rgba(0, 0, 0, 0.035);
+  --draft: #a6791a;
+  --danger: #c2402c;
+  --rule: #d4d4d2;
+  --surface: #ffffff;
+}
+
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme="dark"]):not([data-theme="light"]) {
+    --bg: #fafafa;
+    --fg: #0e0e10;
+    --fg-muted: #6b6b68;
+    --fg-faint: #93938f;
+    --fg-body: #1c1c1e;
+    --fg-field: #3a3a3c;
+    --accent: #12915a;
+    --accent-fg: #fafafa;
+    --line: rgba(0, 0, 0, 0.09);
+    --line-strong: rgba(0, 0, 0, 0.12);
+    --line-field: rgba(0, 0, 0, 0.14);
+    --tint: rgba(0, 0, 0, 0.035);
+    --draft: #a6791a;
+    --danger: #c2402c;
+    --rule: #d4d4d2;
+    --surface: #ffffff;
+  }
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-fg: var(--fg);
+  --color-fg-muted: var(--fg-muted);
+  --color-fg-faint: var(--fg-faint);
+  --color-fg-body: var(--fg-body);
+  --color-fg-field: var(--fg-field);
+  --color-accent: var(--accent);
+  --color-accent-fg: var(--accent-fg);
+  --color-line: var(--line);
+  --color-line-strong: var(--line-strong);
+  --color-line-field: var(--line-field);
+  --color-tint: var(--tint);
+  --color-draft: var(--draft);
+  --color-danger: var(--danger);
+  --color-rule: var(--rule);
+  --color-surface: var(--surface);
+  --font-sans: var(--font-geist-sans), system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, monospace;
 }
 
 * {
-  border-color: color-mix(in srgb, var(--text) 12%, transparent);
+  border-color: var(--line);
 }
 
 html,
 body {
-  background: var(--background);
-  color: var(--text);
+  background: var(--bg);
+  color: var(--fg);
 }
 
 body {
   min-height: 100vh;
-}
-
-.font-inria {
-  font-family: var(--font-inria-sans), sans-serif;
-}
-
-.font-instrument {
-  font-family: var(--font-instrument-serif), serif;
+  font-family: var(--font-geist-sans), system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
 }
 
 ::selection {
-  background: color-mix(in srgb, var(--green) 28%, transparent);
-  color: var(--text);
+  background: color-mix(in srgb, var(--accent) 28%, transparent);
+  color: var(--fg);
 }
 
-.hero-code-mask {
-  mask-image:
-    radial-gradient(70% 82% at 70% 50%, rgba(255, 255, 255, 0.98) 0%, rgba(255, 255, 255, 0.68) 40%, rgba(255, 255, 255, 0.2) 64%, transparent 88%),
-    linear-gradient(to left, transparent 2%, rgba(255, 255, 255, 0.92) 22%, rgba(255, 255, 255, 0.92) 74%, transparent 97%);
-  -webkit-mask-image:
-    radial-gradient(70% 82% at 70% 50%, rgba(255, 255, 255, 0.98) 0%, rgba(255, 255, 255, 0.68) 40%, rgba(255, 255, 255, 0.2) 64%, transparent 88%),
-    linear-gradient(to left, transparent 2%, rgba(255, 255, 255, 0.92) 22%, rgba(255, 255, 255, 0.92) 74%, transparent 97%);
+/* ── Scroll reveal ─────────────────────────────────────────────────────────
+   Sections start hidden only once JS has confirmed it will run (the .reveal-ready
+   class is set by the no-flash script), so with JS disabled everything is
+   simply visible instead of stuck at opacity 0.
+   ────────────────────────────────────────────────────────────────────────── */
+
+.reveal-ready [data-reveal]:not([data-shown]) {
+  opacity: 0;
+  transform: translateY(14px);
 }
 
-.hero-code-mask-mobile {
-  mask-image: radial-gradient(92% 66% at 66% 34%, rgba(255, 255, 255, 0.96) 0%, rgba(255, 255, 255, 0.58) 42%, rgba(255, 255, 255, 0.14) 68%, transparent 92%);
-  -webkit-mask-image: radial-gradient(92% 66% at 66% 34%, rgba(255, 255, 255, 0.96) 0%, rgba(255, 255, 255, 0.58) 42%, rgba(255, 255, 255, 0.14) 68%, transparent 92%);
+.reveal-ready [data-reveal]:not([data-shown]) [data-row] {
+  opacity: 0;
+  transform: translateY(8px);
 }
 
-.crt-loader {
-  background:
-    linear-gradient(to bottom, rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.6)),
-    repeating-linear-gradient(to bottom, rgba(91, 227, 139, 0.08) 0, rgba(91, 227, 139, 0.08) 1px, transparent 1px, transparent 3px),
-    radial-gradient(circle at center, rgba(91, 227, 139, 0.14), rgba(0, 0, 0, 0.75));
-  animation: crt-flicker 1.8s steps(12, end) infinite;
+.reveal-ready [data-word] {
+  opacity: 0;
 }
 
-.about-word-initial {
-  opacity: 0.3;
+[data-reveal] {
+  transition: opacity 0.5s ease, transform 0.5s cubic-bezier(0.2, 0.7, 0.2, 1);
 }
 
-@keyframes crt-flicker {
-  0% { opacity: 0.85; }
-  30% { opacity: 0.95; }
-  31% { opacity: 0.82; }
-  33% { opacity: 0.96; }
-  70% { opacity: 0.9; }
-  100% { opacity: 0.84; }
+[data-reveal][data-shown] {
+  opacity: 1;
+  transform: none;
+}
+
+/* Rows animate in on a stagger, then hand `transition` back to the hover rule
+   below so the hover shift stays smooth instead of inheriting the reveal timing. */
+[data-row] {
+  transition: opacity 0.4s ease, transform 0.4s cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+
+[data-reveal][data-shown] [data-row] {
+  opacity: 1;
+  transform: none;
+}
+
+/* ── Row hover ─────────────────────────────────────────────────────────────
+   Tint + 4px shift + accent edge, all on one timing function so the three
+   never read as separate animations.
+   ────────────────────────────────────────────────────────────────────────── */
+
+.row-link {
+  border-left: 1px solid transparent;
+  transition: background-color 0.18s ease, padding-left 0.18s ease, border-left-color 0.18s ease;
+}
+
+@media (hover: hover) {
+  .row-link:hover {
+    background-color: var(--tint);
+    border-left-color: var(--accent);
+    padding-left: 20px;
+  }
+}
+
+/* ── Admin navigation ──────────────────────────────────────────────────────
+   The mobile drawer slides in over the content; its backdrop fades. Nav items
+   stagger in behind it so the panel does not arrive as one flat block.
+   ────────────────────────────────────────────────────────────────────────── */
+
+.drawer-backdrop {
+  animation: drawer-backdrop-in 0.2s ease-out;
+}
+
+.drawer-panel {
+  animation: drawer-panel-in 0.26s cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+
+.drawer-panel [data-nav-item] {
+  animation: nav-item-in 0.3s cubic-bezier(0.2, 0.7, 0.2, 1) backwards;
+}
+
+.drawer-panel [data-nav-item]:nth-child(1) { animation-delay: 0.06s; }
+.drawer-panel [data-nav-item]:nth-child(2) { animation-delay: 0.10s; }
+.drawer-panel [data-nav-item]:nth-child(3) { animation-delay: 0.14s; }
+.drawer-panel [data-nav-item]:nth-child(4) { animation-delay: 0.18s; }
+
+@keyframes drawer-backdrop-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes drawer-panel-in {
+  from { transform: translateX(-100%); }
+  to { transform: none; }
+}
+
+@keyframes nav-item-in {
+  from { opacity: 0; transform: translateX(-10px); }
+  to { opacity: 1; transform: none; }
+}
+
+/* The active marker grows from the top edge rather than blinking on. */
+.nav-item {
+  transition: background-color 0.18s ease, color 0.18s ease;
+}
+
+.nav-item::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 50%;
+  width: 2px;
+  height: 0;
+  background: var(--accent);
+  transform: translateY(-50%);
+  transition: height 0.22s cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+
+.nav-item[data-active="true"]::before {
+  height: 100%;
 }
 
 .ai-shimmer {
@@ -115,10 +266,26 @@ body {
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .reveal-ready [data-reveal]:not([data-shown]),
+  .reveal-ready [data-reveal]:not([data-shown]) [data-row],
+  .reveal-ready [data-word] {
+    opacity: 1;
+    transform: none;
+  }
+
+  [data-reveal],
+  [data-row],
+  .row-link,
+  .drawer-backdrop,
+  .drawer-panel,
+  .drawer-panel [data-nav-item],
+  .nav-item,
+  .nav-item::before,
   .ai-shimmer,
   .ai-dots::after,
   .dialog-overlay,
   .dialog-content {
+    transition: none;
     animation: none;
   }
 }

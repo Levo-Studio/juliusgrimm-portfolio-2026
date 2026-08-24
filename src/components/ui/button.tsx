@@ -3,19 +3,24 @@ import { Slot } from "@radix-ui/react-slot";
 import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 
-const buttonVariants = cva("inline-flex items-center justify-center whitespace-nowrap text-sm transition-colors disabled:pointer-events-none disabled:opacity-50", {
-  variants: {
-    variant: {
-      default: "border border-[#5BE38B] bg-[rgba(91,227,139,0.1)] text-[#5BE38B]",
-      ghost: "border border-white/20 text-white"
+const buttonVariants = cva(
+  "inline-flex items-center justify-center whitespace-nowrap rounded-md text-[12px] font-medium transition-colors disabled:pointer-events-none disabled:opacity-50",
+  {
+    variants: {
+      variant: {
+        // One filled action per view; everything else is a quiet outline.
+        default: "bg-accent text-accent-fg hover:opacity-90",
+        ghost: "border border-line-strong font-normal text-fg-muted hover:border-line-field hover:text-fg",
+        danger: "border border-danger/40 font-normal text-danger hover:bg-[color-mix(in_srgb,var(--danger)_10%,transparent)]"
+      },
+      size: {
+        default: "px-[13px] py-2",
+        lg: "px-4 py-2.5"
+      }
     },
-    size: {
-      default: "px-4 py-2",
-      lg: "px-6 py-3"
-    }
-  },
-  defaultVariants: { variant: "default", size: "default" }
-});
+    defaultVariants: { variant: "default", size: "default" }
+  }
+);
 
 export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement>, VariantProps<typeof buttonVariants> {
   asChild?: boolean;

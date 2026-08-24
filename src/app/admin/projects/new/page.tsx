@@ -2,11 +2,11 @@ import Link from "next/link";
 import { cookies } from "next/headers";
 import { notFound } from "next/navigation";
 import { getSessionUser } from "@/server/auth";
-import { Button } from "@/components/ui/button";
 import { createProject } from "@/app/admin/actions";
 import { ProjectLinksEditor } from "@/app/admin/projects/project-links-editor";
 import { ProjectTechEditor } from "@/app/admin/projects/project-tech-editor";
 import { AiCaseStudyGenerator } from "@/app/admin/projects/ai-case-study-generator";
+import { env } from "@/lib/env";
 import { CaseStudyFields } from "@/app/admin/projects/case-study-fields";
 import { CreateSubmitButton } from "@/app/admin/projects/create-submit-button";
 import { AdminReveal } from "@/app/admin/admin-reveal";
@@ -14,6 +14,8 @@ import { AdminReveal } from "@/app/admin/admin-reveal";
 type Search = {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 };
+
+const LABEL = "font-mono text-[10px] font-medium uppercase tracking-[0.14em] text-fg-muted";
 
 export default async function AdminProjectCreatePage({ searchParams }: Search): Promise<React.JSX.Element> {
   const user = await getSessionUser();
@@ -33,40 +35,76 @@ export default async function AdminProjectCreatePage({ searchParams }: Search): 
             : undefined;
 
   return (
-    <main className="min-h-screen bg-black p-6 text-white md:p-8">
-      <AdminReveal className="mx-auto max-w-[980px] space-y-6">
-        <div className="flex items-center justify-between">
-          <h1 className="font-inria text-3xl">Add Case Study</h1>
-          <div className="flex items-center gap-2">
-            <Link href="/admin?tab=case-studies"><Button className="border border-white/25">Back</Button></Link>
-            <CreateSubmitButton className="border border-[#5BE38B] bg-[rgba(91,227,139,0.1)] text-[#5BE38B] hover:bg-[rgba(91,227,139,0.2)]">Create case study</CreateSubmitButton>
-          </div>
-        </div>
-        {error ? <div className="border border-[#E35B5B] bg-[rgba(227,91,91,0.1)] px-4 py-3 text-sm text-[#E35B5B]">{error}</div> : null}
-
-        <AiCaseStudyGenerator csrf={csrfToken} />
-
-        <form id="project-create-form" action={createProject} className="grid gap-3 border border-white/15 bg-[#070707] p-5">
+    <main className="min-h-screen bg-bg text-fg">
+      <AdminReveal className="min-h-screen">
+        <form id="project-create-form" action={createProject}>
           <input type="hidden" name="csrf" value={csrfToken} />
 
-          <CaseStudyFields />
+          {/* Same shell as the edit screen: breadcrumb left, state and the one
+              committing action right. */}
+          <header className="flex flex-wrap items-center justify-between gap-3 border-b border-line px-5 py-[18px] md:px-8">
+            <div className="flex items-center gap-3 font-mono text-[10px] font-medium uppercase tracking-[0.16em] text-fg-muted">
+              <Link href="/admin?tab=case-studies" className="transition-colors hover:text-fg">
+                ← Case studies
+              </Link>
+              <span className="text-rule">/</span>
+              <span className="text-fg">New</span>
+            </div>
 
-          <label className="text-sm text-white/70">Title image URL (shown on homepage cards)</label>
-          <input name="imageUrl" placeholder="https://..." className="border border-white/20 bg-black px-3 py-2" />
+            <div className="flex items-center gap-4">
+              <label className="flex cursor-pointer items-center gap-2 text-[12px] text-fg-muted">
+                Published
+                <input type="hidden" name="visible" value="false" />
+                <input type="checkbox" name="visible" value="true" defaultChecked className="peer sr-only" />
+                <span className="relative inline-block h-[17px] w-[30px] rounded-full bg-line-field transition-colors peer-checked:bg-accent peer-checked:[&>span]:translate-x-[13px]">
+                  <span className="absolute top-0.5 left-0.5 size-[13px] rounded-full bg-bg transition-transform" />
+                </span>
+              </label>
 
-          <label className="text-sm text-white/70">Month / year</label>
-          <input name="createdAt" placeholder="May 2026" className="border border-white/20 bg-black px-3 py-2" />
+              <CreateSubmitButton>Create</CreateSubmitButton>
+            </div>
+          </header>
 
-          <input type="hidden" name="visible" value="false" />
-          <label className="inline-flex items-center gap-3 text-sm">
-            <input type="checkbox" name="visible" value="true" defaultChecked className="size-4 accent-[#5BE38B]" />
-            Visible on homepage
-          </label>
+          {error ? (
+            <div className="border-b border-danger/40 bg-[color-mix(in_srgb,var(--danger)_10%,transparent)] px-5 py-3 text-sm text-danger md:px-8">
+              {error}
+            </div>
+          ) : null}
 
-          <ProjectLinksEditor initialLinks={[]} />
-          <ProjectTechEditor initialTech={[]} />
+          <CaseStudyFields
+            /* The generator leads the writing column rather than spanning the page,
+               so the sidebar starts level with it instead of below it. */
+            contentBefore={<AiCaseStudyGenerator csrf={csrfToken} model={env.MISTRAL_MODEL ?? "mistral-large-latest"} />}
+            sidebarBefore={
+              <div className="flex flex-col gap-2">
+                <span className={LABEL}>Project URL</span>
+                <ProjectLinksEditor initialLinks={[]} />
+                <span className="text-[11px] leading-[1.5] text-fg-faint">
+                  The first non-repository link supplies the project&apos;s favicon.
+                </span>
+              </div>
+            }
+            sidebarAfter={
+              <>
+                <div className="flex flex-col gap-2">
+                  <label htmlFor="new-date" className={LABEL}>
+                    Date
+                  </label>
+                  <input
+                    id="new-date"
+                    name="createdAt"
+                    placeholder="May 2026"
+                    className="rounded-[7px] border border-line bg-transparent px-2.5 py-2 font-mono text-[12px] text-fg-field outline-none placeholder:text-fg-faint focus:border-accent"
+                  />
+                </div>
 
-          <CreateSubmitButton className="justify-self-start border border-[#5BE38B] bg-[rgba(91,227,139,0.1)] text-[#5BE38B] hover:bg-[rgba(91,227,139,0.2)]">Create case study</CreateSubmitButton>
+                <div className="flex flex-col gap-2">
+                  <span className={LABEL}>Stack</span>
+                  <ProjectTechEditor initialTech={[]} />
+                </div>
+              </>
+            }
+          />
         </form>
       </AdminReveal>
     </main>

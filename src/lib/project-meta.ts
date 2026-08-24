@@ -50,3 +50,13 @@ export const getProjectMonthLabel = (value: Date | string | null | undefined): s
   if (Number.isNaN(parsed.getTime())) return "April 2026";
   return formatter.format(parsed);
 };
+
+const shortFormatter = new Intl.DateTimeFormat("en-US", { month: "2-digit", year: "numeric", timeZone: "UTC" });
+
+/** "07 / 2026" — the compact form the project rows and case-study headers use. */
+export const getProjectMonthShort = (value: Date | string | null | undefined): string => {
+  const parsed = value instanceof Date ? value : value ? new Date(value) : null;
+  if (!parsed || Number.isNaN(parsed.getTime())) return "";
+  const [month, year] = shortFormatter.format(parsed).split("/");
+  return `${month.trim()} / ${year.trim()}`;
+};

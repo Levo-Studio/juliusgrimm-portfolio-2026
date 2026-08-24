@@ -20,8 +20,7 @@ export const CreateSubmitButton = ({ className, children }: Props): React.JSX.El
   }, []);
 
   return (
-    <Button
-      type="submit"
+    <Button type="submit"
       form="project-create-form"
       disabled={!complete}
       className={`${className ?? ""} transition disabled:cursor-not-allowed disabled:opacity-40`}

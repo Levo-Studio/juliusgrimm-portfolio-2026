@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Button } from "@/components/ui/button";
 
 type ColorCategory = "green" | "orange" | "red" | "blue";
 
@@ -88,56 +87,69 @@ export const ProjectTechEditor = ({ initialTech }: Props): React.JSX.Element => 
   };
 
   return (
-    <div className="space-y-3">
-      <div className="flex items-center justify-between">
-        <p className="text-sm text-white/70">Frameworks & Tech Stack</p>
-        <Button type="button" onClick={addRow} className="border border-[#5BE38B] bg-[rgba(91,227,139,0.1)] text-[#5BE38B]">
-          Add tech
-        </Button>
-      </div>
-
-      <div className="flex flex-wrap gap-2">
-        {suggestions.map((item) => (
-          <button
-            key={item.label}
-            type="button"
-            onClick={() => addSuggestion(item.label, item.colorCategory)}
-            className="border border-white/20 bg-black px-3 py-1.5 text-xs text-white/80 transition hover:border-[#5BE38B] hover:text-[#5BE38B]"
-          >
-            + {item.label}
-          </button>
-        ))}
-      </div>
-
-      {feedback ? <p className="text-xs text-[#5BE38B]">{feedback}</p> : null}
-
+    <div className="flex flex-col gap-2.5">
+      {/* Each tag is one compact row: the name, its colour, and a way out. The old
+          four-column grid could not fit the sidebar without widening the layout. */}
       {tech.map((item, index) => (
-        <div key={`tech-${index}`} className="grid gap-2 border border-white/15 bg-[#060606] p-3 md:grid-cols-[1.3fr_160px_90px_90px]">
+        <div key={`tech-${index}`} className="flex items-center gap-2 rounded-[7px] border border-line px-2.5 py-2">
           <input type="hidden" name="techSortOrder" value={item.sortOrder} />
           <input
             name="techLabel"
             value={item.label}
             onChange={(event) => updateRow(index, { label: event.target.value })}
             placeholder="e.g. Next.js"
-            className="border border-white/20 bg-black px-3 py-2"
+            className="min-w-0 flex-1 bg-transparent text-[13px] text-fg outline-none placeholder:text-fg-faint"
           />
           <select
             name="techColorCategory"
             value={item.colorCategory}
             onChange={(event) => updateRow(index, { colorCategory: event.target.value as ColorCategory })}
-            className="border border-white/20 bg-black px-3 py-2"
+            aria-label="Colour category"
+            className="shrink-0 bg-transparent font-mono text-[10px] text-fg-muted outline-none"
           >
-            <option value="green">Green</option>
-            <option value="orange">Orange</option>
-            <option value="red">Red</option>
-            <option value="blue">Blue</option>
+            <option value="green">green</option>
+            <option value="orange">orange</option>
+            <option value="red">red</option>
+            <option value="blue">blue</option>
           </select>
-          <Button type="button" onClick={() => removeRow(index)} className="border border-[#E35B5B] bg-[rgba(227,91,91,0.1)] text-[#E35B5B]">
-            Remove
-          </Button>
+          <button
+            type="button"
+            onClick={() => removeRow(index)}
+            aria-label={`Remove ${item.label || "tag"}`}
+            className="shrink-0 text-[13px] leading-none text-fg-muted transition-colors hover:text-danger"
+          >
+            ×
+          </button>
         </div>
       ))}
+
+      <button
+        type="button"
+        onClick={addRow}
+        className="rounded-md border border-dashed border-line-field py-1.5 text-[11px] text-fg-muted transition-colors hover:border-accent hover:text-fg"
+      >
+        + Add tech
+      </button>
+
+      <details className="group">
+        <summary className="cursor-pointer list-none text-[11px] text-fg-muted transition-colors hover:text-fg">
+          Common tags
+        </summary>
+        <div className="mt-2 flex flex-wrap gap-1.5">
+          {suggestions.map((item) => (
+            <button
+              key={item.label}
+              type="button"
+              onClick={() => addSuggestion(item.label, item.colorCategory)}
+              className="rounded-[5px] border border-line px-2 py-1 text-[11px] text-fg-muted transition-colors hover:border-accent hover:text-fg"
+            >
+              {item.label}
+            </button>
+          ))}
+        </div>
+      </details>
+
+      {feedback ? <p className="m-0 text-[11px] text-accent">{feedback}</p> : null}
     </div>
   );
 };
-

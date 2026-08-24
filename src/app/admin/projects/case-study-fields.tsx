@@ -16,6 +16,11 @@ type Props = {
   initialSubtitle?: string;
   initialDescription?: string;
   initialWhyBuilt?: string;
+  /** Leads the writing column — the generator that fills these fields. */
+  contentBefore?: React.ReactNode;
+  /** Sidebar content above the slug (project links) and below it (date, stack, actions). */
+  sidebarBefore?: React.ReactNode;
+  sidebarAfter?: React.ReactNode;
 };
 
 // Mirrors the server-side slugify in admin/actions.ts so the previewed slug matches what gets saved.
@@ -33,7 +38,10 @@ export const CaseStudyFields = ({
   initialTitle = "",
   initialSubtitle = "",
   initialDescription = "",
-  initialWhyBuilt = ""
+  initialWhyBuilt = "",
+  contentBefore,
+  sidebarBefore,
+  sidebarAfter
 }: Props): React.JSX.Element => {
   const [title, setTitle] = useState(initialTitle);
   const [slug, setSlug] = useState(initialSlug);
@@ -130,57 +138,87 @@ export const CaseStudyFields = ({
     };
   }, []);
 
+  const label = "font-mono text-[10px] font-medium uppercase tracking-[0.14em] text-fg-muted";
+  const body =
+    "rounded-[7px] border border-line bg-transparent px-3 py-2.5 text-[14px] leading-[1.7] text-fg-field outline-none placeholder:text-fg-faint focus:border-accent";
+
   return (
-    <div ref={rootRef} className="grid gap-3">
-      <label className="text-sm text-white/70">Slug</label>
-      <input
-        name="slug"
-        data-fill-target
-        value={slug}
-        onChange={(event) => onSlugChange(event.target.value)}
-        placeholder="my-new-case-study"
-        className="border border-white/20 bg-black px-3 py-2"
-      />
+    <div ref={rootRef} className="grid grid-cols-1 md:grid-cols-[minmax(0,1fr)_280px]">
+      <div className="flex min-w-0 flex-col gap-6 border-line px-5 py-7 md:border-r md:px-8">
+        {contentBefore}
 
-      <label className="text-sm text-white/70">Title</label>
-      <input
-        name="title"
-        data-fill-target
-        value={title}
-        onChange={(event) => onTitleChange(event.target.value)}
-        placeholder="Case Study Title"
-        className="border border-white/20 bg-black px-3 py-2"
-      />
+        <div className="flex flex-col gap-2">
+          <label htmlFor="new-title" className={label}>Title</label>
+          <input
+            id="new-title"
+            name="title"
+            data-fill-target
+            value={title}
+            onChange={(event) => onTitleChange(event.target.value)}
+            placeholder="Case study title"
+            className="border-b border-line-field bg-transparent pt-1 pb-2 text-[24px] tracking-[-0.02em] outline-none placeholder:text-fg-faint focus:border-accent"
+          />
+        </div>
 
-      <label className="text-sm text-white/70">Subtitle</label>
-      <input
-        name="subtitle"
-        data-fill-target
-        value={subtitle}
-        onChange={(event) => setSubtitle(event.target.value)}
-        placeholder="Short subtitle in your style"
-        className="border border-white/20 bg-black px-3 py-2"
-      />
+        <div className="flex flex-col gap-2">
+          <label htmlFor="new-subtitle" className={label}>One-liner</label>
+          <input
+            id="new-subtitle"
+            name="subtitle"
+            data-fill-target
+            value={subtitle}
+            onChange={(event) => setSubtitle(event.target.value)}
+            placeholder="Short subtitle in your style"
+            className="border-b border-line bg-transparent pt-1.5 pb-2 text-[14px] text-fg-field outline-none placeholder:text-fg-faint focus:border-accent"
+          />
+        </div>
 
-      <label className="text-sm text-white/70">Description</label>
-      <textarea
-        name="description"
-        data-fill-target
-        value={description}
-        onChange={(event) => setDescription(event.target.value)}
-        placeholder="Project description..."
-        className="min-h-32 border border-white/20 bg-black px-3 py-2"
-      />
+        <div className="flex flex-col gap-2">
+          <label htmlFor="new-description" className={label}>Context</label>
+          <textarea
+            id="new-description"
+            name="description"
+            data-fill-target
+            value={description}
+            onChange={(event) => setDescription(event.target.value)}
+            placeholder="What it is, and why it exists…"
+            className={`min-h-[190px] ${body}`}
+          />
+        </div>
 
-      <label className="text-sm text-white/70">Why built it</label>
-      <textarea
-        name="whyBuilt"
-        data-fill-target
-        value={whyBuilt}
-        onChange={(event) => setWhyBuilt(event.target.value)}
-        placeholder="Why you built it..."
-        className="min-h-32 border border-white/20 bg-black px-3 py-2"
-      />
+        <div className="flex flex-col gap-2">
+          <label htmlFor="new-why" className={label}>Why I built it</label>
+          <textarea
+            id="new-why"
+            name="whyBuilt"
+            data-fill-target
+            value={whyBuilt}
+            onChange={(event) => setWhyBuilt(event.target.value)}
+            placeholder="The itch it scratched…"
+            className={`min-h-[150px] ${body}`}
+          />
+        </div>
+      </div>
+
+      <aside className="flex min-w-0 flex-col gap-[22px] px-5 py-7 md:px-6">
+        {sidebarBefore}
+
+        <div className="flex flex-col gap-2">
+          <label htmlFor="new-slug" className={label}>Slug</label>
+          <input
+            id="new-slug"
+            name="slug"
+            data-fill-target
+            value={slug}
+            onChange={(event) => onSlugChange(event.target.value)}
+            placeholder="my-new-case-study"
+            className="rounded-[7px] border border-line bg-transparent px-2.5 py-2 font-mono text-[12px] text-fg-field outline-none placeholder:text-fg-faint focus:border-accent"
+          />
+          {/* Derived from the title until you type here, then it stops following. */}
+        </div>
+
+        {sidebarAfter}
+      </aside>
     </div>
   );
 };

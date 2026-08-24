@@ -6,7 +6,6 @@ import { db } from "@/server/db/client";
 import { projectLinks, projects, projectTechStack } from "@/server/db/schema";
 import { getSessionUser } from "@/server/auth";
 import { Button } from "@/components/ui/button";
-import { DirectProjectImage } from "@/components/shared/direct-project-image";
 import { upsertProject } from "@/app/admin/actions";
 import { ProjectLinksEditor } from "@/app/admin/projects/project-links-editor";
 import { ProjectTechEditor } from "@/app/admin/projects/project-tech-editor";
@@ -37,77 +36,168 @@ export default async function AdminProjectEditPage({ params, searchParams }: Pro
         : undefined;
 
   return (
-    <main className="min-h-screen bg-black p-6 text-white md:p-8">
-      <AdminReveal className="mx-auto max-w-[980px] space-y-6">
-        <div className="flex items-center justify-between">
-          <h1 className="font-inria text-3xl">Edit Case Study</h1>
-          <div className="flex items-center gap-2">
-            <Button form="project-edit-form" className="border border-[#5BE38B] bg-[rgba(91,227,139,0.1)] text-[#5BE38B] transition hover:bg-[rgba(91,227,139,0.2)]">Save changes</Button>
-            <Link href="/admin?tab=case-studies"><Button className="border border-white/25">Back</Button></Link>
-          </div>
-        </div>
-        {error ? <div className="border border-[#E35B5B] bg-[rgba(227,91,91,0.1)] px-4 py-3 text-sm text-[#E35B5B]">{error}</div> : null}
-
-        <form id="project-edit-form" action={upsertProject} className="grid gap-3 border border-white/15 bg-[#070707] p-5">
+    <main className="min-h-screen bg-bg text-fg">
+      <AdminReveal className="min-h-screen">
+        <form id="project-edit-form" action={upsertProject}>
           <input type="hidden" name="csrf" value={csrfToken} />
           <input type="hidden" name="id" value={project.id} />
+          {/* Title images are gone from the site — project rows carry the site's own
+              favicon instead. The stored value rides along as a hidden field so
+              saving here does not wipe a column the form no longer edits. */}
+          <input type="hidden" name="imageUrl" value={project.imageUrl ?? ""} />
 
-          <label className="text-sm text-white/70">Slug</label>
-          <input name="slug" defaultValue={project.slug} className="border border-white/20 bg-black px-3 py-2" />
+          <header className="flex flex-wrap items-center justify-between gap-3 border-b border-line px-5 py-[18px] md:px-8">
+            <div className="flex items-center gap-3 font-mono text-[10px] font-medium uppercase tracking-[0.16em] text-fg-muted">
+              <Link href="/admin?tab=case-studies" className="transition-colors hover:text-fg">
+                ← Case studies
+              </Link>
+              <span className="text-rule">/</span>
+              <span className="text-fg">Edit</span>
+            </div>
 
-          <label className="text-sm text-white/70">Title</label>
-          <input name="title" defaultValue={project.title} className="border border-white/20 bg-black px-3 py-2" />
+            <div className="flex items-center gap-4">
+              {/* Publishing is a header-level decision, not another field in the form. */}
+              <label className="flex cursor-pointer items-center gap-2 text-[12px] text-fg-muted">
+                Published
+                <input type="hidden" name="visible" value="false" />
+                <input
+                  type="checkbox"
+                  name="visible"
+                  value="true"
+                  defaultChecked={project.visible}
+                  className="peer sr-only"
+                />
+                <span className="relative inline-block h-[17px] w-[30px] rounded-full bg-line-field transition-colors peer-checked:bg-accent peer-checked:[&>span]:translate-x-[13px]">
+                  <span className="absolute top-0.5 left-0.5 size-[13px] rounded-full bg-bg transition-transform" />
+                </span>
+              </label>
 
-          <label className="text-sm text-white/70">Subtitle</label>
-          <input name="subtitle" defaultValue={project.subtitle} className="border border-white/20 bg-black px-3 py-2" />
+              <Button className="rounded-md bg-fg px-[13px] py-2 text-[12px] font-medium text-bg">Save</Button>
+            </div>
+          </header>
 
-          <label className="text-sm text-white/70">Description</label>
-          <textarea name="description" defaultValue={project.description} className="min-h-32 border border-white/20 bg-black px-3 py-2" />
+          {error ? (
+            <div className="border-b border-danger/40 bg-[color-mix(in_srgb,var(--danger)_10%,transparent)] px-5 py-3 text-sm text-danger md:px-8">
+              {error}
+            </div>
+          ) : null}
 
-          <label className="text-sm text-white/70">Why built it</label>
-          <textarea name="whyBuilt" defaultValue={project.whyBuilt} className="min-h-32 border border-white/20 bg-black px-3 py-2" />
+          <div className="grid grid-cols-1 md:grid-cols-[minmax(0,1fr)_280px]">
+            <div className="flex min-w-0 flex-col gap-6 border-line px-5 py-7 md:border-r md:px-8">
+              <div className="flex flex-col gap-2">
+                <label htmlFor="field-title" className="font-mono text-[10px] font-medium uppercase tracking-[0.14em] text-fg-muted">
+                  Title
+                </label>
+                <input
+                  id="field-title"
+                  name="title"
+                  defaultValue={project.title}
+                  className="border-b border-line-field bg-transparent pt-1 pb-2 text-[24px] tracking-[-0.02em] outline-none focus:border-accent"
+                />
+              </div>
 
-          <label className="text-sm text-white/70">Title image URL (shown on homepage cards)</label>
-          <input name="imageUrl" defaultValue={project.imageUrl ?? ""} className="border border-white/20 bg-black px-3 py-2" />
-          <div className="relative mt-1 aspect-[1200/630] w-full overflow-hidden border border-white/15 bg-[#151618]">
-            {project.imageUrl ? (
-              <DirectProjectImage src={project.imageUrl} alt={`${project.title} title image preview`} />
-            ) : (
-              <div className="absolute inset-0 flex items-center justify-center text-sm text-white/50">No title image yet</div>
-            )}
+              <div className="flex flex-col gap-2">
+                <label htmlFor="field-subtitle" className="font-mono text-[10px] font-medium uppercase tracking-[0.14em] text-fg-muted">
+                  One-liner
+                </label>
+                <input
+                  id="field-subtitle"
+                  name="subtitle"
+                  defaultValue={project.subtitle}
+                  className="border-b border-line bg-transparent pt-1.5 pb-2 text-[14px] text-fg-field outline-none focus:border-accent"
+                />
+              </div>
+
+              {/* The public page is built from these two sections, so the editor keeps
+                  them apart rather than offering one undifferentiated body field. */}
+              <div className="flex flex-col gap-2">
+                <label htmlFor="field-description" className="font-mono text-[10px] font-medium uppercase tracking-[0.14em] text-fg-muted">
+                  Context
+                </label>
+                <textarea
+                  id="field-description"
+                  name="description"
+                  defaultValue={project.description}
+                  className="min-h-[190px] rounded-[7px] border border-line bg-transparent px-3 py-2.5 text-[14px] leading-[1.7] text-fg-field outline-none focus:border-accent"
+                />
+              </div>
+
+              <div className="flex flex-col gap-2">
+                <label htmlFor="field-why" className="font-mono text-[10px] font-medium uppercase tracking-[0.14em] text-fg-muted">
+                  Why I built it
+                </label>
+                <textarea
+                  id="field-why"
+                  name="whyBuilt"
+                  defaultValue={project.whyBuilt}
+                  className="min-h-[150px] rounded-[7px] border border-line bg-transparent px-3 py-2.5 text-[14px] leading-[1.7] text-fg-field outline-none focus:border-accent"
+                />
+              </div>
+            </div>
+
+            <aside className="flex min-w-0 flex-col gap-[22px] px-5 py-7 md:px-6">
+              <div className="flex flex-col gap-2">
+                <span className="font-mono text-[10px] font-medium uppercase tracking-[0.14em] text-fg-muted">
+                  Project URL
+                </span>
+                <ProjectLinksEditor
+                  initialLinks={links.map((link) => ({
+                    label: link.label,
+                    url: link.url,
+                    visible: link.visible,
+                    sortOrder: link.sortOrder
+                  }))}
+                />
+                <span className="text-[11px] leading-[1.5] text-fg-faint">
+                  The first non-repository link supplies the project&apos;s favicon.
+                </span>
+              </div>
+
+              <div className="flex flex-col gap-2">
+                <label htmlFor="field-slug" className="font-mono text-[10px] font-medium uppercase tracking-[0.14em] text-fg-muted">
+                  Slug
+                </label>
+                <input
+                  id="field-slug"
+                  name="slug"
+                  defaultValue={project.slug}
+                  className="rounded-[7px] border border-line bg-transparent px-2.5 py-2 font-mono text-[12px] text-fg-field outline-none focus:border-accent"
+                />
+              </div>
+
+              <div className="flex flex-col gap-2">
+                <label htmlFor="field-date" className="font-mono text-[10px] font-medium uppercase tracking-[0.14em] text-fg-muted">
+                  Date
+                </label>
+                <input
+                  id="field-date"
+                  name="createdAt"
+                  defaultValue={project.createdAt.toLocaleDateString("en-US", { month: "long", year: "numeric", timeZone: "UTC" })}
+                  placeholder="May 2026"
+                  className="rounded-[7px] border border-line bg-transparent px-2.5 py-2 font-mono text-[12px] text-fg-field outline-none focus:border-accent"
+                />
+              </div>
+
+              <div className="flex flex-col gap-2">
+                <span className="font-mono text-[10px] font-medium uppercase tracking-[0.14em] text-fg-muted">Stack</span>
+                <ProjectTechEditor
+                  initialTech={tech.map((item) => ({
+                    label: item.label,
+                    colorCategory: (item.colorCategory as "green" | "orange" | "red" | "blue") ?? "green",
+                    sortOrder: item.sortOrder
+                  }))}
+                />
+              </div>
+
+              <Link
+                href={`/projects/${project.slug}`}
+                target="_blank"
+                className="mt-auto rounded-md border border-line-strong px-3 py-2 text-center text-[12px] text-fg-muted transition-colors hover:border-line-field hover:text-fg"
+              >
+                Preview public page
+              </Link>
+            </aside>
           </div>
-
-          <label className="text-sm text-white/70">Month / year</label>
-          <input
-            name="createdAt"
-            defaultValue={project.createdAt.toLocaleDateString("en-US", { month: "long", year: "numeric", timeZone: "UTC" })}
-            placeholder="May 2026"
-            className="border border-white/20 bg-black px-3 py-2"
-          />
-
-          <ProjectLinksEditor
-            initialLinks={links.map((link) => ({
-              label: link.label,
-              url: link.url,
-              visible: link.visible,
-              sortOrder: link.sortOrder
-            }))}
-          />
-          <ProjectTechEditor
-            initialTech={tech.map((item) => ({
-              label: item.label,
-              colorCategory: (item.colorCategory as "green" | "orange" | "red" | "blue") ?? "green",
-              sortOrder: item.sortOrder
-            }))}
-          />
-
-          <input type="hidden" name="visible" value="false" />
-          <label className="inline-flex items-center gap-3 text-sm">
-            <input type="checkbox" name="visible" value="true" defaultChecked={project.visible} className="size-4 accent-[#5BE38B]" />
-            Visible on homepage
-          </label>
-
-          <Button className="justify-self-start border border-[#5BE38B] bg-[rgba(91,227,139,0.1)] text-[#5BE38B] transition hover:bg-[rgba(91,227,139,0.2)]">Save changes</Button>
         </form>
       </AdminReveal>
     </main>
