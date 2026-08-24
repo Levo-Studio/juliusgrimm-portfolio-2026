@@ -34,12 +34,6 @@ export const SiteHeader = ({ back }: SiteHeaderProps): React.JSX.Element => (
           ))}
         </nav>
         <ThemeToggle compact />
-        {/* The nav collapses to anchors that are all reachable by scrolling, so the
-            mobile control is a scroll cue rather than a menu that opens. */}
-        <Link href="#about" aria-label="Skip to content" className="flex w-[18px] flex-col gap-1 md:hidden">
-          <span className="h-px bg-fg-muted" />
-          <span className="h-px bg-fg-muted" />
-        </Link>
       </div>
     )}
   </header>

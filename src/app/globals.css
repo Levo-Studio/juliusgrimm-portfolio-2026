@@ -96,6 +96,10 @@ body {
   color: var(--fg);
 }
 
+html {
+  scroll-behavior: smooth;
+}
+
 body {
   min-height: 100vh;
   font-family: var(--font-geist-sans), system-ui, sans-serif;
@@ -266,6 +270,10 @@ body {
 }
 
 @media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
   .reveal-ready [data-reveal]:not([data-shown]),
   .reveal-ready [data-reveal]:not([data-shown]) [data-row],
   .reveal-ready [data-word] {
