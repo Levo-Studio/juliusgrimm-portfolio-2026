@@ -37,7 +37,9 @@ export default async function AdminPage({ searchParams }: Props): Promise<React.
     .from(adminAuthenticators)
     .where(eq(adminAuthenticators.userId, user.id))
     .orderBy(desc(adminAuthenticators.createdAt));
-  const initialTab = params.tab === "settings" ? "settings" : params.tab === "overview" ? "overview" : params.tab === "survival-kit" ? "survival-kit" : "case-studies";
+  // Case studies is the only landing worth having: the dashboard summarised a list
+  // you could simply be looking at.
+  const initialTab = params.tab === "settings" ? "settings" : params.tab === "survival-kit" ? "survival-kit" : "case-studies";
   const saved = params.saved === "1";
   const errorParam = typeof params.error === "string" ? params.error : "";
   const errorMessage =

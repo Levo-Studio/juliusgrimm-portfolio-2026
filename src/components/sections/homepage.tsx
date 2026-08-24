@@ -4,6 +4,7 @@ import { ProjectIcon } from "@/components/shared/project-icon";
 import { SiteHeader } from "@/components/sections/site-header";
 import { HeroCodeCloud } from "@/components/sections/hero-code-cloud";
 import { Reveal } from "@/components/sections/reveal";
+import { AboutText } from "@/components/sections/about-text";
 import { contactItems } from "@/lib/content";
 import { getVisibleProjects } from "@/server/projects";
 import { getSurvivalKitTags } from "@/server/survival-kit";
@@ -68,10 +69,9 @@ export const Homepage = async (): Promise<React.JSX.Element> => {
       <div className="flex flex-col gap-12 px-[22px] pb-10 md:gap-21 md:px-14 md:pb-19">
         {/* No reveal: the one line about who this is should not wait on a scroll. */}
         <SectionShell id="about" label="About" reveal={false}>
-          <p className="m-0 max-w-[56ch] text-[15px] leading-[1.6] text-pretty md:text-[17px] md:leading-[1.62]">
-            I&apos;m Julius — founder, developer, and professional overthinker. I build fast digital products with an
-            unhealthy attention to detail and a tendency to overengineer things that worked fine before.
-          </p>
+          <AboutText>
+            {"I'm Julius — founder, developer, and professional overthinker. I build fast digital products with an unhealthy attention to detail and a tendency to overengineer things that worked fine before."}
+          </AboutText>
         </SectionShell>
 
         <SectionShell id="projects" label="Projects">

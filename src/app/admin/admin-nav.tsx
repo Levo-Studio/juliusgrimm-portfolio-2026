@@ -2,12 +2,11 @@
 
 import { useEffect } from "react";
 import Image from "next/image";
-import { FileText, LayoutDashboard, Settings, Tags, X } from "lucide-react";
+import { FileText, Settings, Tags, X } from "lucide-react";
 
-export type AdminTab = "overview" | "case-studies" | "survival-kit" | "settings";
+export type AdminTab = "case-studies" | "survival-kit" | "settings";
 
 const ITEMS: { value: AdminTab; label: string; Icon: typeof FileText }[] = [
-  { value: "overview", label: "Overview", Icon: LayoutDashboard },
   { value: "case-studies", label: "Case studies", Icon: FileText },
   { value: "survival-kit", label: "Survival kit", Icon: Tags },
   { value: "settings", label: "Settings", Icon: Settings }

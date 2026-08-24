@@ -1,65 +1,74 @@
 "use client";
 
 import { useEffect } from "react";
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
 
 /**
- * Fades sections up as they scroll in, staggering any [data-row] children.
+ * Sections fade up as they scroll in and fade back down when you scroll past them
+ * upwards, so the page reads the same in both directions.
  *
- * Observe-first with an unconditional release: a section is only hidden once the
- * observer has actually reported it off-screen, and after 1.2s everything is shown
- * regardless. Both guards exist because the earlier version could leave content
- * permanently invisible when the observer never fired — inside a scroll container
- * that isn't the window, for instance.
+ * The hidden starting state lives in CSS behind `.reveal-ready`, which the pre-paint
+ * script sets — with JS disabled nothing is ever hidden. If ScrollTrigger fails to
+ * set up for any reason, the catch below reveals everything rather than leaving the
+ * page blank.
  */
 export const Reveal = (): null => {
   useEffect(() => {
-    const nodes = Array.from(document.querySelectorAll<HTMLElement>("[data-reveal]"));
+    const nodes = gsap.utils.toArray<HTMLElement>("[data-reveal]");
     if (nodes.length === 0) return;
 
-    const show = (el: HTMLElement, stagger: boolean): void => {
-      el.setAttribute("data-shown", "");
-      el.querySelectorAll<HTMLElement>("[data-row]").forEach((row, index) => {
-        const delay = stagger ? index * 45 + 120 : 0;
-        row.style.transitionDelay = `${delay}ms`;
-        // Hand `transition` back to the hover rule once the row has landed, so the
-        // hover shift is never competing with the reveal's timing function.
-        window.setTimeout(() => {
-          row.style.transitionDelay = "";
-        }, delay + 500);
-      });
+    const revealAll = (): void => {
+      nodes.forEach((node) => node.setAttribute("data-shown", ""));
     };
 
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (!entry.isIntersecting) return;
-          const el = entry.target as HTMLElement;
-          show(el, el.hasAttribute("data-offscreen"));
-          observer.unobserve(el);
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      revealAll();
+      return;
+    }
+
+    let ctx: gsap.Context | undefined;
+    try {
+      gsap.registerPlugin(ScrollTrigger);
+
+      ctx = gsap.context(() => {
+        nodes.forEach((node) => {
+          // Marks the section shown so the CSS hidden state stops applying; GSAP owns
+          // the values from here.
+          node.setAttribute("data-shown", "");
+          const rows = gsap.utils.toArray<HTMLElement>(node.querySelectorAll("[data-row]"));
+
+          const timeline = gsap.timeline({
+            scrollTrigger: {
+              trigger: node,
+              start: "top 88%",
+              // play on the way down, reverse on the way back up
+              toggleActions: "play none none reverse"
+            }
+          });
+
+          timeline.fromTo(
+            node,
+            { opacity: 0, y: 14 },
+            { opacity: 1, y: 0, duration: 0.5, ease: "power2.out" }
+          );
+
+          if (rows.length > 0) {
+            timeline.fromTo(
+              rows,
+              { opacity: 0, y: 8 },
+              { opacity: 1, y: 0, duration: 0.4, stagger: 0.045, ease: "power2.out" },
+              "-=0.3"
+            );
+          }
         });
-      },
-      { threshold: 0.12 }
-    );
+      });
+    } catch {
+      revealAll();
+      return;
+    }
 
-    nodes.forEach((node) => {
-      // Anything already in view on load is shown immediately and un-staggered.
-      const rect = node.getBoundingClientRect();
-      if (rect.top < window.innerHeight && rect.bottom > 0) show(node, false);
-      else {
-        node.setAttribute("data-offscreen", "");
-        observer.observe(node);
-      }
-    });
-
-    const failsafe = window.setTimeout(() => {
-      observer.disconnect();
-      nodes.forEach((node) => show(node, false));
-    }, 1200);
-
-    return () => {
-      observer.disconnect();
-      window.clearTimeout(failsafe);
-    };
+    return () => ctx?.revert();
   }, []);
 
   return null;

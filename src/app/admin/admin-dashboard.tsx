@@ -150,61 +150,18 @@ export const AdminDashboard = ({ csrfToken, projects, survivalTags, sessions, pa
           ) : null}
 
           <AdminReveal key={tab}>
-          {tab === "overview" ? (
-            <div className="space-y-5">
-              <div className="grid gap-4 xl:grid-cols-4">
-                <article className="border border-line-strong bg-surface p-4">
-                  <p className="text-xs uppercase text-fg-muted">Total Projects</p>
-                  <p className="mt-2 text-4xl">{projects.length}</p>
-                </article>
-                <article className="border border-accent/40 bg-[rgba(91,227,139,0.08)] p-4">
-                  <p className="text-xs uppercase text-fg-muted">Visible</p>
-                  <p className="mt-2 text-4xl text-accent">{visibleProjects}</p>
-                </article>
-                <article className="border border-danger/40 bg-[rgba(227,91,91,0.08)] p-4">
-                  <p className="text-xs uppercase text-fg-muted">Hidden</p>
-                  <p className="mt-2 text-4xl text-danger">{hiddenProjects}</p>
-                </article>
-              </div>
-
-              <div className="grid gap-4">
-                <section className="border border-line-strong bg-surface p-5">
-                  <h2 className="flex items-center gap-2 text-xl"><FolderOpen className="size-5" /> Recent Case Studies</h2>
-                  <div className="mt-4 space-y-2">
-                    {projects.slice(0, 5).map((project) => (
-                      <div key={project.id} className="flex items-center justify-between border border-line p-3">
-                        <div>
-                          <p className="">{project.title}</p>
-                          <p className="text-xs text-fg-muted">{project.slug}</p>
-                        </div>
-                        <Link href={`/admin/projects/${project.id}`} className="text-sm text-accent underline">Edit</Link>
-                      </div>
-                    ))}
-                  </div>
-                </section>
-
-              </div>
-            </div>
-          ) : tab === "case-studies" ? (
+          {tab === "case-studies" ? (
             <div className="space-y-6">
               <div className="flex flex-wrap items-center justify-between gap-3">
                 <p className="font-mono text-[10px] font-medium uppercase tracking-[0.16em] text-fg-muted">
                   Admin / Case studies
                 </p>
-                <div className="flex items-center gap-2.5">
-                  <Link
-                    href="/admin/projects/new?mode=ai"
-                    className="rounded-md border border-line-strong px-3 py-[7px] text-[12px] text-fg-muted transition-colors hover:border-line-field hover:text-fg"
-                  >
-                    Generate with AI
-                  </Link>
-                  <Link
-                    href="/admin/projects/new"
-                    className="rounded-md bg-accent px-[13px] py-2 text-[12px] font-medium text-accent-fg"
-                  >
-                    New case study
-                  </Link>
-                </div>
+                <Link
+                  href="/admin/projects/new"
+                  className="rounded-md bg-accent px-[13px] py-2 text-[12px] font-medium text-accent-fg"
+                >
+                  Add case study
+                </Link>
               </div>
 
               {/* Published and draft are the two states that matter here, so they are
@@ -269,14 +226,17 @@ export const AdminDashboard = ({ csrfToken, projects, survivalTags, sessions, pa
               </div>
             </div>
           ) : tab === "survival-kit" ? (
-            <div className="space-y-4">
-              <section className="border border-line-strong bg-surface p-4 md:p-5">
+            <div className="space-y-6">
+              <p className="font-mono text-[10px] font-medium uppercase tracking-[0.16em] text-fg-muted">
+                Admin / Survival kit
+              </p>
+              <section className="rounded-[10px] border border-line-strong bg-surface p-5 md:p-6">
                 <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
                   <div>
-                    <h2 className="flex items-center gap-2 text-xl md:text-2xl"><Tags className="size-5" /> Survival Kit Tags</h2>
-                    <p className="mt-1 text-sm text-fg-muted">Manage the tags shown in the TECH STACK section.</p>
+                    <h2 className="m-0 text-[20px] font-light tracking-[-0.02em] md:text-[22px]">Survival kit</h2>
+                    <p className="mt-1.5 text-[12px] leading-[1.6] text-fg-muted">Manage the tags shown in the TECH STACK section.</p>
                   </div>
-                  <Link href="/#tech-stack" className="text-sm text-accent underline">View homepage</Link>
+                  <Link href="/#tech-stack" className="text-[12px] text-accent transition-opacity hover:opacity-80">View homepage</Link>
                 </div>
                 <form action={saveSurvivalKitTags} className="space-y-5">
                   <input type="hidden" name="csrf" value={csrfToken} />
@@ -288,29 +248,32 @@ export const AdminDashboard = ({ csrfToken, projects, survivalTags, sessions, pa
               </section>
             </div>
           ) : (
-            <div className="space-y-8">
-              <section className="border border-line-strong bg-surface p-4 md:p-5">
-                <h2 className="text-xl md:text-2xl">Security</h2>
-                <p className="mt-1 text-sm text-fg-muted">Passkeys and 2FA controls.</p>
+            <div className="space-y-6">
+              <p className="font-mono text-[10px] font-medium uppercase tracking-[0.16em] text-fg-muted">
+                Admin / Settings
+              </p>
+              <section className="rounded-[10px] border border-line-strong bg-surface p-5 md:p-6">
+                <h2 className="m-0 text-[20px] font-light tracking-[-0.02em] md:text-[22px]">Security</h2>
+                <p className="mt-1.5 text-[12px] leading-[1.6] text-fg-muted">Passkeys and 2FA controls.</p>
                 <div className="mt-4 space-y-4">
-                  <div className="border border-line p-3">
+                  <div className="rounded-[7px] border border-line p-4">
                     <div className="mb-3 flex items-center justify-between">
-                      <h3 className="text-lg">Passkeys</h3>
-                      <Button type="button" onClick={registerPasskey} disabled={passkeyPending} className="justify-start border border-line-strong bg-transparent">
+                      <h3 className="m-0 text-[15px]">Passkeys</h3>
+                      <Button type="button" onClick={registerPasskey} disabled={passkeyPending} variant="ghost">
                         <KeyRound className="mr-2 size-4" />
-                        {passkeyPending ? "Registering..." : "Register Passkey"}
+                        {passkeyPending ? "Registering…" : "Register passkey"}
                       </Button>
                     </div>
-                    {passkeyError ? <p className="mb-3 text-sm text-danger">{passkeyError}</p> : null}
+                    {passkeyError ? <p className="mb-3 text-[12px] text-danger">{passkeyError}</p> : null}
                     <div className="space-y-2">
                       {passkeys.length === 0 ? (
-                        <p className="text-sm text-fg-muted">No passkeys registered yet.</p>
+                        <p className="text-[12px] text-fg-muted">No passkeys registered yet.</p>
                       ) : (
                         passkeys.map((passkey) => (
-                          <form key={passkey.id} action={deletePasskey} className="flex flex-wrap items-center justify-between gap-3 border border-line p-3">
+                          <form key={passkey.id} action={deletePasskey} className="flex flex-wrap items-center justify-between gap-3 rounded-[7px] border border-line p-3">
                             <input type="hidden" name="csrf" value={csrfToken} />
                             <input type="hidden" name="authenticatorId" value={passkey.id} />
-                            <div className="text-sm">
+                            <div className="text-[12px]">
                               <p>{passkey.deviceType}</p>
                               <p className="text-fg-muted">Created: {new Date(passkey.createdAt).toLocaleString("de-DE")}</p>
                               <p className="text-fg-muted">Last used: {passkey.lastUsedAt ? new Date(passkey.lastUsedAt).toLocaleString("de-DE") : "Never"}</p>
@@ -322,9 +285,9 @@ export const AdminDashboard = ({ csrfToken, projects, survivalTags, sessions, pa
                     </div>
                   </div>
 
-                  <div className="border border-line p-3">
+                  <div className="rounded-[7px] border border-line p-4">
                     <div className="mb-3 flex items-center justify-between">
-                      <h3 className="text-lg">Two-Factor Auth (TOTP)</h3>
+                      <h3 className="m-0 text-[15px]">Two-factor authentication</h3>
                       {twoFactorEnabled ? (
                         <form action={disableTwoFactor}>
                           <input type="hidden" name="csrf" value={csrfToken} />
@@ -336,7 +299,7 @@ export const AdminDashboard = ({ csrfToken, projects, survivalTags, sessions, pa
                       ) : (
                         <form action={twoFactorSetupAction}>
                           <input type="hidden" name="csrf" value={csrfToken} />
-                          <Button disabled={twoFactorSetupPending} className="justify-start border border-line-strong bg-transparent">
+                          <Button disabled={twoFactorSetupPending} variant="ghost">
                             <ShieldCheck className="mr-2 size-4" />
                             {twoFactorSetupPending ? "Preparing..." : "Setup 2FA"}
                           </Button>
@@ -345,7 +308,7 @@ export const AdminDashboard = ({ csrfToken, projects, survivalTags, sessions, pa
                     </div>
 
                     {twoFactorEnabled ? <p className="text-sm text-accent">2FA is currently enabled.</p> : null}
-                    {twoFactorState.error ? <p className="text-sm text-danger">{twoFactorState.error}</p> : null}
+                    {twoFactorState.error ? <p className="text-[12px] text-danger">{twoFactorState.error}</p> : null}
                     {twoFactorState.message ? <p className="text-sm text-accent">{twoFactorState.message}</p> : null}
 
                     {twoFactorState.qrDataUrl ? (
@@ -359,7 +322,7 @@ export const AdminDashboard = ({ csrfToken, projects, survivalTags, sessions, pa
                             {twoFactorConfirmPending ? "Verifying..." : "Enable 2FA"}
                           </Button>
                         </form>
-                        {twoFactorConfirmState.error ? <p className="text-sm text-danger">{twoFactorConfirmState.error}</p> : null}
+                        {twoFactorConfirmState.error ? <p className="text-[12px] text-danger">{twoFactorConfirmState.error}</p> : null}
                         {twoFactorConfirmState.message ? <p className="text-sm text-accent">{twoFactorConfirmState.message}</p> : null}
                       </div>
                     ) : null}
@@ -367,22 +330,22 @@ export const AdminDashboard = ({ csrfToken, projects, survivalTags, sessions, pa
                 </div>
               </section>
 
-              <section className="border border-line-strong bg-surface p-4 md:p-5">
-                <h2 className="text-xl md:text-2xl">Change Password</h2>
+              <section className="rounded-[10px] border border-line-strong bg-surface p-5 md:p-6">
+                <h2 className="text-[20px] font-light tracking-[-0.02em] md:text-[22px]">Change Password</h2>
                 <form action={pwAction} className="mt-4 grid gap-3 md:max-w-xl">
                   <input type="hidden" name="csrf" value={csrfToken} />
                   <input name="currentPassword" type="password" required placeholder="Current password" className="border border-line-strong bg-bg px-3 py-2" />
                   <input name="newPassword" type="password" required placeholder="New password" className="border border-line-strong bg-bg px-3 py-2" />
                   <input name="confirmPassword" type="password" required placeholder="Confirm new password" className="border border-line-strong bg-bg px-3 py-2" />
-                  {pwState.error ? <p className="text-sm text-danger">{pwState.error}</p> : null}
+                  {pwState.error ? <p className="text-[12px] text-danger">{pwState.error}</p> : null}
                   {pwState.message ? <p className="text-sm text-accent">{pwState.message}</p> : null}
                   <Button disabled={pwPending} className="justify-self-start border border-accent bg-[color-mix(in_srgb,var(--accent)_10%,transparent)] text-accent">{pwPending ? "Saving..." : "Update password"}</Button>
                 </form>
               </section>
 
-              <section className="border border-line-strong bg-surface p-4 md:p-5">
+              <section className="rounded-[10px] border border-line-strong bg-surface p-5 md:p-6">
                 <div className="flex flex-wrap items-center justify-between gap-3">
-                  <h2 className="text-xl md:text-2xl">Sessions</h2>
+                  <h2 className="text-[20px] font-light tracking-[-0.02em] md:text-[22px]">Sessions</h2>
                   <LogoutOtherDevicesDialog csrfToken={csrfToken} />
                 </div>
                 <div className="mt-4 space-y-2">
@@ -390,7 +353,7 @@ export const AdminDashboard = ({ csrfToken, projects, survivalTags, sessions, pa
                     <form key={session.id} action={revokeSession} className="flex flex-col justify-between gap-3 border border-line-strong p-3 md:flex-row md:items-center">
                       <input type="hidden" name="csrf" value={csrfToken} />
                       <input type="hidden" name="sessionId" value={session.id} />
-                      <div className="text-sm">
+                      <div className="text-[12px]">
                         <p className="flex items-center gap-2"><Monitor className="size-4" />{session.userAgent ?? "Unknown device"}</p>
                         <p className="mt-1 flex items-center gap-2 text-fg-muted"><Smartphone className="size-4" />{session.ipAddress ?? "Unknown IP"}</p>
                       </div>
