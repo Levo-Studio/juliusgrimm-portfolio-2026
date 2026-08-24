@@ -1,9 +1,10 @@
 import { cookies } from "next/headers";
-import { and, desc, eq, gt, isNull } from "drizzle-orm";
+import { and, asc, desc, eq, gt, inArray, isNull } from "drizzle-orm";
 import { db } from "@/server/db/client";
-import { adminAuthenticators, adminSessions, adminUsers, projects } from "@/server/db/schema";
+import { adminAuthenticators, adminSessions, adminUsers, projectLinks, projects } from "@/server/db/schema";
 import { getSessionUser } from "@/server/auth";
 import { getSurvivalKitTags } from "@/server/survival-kit";
+import { getFaviconUrl, getProjectSiteUrl } from "@/lib/project-icon";
 import { AdminLoginForm } from "./admin-login-form";
 import { AdminDashboard } from "./admin-dashboard";
 
@@ -25,6 +26,20 @@ export default async function AdminPage({ searchParams }: Props): Promise<React.
   }
 
   const allProjects = await db.select().from(projects).orderBy(projects.createdAt);
+  const projectIds = allProjects.map((project) => project.id);
+  const allLinks = projectIds.length
+    ? await db.select().from(projectLinks).where(inArray(projectLinks.projectId, projectIds)).orderBy(asc(projectLinks.sortOrder))
+    : [];
+  const linksByProject = new Map<string, typeof allLinks>();
+  for (const link of allLinks) {
+    const list = linksByProject.get(link.projectId) ?? [];
+    list.push(link);
+    linksByProject.set(link.projectId, list);
+  }
+  const projectsWithIcons = allProjects.map((project) => ({
+    ...project,
+    faviconUrl: getFaviconUrl(getProjectSiteUrl(linksByProject.get(project.id) ?? []))
+  }));
   const survivalTags = await getSurvivalKitTags();
   const sessions = await db
     .select()
@@ -54,7 +69,7 @@ export default async function AdminPage({ searchParams }: Props): Promise<React.
   return (
     <AdminDashboard
       csrfToken={csrfToken}
-      projects={allProjects}
+      projects={projectsWithIcons}
       survivalTags={survivalTags}
       sessions={sessions}
       passkeys={passkeys}

@@ -14,6 +14,7 @@ import { AdminReveal } from "@/app/admin/admin-reveal";
 import { AdminNav, type AdminTab } from "@/app/admin/admin-nav";
 import { DeleteProjectDialog } from "@/app/admin/projects/delete-project-dialog";
 import { LogoutOtherDevicesDialog } from "@/app/admin/logout-other-devices-dialog";
+import { ProjectIcon } from "@/components/shared/project-icon";
 import type { ColorCategory } from "@/types/project";
 
 type ProjectItem = {
@@ -24,6 +25,7 @@ type ProjectItem = {
   subtitle: string;
   visible: boolean;
   imageUrl: string | null;
+  faviconUrl: string | null;
 };
 
 type SessionItem = {
@@ -184,12 +186,7 @@ export const AdminDashboard = ({ csrfToken, projects, survivalTags, sessions, pa
                     key={project.id}
                     className="row-link grid grid-cols-[18px_minmax(0,1fr)] items-start gap-3 border-b border-line px-3 py-3.5 md:grid-cols-[18px_200px_minmax(0,1fr)_auto_auto] md:items-center md:gap-5"
                   >
-                    <span
-                      aria-hidden
-                      className="grid size-[18px] shrink-0 place-items-center rounded-[4px] bg-accent font-mono text-[9px] font-medium text-accent-fg"
-                    >
-                      {project.title.trim().charAt(0).toUpperCase()}
-                    </span>
+                    <ProjectIcon src={project.faviconUrl} title={project.title} size={18} />
 
                     <span className="truncate text-[14px]">{project.title}</span>
 
