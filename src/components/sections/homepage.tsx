@@ -20,13 +20,15 @@ const CONTACT_LINKS: Record<string, string> = {
 };
 
 /**
- * The design collapses the survival kit into two captioned groups. The four colour
- * categories stay intact in the data (and stay editable in the admin) — they just
- * map onto the two captions the design shows, so no tag is dropped from the page.
+ * One captioned group per colour category. The design file mocks only two
+ * captions, but the survival kit is authored in four — collapsing them buried the
+ * side quests among the operating systems.
  */
-const STACK_GROUPS: { caption: string; colors: ColorCategory[] }[] = [
-  { caption: "Things causing compiling errors.", colors: ["green", "orange"] },
-  { caption: "Root access and emotional damage.", colors: ["red", "blue"] }
+const STACK_GROUPS: { caption: string; color: ColorCategory }[] = [
+  { caption: "Things causing compiling errors.", color: "green" },
+  { caption: "Daily damage control.", color: "orange" },
+  { caption: "Root access and emotional damage.", color: "red" },
+  { caption: "Real-world side quests.", color: "blue" }
 ];
 
 const Tag = ({ label }: { label: string }): React.JSX.Element => (
@@ -94,7 +96,7 @@ export const Homepage = async (): Promise<React.JSX.Element> => {
                     <span className="truncate text-[14px] leading-[1.25] md:text-[15px] md:leading-[1.3]">
                       {project.title}
                     </span>
-                    <span className="truncate text-[12px] leading-[1.35] text-fg-muted md:text-[13px] md:leading-[1.3]">
+                    <span className="text-[12px] leading-[1.35] text-fg-muted md:truncate md:text-[13px] md:leading-[1.3]">
                       {project.subtitle}
                     </span>
                   </span>
@@ -110,7 +112,7 @@ export const Homepage = async (): Promise<React.JSX.Element> => {
         <SectionShell id="stack" label="Stack">
           <div className="flex flex-col gap-5 md:gap-[26px]">
             {STACK_GROUPS.map((group) => {
-              const tags = survivalTags.filter((tag) => group.colors.includes(tag.color));
+              const tags = survivalTags.filter((tag) => tag.color === group.color);
               if (tags.length === 0) return null;
               return (
                 <div key={group.caption}>
@@ -140,11 +142,11 @@ export const Homepage = async (): Promise<React.JSX.Element> => {
                 rel="noreferrer"
                 className="row-link flex flex-col gap-[5px] border-b border-line px-1 py-[13px] md:grid md:grid-cols-[96px_250px_minmax(0,1fr)] md:items-baseline md:gap-[18px] md:px-3 md:py-3.5"
               >
-                <span className="flex items-baseline justify-between md:contents">
-                  <span className="order-2 text-[14px] md:order-none">{item.value}</span>
-                  <span className="order-1 font-mono text-[9px] font-medium uppercase tracking-[0.14em] text-fg-muted md:order-none md:text-[10px]">
+                <span className="flex items-baseline justify-between gap-3 md:contents">
+                  <span className="order-2 font-mono text-[9px] font-medium uppercase tracking-[0.14em] text-fg-muted md:order-none md:text-[10px]">
                     {item.title}
                   </span>
+                  <span className="order-1 text-[14px] md:order-none md:whitespace-nowrap">{item.value}</span>
                 </span>
                 <span className="text-[12px] leading-[1.35] text-fg-muted">{item.note}</span>
               </Link>
