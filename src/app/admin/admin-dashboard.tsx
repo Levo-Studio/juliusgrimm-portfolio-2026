@@ -231,7 +231,7 @@ export const AdminDashboard = ({ csrfToken, projects, survivalTags, sessions, pa
                 {projects.map((project) => (
                   <div
                     key={project.id}
-                    className="row-link grid grid-cols-[18px_minmax(0,1fr)] items-start gap-3 border-b border-line px-3 py-3.5 md:grid-cols-[18px_220px_minmax(0,1fr)_100px_96px] md:items-center md:gap-4"
+                    className="row-link grid grid-cols-[18px_minmax(0,1fr)] items-start gap-3 border-b border-line px-3 py-3.5 md:grid-cols-[18px_200px_minmax(0,1fr)_auto_auto] md:items-center md:gap-5"
                   >
                     <span
                       aria-hidden
@@ -248,13 +248,13 @@ export const AdminDashboard = ({ csrfToken, projects, survivalTags, sessions, pa
 
                     <span className="col-start-2 md:col-start-auto">
                       {project.visible ? (
-                        <span className="font-mono text-[10px] font-medium tracking-[0.1em] text-accent">● PUBLISHED</span>
+                        <span className="whitespace-nowrap font-mono text-[10px] font-medium tracking-[0.1em] text-accent">● PUBLISHED</span>
                       ) : (
-                        <span className="font-mono text-[10px] font-medium tracking-[0.1em] text-draft">◌ DRAFT</span>
+                        <span className="whitespace-nowrap font-mono text-[10px] font-medium tracking-[0.1em] text-draft">◌ DRAFT</span>
                       )}
                     </span>
 
-                    <span className="col-start-2 flex items-center gap-3 text-[11px] text-fg-muted md:col-start-auto md:justify-end">
+                    <span className="col-start-2 flex items-center gap-3 whitespace-nowrap text-[11px] text-fg-muted md:col-start-auto md:justify-end">
                       <Link href={`/admin/projects/${project.id}`} className="transition-colors hover:text-fg">
                         Edit
                       </Link>
