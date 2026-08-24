@@ -51,7 +51,7 @@ export default function ImpressumPage(): React.JSX.Element {
       </div>
 
       {/* Wording is left exactly as it stands — only its presentation changes. */}
-      <div className="flex flex-col gap-7 px-[22px] pb-10 md:gap-[34px] md:px-14 md:pb-16">
+      <div className="flex flex-col gap-7 px-[22px] pb-10 md:gap-[34px] md:px-14 md:pb-16 [&>section]:md:grid-cols-[120px_minmax(0,640px)]">
         <SectionShell label="Info">
           <div className="flex flex-col gap-[18px] text-[15px] leading-[1.68] text-fg-body md:text-[16px]">
             <p className="m-0">Angaben gemäß § 5 DDG</p>
