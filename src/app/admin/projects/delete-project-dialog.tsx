@@ -37,12 +37,12 @@ export const DeleteProjectDialog = ({ csrfToken, projectId, projectTitle }: Prop
 
           <div className="mt-6 flex justify-end gap-2">
             <Dialog.Close asChild>
-              <Button className="border border-line-strong transition hover:border-line-strong">Cancel</Button>
+              <Button variant="ghost">Cancel</Button>
             </Dialog.Close>
             <form action={deleteProject}>
               <input type="hidden" name="csrf" value={csrfToken} />
               <input type="hidden" name="id" value={projectId} />
-              <Button className="border border-danger bg-[color-mix(in_srgb,var(--danger)_10%,transparent)] text-danger transition hover:bg-[color-mix(in_srgb,var(--danger)_20%,transparent)]">
+              <Button variant="danger">
                 <Trash2 className="mr-2 size-4" />
                 Delete permanently
               </Button>

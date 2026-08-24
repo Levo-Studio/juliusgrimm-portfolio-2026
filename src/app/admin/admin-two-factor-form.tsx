@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useMemo, useRef, useState } from "react";
+import { useActionState, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import type { TwoFactorLoginState } from "@/app/admin/actions";
@@ -12,43 +12,7 @@ const initialState: TwoFactorLoginState = { ok: false };
 
 export const AdminTwoFactorForm = (_props: Props): React.JSX.Element => {
   const [state, formAction, pending] = useActionState(verifyTwoFactorLogin, initialState);
-  const [digits, setDigits] = useState<string[]>(["", "", "", "", "", ""]);
-  const refs = useRef<Array<HTMLInputElement | null>>([]);
-  const code = useMemo(() => digits.join(""), [digits]);
-
-  const setAt = (idx: number, value: string): void => {
-    const cleaned = value.replace(/\D/g, "");
-    if (!cleaned) {
-      setDigits((prev) => {
-        const next = [...prev];
-        next[idx] = "";
-        return next;
-      });
-      return;
-    }
-
-    if (cleaned.length > 1) {
-      const arr = cleaned.slice(0, 6).split("");
-      setDigits([arr[0] ?? "", arr[1] ?? "", arr[2] ?? "", arr[3] ?? "", arr[4] ?? "", arr[5] ?? ""]);
-      refs.current[Math.min(arr.length, 5)]?.focus();
-      return;
-    }
-
-    setDigits((prev) => {
-      const next = [...prev];
-      next[idx] = cleaned;
-      return next;
-    });
-    if (idx < 5) refs.current[idx + 1]?.focus();
-  };
-
-  const onPaste = (event: React.ClipboardEvent<HTMLInputElement>): void => {
-    event.preventDefault();
-    const pasted = event.clipboardData.getData("text").replace(/\D/g, "").slice(0, 6);
-    const arr = pasted.split("");
-    setDigits([arr[0] ?? "", arr[1] ?? "", arr[2] ?? "", arr[3] ?? "", arr[4] ?? "", arr[5] ?? ""]);
-    refs.current[Math.min(arr.length, 5)]?.focus();
-  };
+  const [code, setCode] = useState("");
 
   return (
     <form
@@ -68,34 +32,26 @@ export const AdminTwoFactorForm = (_props: Props): React.JSX.Element => {
           </p>
         </div>
 
-        <input type="hidden" name="code" value={code} />
-
-        <div className="flex gap-2">
-          {digits.map((value, idx) => (
-            <input
-              key={`otp-${idx}`}
-              ref={(el) => {
-                refs.current[idx] = el;
-              }}
-              inputMode="numeric"
-              maxLength={1}
-              value={value}
-              aria-label={`Digit ${idx + 1}`}
-              onChange={(event) => setAt(idx, event.target.value)}
-              onPaste={onPaste}
-              onKeyDown={(event) => {
-                if (event.key === "Backspace" && !digits[idx] && idx > 0) refs.current[idx - 1]?.focus();
-              }}
-              className="h-12 flex-1 rounded-[7px] border border-line bg-transparent text-center font-mono text-[18px] text-fg outline-none focus:border-accent"
-            />
-          ))}
-        </div>
+        {/* One field rather than six boxes: it pastes cleanly, autofills from the
+            OS one-time-code hint, and never leaves focus stranded mid-code. */}
+        <input
+          name="code"
+          value={code}
+          onChange={(event) => setCode(event.target.value.replace(/\D/g, "").slice(0, 6))}
+          inputMode="numeric"
+          autoComplete="one-time-code"
+          autoFocus
+          maxLength={6}
+          placeholder="000000"
+          aria-label="Six-digit authentication code"
+          className="rounded-[7px] border border-line bg-transparent px-3.5 py-3 text-center font-mono text-[22px] tracking-[0.4em] text-fg outline-none placeholder:text-fg-faint placeholder:tracking-[0.4em] focus:border-accent"
+        />
 
         {state.error ? <p className="m-0 text-[12px] text-danger">{state.error}</p> : null}
 
         <button
           type="submit"
-          disabled={pending}
+          disabled={pending || code.length < 6}
           className="rounded-md bg-accent px-3.5 py-2.5 text-[12px] font-medium text-accent-fg transition-opacity disabled:opacity-50"
         >
           {pending ? "Verifying…" : "Verify and continue"}

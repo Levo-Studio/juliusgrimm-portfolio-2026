@@ -161,6 +161,64 @@ body {
   }
 }
 
+/* ── Admin navigation ──────────────────────────────────────────────────────
+   The mobile drawer slides in over the content; its backdrop fades. Nav items
+   stagger in behind it so the panel does not arrive as one flat block.
+   ────────────────────────────────────────────────────────────────────────── */
+
+.drawer-backdrop {
+  animation: drawer-backdrop-in 0.2s ease-out;
+}
+
+.drawer-panel {
+  animation: drawer-panel-in 0.26s cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+
+.drawer-panel [data-nav-item] {
+  animation: nav-item-in 0.3s cubic-bezier(0.2, 0.7, 0.2, 1) backwards;
+}
+
+.drawer-panel [data-nav-item]:nth-child(1) { animation-delay: 0.06s; }
+.drawer-panel [data-nav-item]:nth-child(2) { animation-delay: 0.10s; }
+.drawer-panel [data-nav-item]:nth-child(3) { animation-delay: 0.14s; }
+.drawer-panel [data-nav-item]:nth-child(4) { animation-delay: 0.18s; }
+
+@keyframes drawer-backdrop-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes drawer-panel-in {
+  from { transform: translateX(-100%); }
+  to { transform: none; }
+}
+
+@keyframes nav-item-in {
+  from { opacity: 0; transform: translateX(-10px); }
+  to { opacity: 1; transform: none; }
+}
+
+/* The active marker grows from the top edge rather than blinking on. */
+.nav-item {
+  transition: background-color 0.18s ease, color 0.18s ease;
+}
+
+.nav-item::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 50%;
+  width: 2px;
+  height: 0;
+  background: var(--accent);
+  transform: translateY(-50%);
+  transition: height 0.22s cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+
+.nav-item[data-active="true"]::before {
+  height: 100%;
+}
+
 .ai-shimmer {
   background: linear-gradient(90deg, rgba(91, 227, 139, 0) 0%, rgba(91, 227, 139, 0.85) 50%, rgba(91, 227, 139, 0) 100%);
   background-size: 200% 100%;
@@ -213,6 +271,11 @@ body {
   [data-reveal],
   [data-row],
   .row-link,
+  .drawer-backdrop,
+  .drawer-panel,
+  .drawer-panel [data-nav-item],
+  .nav-item,
+  .nav-item::before,
   .ai-shimmer,
   .ai-dots::after,
   .dialog-overlay,

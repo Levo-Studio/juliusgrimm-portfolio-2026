@@ -16,7 +16,7 @@ export const LogoutOtherDevicesDialog = ({ csrfToken }: Props): React.JSX.Elemen
   return (
     <Dialog.Root open={open} onOpenChange={setOpen}>
       <Dialog.Trigger asChild>
-        <Button className="border border-danger bg-[color-mix(in_srgb,var(--danger)_10%,transparent)] text-danger transition hover:bg-[color-mix(in_srgb,var(--danger)_20%,transparent)]">
+        <Button variant="danger">
           <LogOut className="mr-2 size-4" />
           Log out other devices
         </Button>
@@ -38,11 +38,11 @@ export const LogoutOtherDevicesDialog = ({ csrfToken }: Props): React.JSX.Elemen
 
           <div className="mt-6 flex justify-end gap-2">
             <Dialog.Close asChild>
-              <Button className="border border-line-strong transition hover:border-line-strong">Cancel</Button>
+              <Button variant="ghost">Cancel</Button>
             </Dialog.Close>
             <form action={logoutOtherDevices}>
               <input type="hidden" name="csrf" value={csrfToken} />
-              <Button className="border border-danger bg-[color-mix(in_srgb,var(--danger)_10%,transparent)] text-danger transition hover:bg-[color-mix(in_srgb,var(--danger)_20%,transparent)]">
+              <Button variant="danger">
                 <LogOut className="mr-2 size-4" />
                 Log out other devices
               </Button>

@@ -5,12 +5,13 @@ import Image from "next/image";
 import { useActionState, useEffect, useState } from "react";
 import gsap from "gsap";
 import { startRegistration } from "@simplewebauthn/browser";
-import { Menu, PanelLeftClose, ShieldCheck, FileText, Settings, Monitor, Smartphone, KeyRound, LogOut, LayoutDashboard, FolderOpen, Tags } from "lucide-react";
+import { Menu, ShieldCheck, Monitor, Smartphone, KeyRound, LogOut, FolderOpen, Tags } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import type { PasswordState, TwoFactorState } from "@/app/admin/actions";
 import { changePassword, confirmTwoFactorSetup, deletePasskey, disableTwoFactor, logoutAdmin, revokeSession, saveSurvivalKitTags, startTwoFactorSetup, toggleProjectVisibility } from "@/app/admin/actions";
 import { SurvivalKitTagEditor } from "@/app/admin/survival-kit-tag-editor";
 import { AdminReveal } from "@/app/admin/admin-reveal";
+import { AdminNav, type AdminTab } from "@/app/admin/admin-nav";
 import { DeleteProjectDialog } from "@/app/admin/projects/delete-project-dialog";
 import { LogoutOtherDevicesDialog } from "@/app/admin/logout-other-devices-dialog";
 import type { ColorCategory } from "@/types/project";
@@ -37,8 +38,6 @@ type SurvivalTagItem = {
   label: string;
   color: ColorCategory;
 };
-
-type AdminTab = "overview" | "case-studies" | "survival-kit" | "settings";
 
 type Props = {
   csrfToken: string;
@@ -113,45 +112,40 @@ export const AdminDashboard = ({ csrfToken, projects, survivalTags, sessions, pa
 
   return (
     <main className="min-h-screen bg-bg text-fg">
-      <div className="mx-auto grid min-h-screen w-full max-w-[2300px] grid-cols-1 md:grid-cols-[280px_minmax(0,1fr)] xl:grid-cols-[340px_minmax(0,1fr)]">
-        <aside className="hidden border-r border-line bg-bg p-6 md:block md:sticky md:top-0 md:h-screen md:self-start md:overflow-y-auto">
-          <nav data-admin-nav className="space-y-2">
-            <button onClick={() => setTab("overview")} className={`flex w-full items-center gap-3 border px-4 py-3 text-left ${tab === "overview" ? "border-accent bg-[color-mix(in_srgb,var(--accent)_10%,transparent)] text-accent" : "border-line-strong"}`}>
-              <LayoutDashboard className="size-4" /> Overview
-            </button>
-            <button onClick={() => setTab("case-studies")} className={`flex w-full items-center gap-3 border px-4 py-3 text-left ${tab === "case-studies" ? "border-accent bg-[color-mix(in_srgb,var(--accent)_10%,transparent)] text-accent" : "border-line-strong"}`}>
-              <FileText className="size-4" /> Case Studies
-            </button>
-            <button onClick={() => setTab("survival-kit")} className={`flex w-full items-center gap-3 border px-4 py-3 text-left ${tab === "survival-kit" ? "border-accent bg-[color-mix(in_srgb,var(--accent)_10%,transparent)] text-accent" : "border-line-strong"}`}>
-              <Tags className="size-4" /> Survival Kit
-            </button>
-            <button onClick={() => setTab("settings")} className={`flex w-full items-center gap-3 border px-4 py-3 text-left ${tab === "settings" ? "border-accent bg-[color-mix(in_srgb,var(--accent)_10%,transparent)] text-accent" : "border-line-strong"}`}>
-              <Settings className="size-4" /> Settings
-            </button>
-          </nav>
-        </aside>
+      <div className="grid min-h-screen grid-cols-1 md:grid-cols-[220px_minmax(0,1fr)]">
+        <AdminNav tab={tab} onSelect={setTab} mobileOpen={mobileOpen} onCloseMobile={() => setMobileOpen(false)} />
 
-        <section className="p-5 md:p-8 xl:p-10">
-          <div data-admin-header className="mb-6 flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <button onClick={() => setMobileOpen(true)} className="inline-flex border border-line-strong p-2 md:hidden"><Menu className="size-5" /></button>
-              <h1 className="text-2xl md:text-3xl">Admin Dashboard</h1>
-            </div>
-            <form action={logoutAdmin}><Button variant="ghost" className="border border-line-strong"><LogOut className="mr-2 size-4" />Logout</Button></form>
+        <section className="min-w-0 px-5 py-6 md:px-8 md:py-7">
+          {/* Each tab states where you are, so the shell only carries the controls. */}
+          <div className="mb-6 flex items-center justify-between gap-3">
+            <button
+              type="button"
+              onClick={() => setMobileOpen(true)}
+              aria-label="Open navigation"
+              className="rounded-md border border-line-strong p-2 text-fg-muted transition-colors hover:border-line-field hover:text-fg md:hidden"
+            >
+              <Menu className="size-4" />
+            </button>
+            <span className="hidden md:block" />
+            <form action={logoutAdmin}>
+              <button
+                type="submit"
+                className="flex items-center gap-2 rounded-md border border-line-strong px-3 py-[7px] text-[12px] text-fg-muted transition-colors hover:border-line-field hover:text-fg"
+              >
+                <LogOut className="size-3.5" />
+                Log out
+              </button>
+            </form>
           </div>
 
-          {saved ? <div className="mb-4 border border-accent bg-[color-mix(in_srgb,var(--accent)_10%,transparent)] px-4 py-3 text-sm text-accent">Saved successfully.</div> : null}
-          {errorMessage ? <div className="mb-4 border border-danger bg-[color-mix(in_srgb,var(--danger)_10%,transparent)] px-4 py-3 text-sm text-danger">{errorMessage}</div> : null}
-
-          {mobileOpen ? (
-            <div className="mb-6 border border-line-strong bg-surface p-3 md:hidden">
-              <button onClick={() => setMobileOpen(false)} className="mb-2 inline-flex border border-line-strong p-2"><PanelLeftClose className="size-4" /></button>
-              <div className="space-y-2">
-                <button onClick={() => { setTab("overview"); setMobileOpen(false); }} className="flex w-full items-center gap-2 border border-line-strong p-3 text-left"><LayoutDashboard className="size-4" />Overview</button>
-                <button onClick={() => { setTab("case-studies"); setMobileOpen(false); }} className="flex w-full items-center gap-2 border border-line-strong p-3 text-left"><FileText className="size-4" />Case Studies</button>
-                <button onClick={() => { setTab("survival-kit"); setMobileOpen(false); }} className="flex w-full items-center gap-2 border border-line-strong p-3 text-left"><Tags className="size-4" />Survival Kit</button>
-                <button onClick={() => { setTab("settings"); setMobileOpen(false); }} className="flex w-full items-center gap-2 border border-line-strong p-3 text-left"><Settings className="size-4" />Settings</button>
-              </div>
+          {saved ? (
+            <div className="mb-5 rounded-md border border-accent/40 bg-[color-mix(in_srgb,var(--accent)_10%,transparent)] px-4 py-3 text-[13px] text-accent">
+              Saved successfully.
+            </div>
+          ) : null}
+          {errorMessage ? (
+            <div className="mb-5 rounded-md border border-danger/40 bg-[color-mix(in_srgb,var(--danger)_10%,transparent)] px-4 py-3 text-[13px] text-danger">
+              {errorMessage}
             </div>
           ) : null}
 
@@ -287,7 +281,7 @@ export const AdminDashboard = ({ csrfToken, projects, survivalTags, sessions, pa
                 <form action={saveSurvivalKitTags} className="space-y-5">
                   <input type="hidden" name="csrf" value={csrfToken} />
                   <SurvivalKitTagEditor initialTags={survivalTags.map((tag, index) => ({ ...tag, sortOrder: index + 1 }))} />
-                  <Button className="border border-accent bg-[color-mix(in_srgb,var(--accent)_10%,transparent)] text-accent transition hover:bg-[color-mix(in_srgb,var(--accent)_20%,transparent)]">
+                  <Button>
                     Save tags
                   </Button>
                 </form>
