@@ -26,7 +26,7 @@ export const ProjectIcon = ({ src, title, size = 18 }: ProjectIconProps): React.
     return (
       <span
         aria-hidden
-        className={`${box} ${glyph} grid shrink-0 place-items-center rounded-[4px] bg-accent font-mono font-medium text-accent-fg`}
+        className={`${box} ${glyph} grid shrink-0 place-items-center rounded-full bg-accent font-mono font-medium text-accent-fg`}
       >
         {title.trim().charAt(0).toUpperCase()}
       </span>
