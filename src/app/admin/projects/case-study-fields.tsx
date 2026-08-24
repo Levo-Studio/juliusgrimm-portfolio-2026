@@ -132,54 +132,54 @@ export const CaseStudyFields = ({
 
   return (
     <div ref={rootRef} className="grid gap-3">
-      <label className="text-sm text-white/70">Slug</label>
+      <label className="text-sm text-fg-muted">Slug</label>
       <input
         name="slug"
         data-fill-target
         value={slug}
         onChange={(event) => onSlugChange(event.target.value)}
         placeholder="my-new-case-study"
-        className="border border-white/20 bg-black px-3 py-2"
+        className="border border-line-strong bg-bg px-3 py-2"
       />
 
-      <label className="text-sm text-white/70">Title</label>
+      <label className="text-sm text-fg-muted">Title</label>
       <input
         name="title"
         data-fill-target
         value={title}
         onChange={(event) => onTitleChange(event.target.value)}
         placeholder="Case Study Title"
-        className="border border-white/20 bg-black px-3 py-2"
+        className="border border-line-strong bg-bg px-3 py-2"
       />
 
-      <label className="text-sm text-white/70">Subtitle</label>
+      <label className="text-sm text-fg-muted">Subtitle</label>
       <input
         name="subtitle"
         data-fill-target
         value={subtitle}
         onChange={(event) => setSubtitle(event.target.value)}
         placeholder="Short subtitle in your style"
-        className="border border-white/20 bg-black px-3 py-2"
+        className="border border-line-strong bg-bg px-3 py-2"
       />
 
-      <label className="text-sm text-white/70">Description</label>
+      <label className="text-sm text-fg-muted">Description</label>
       <textarea
         name="description"
         data-fill-target
         value={description}
         onChange={(event) => setDescription(event.target.value)}
         placeholder="Project description..."
-        className="min-h-32 border border-white/20 bg-black px-3 py-2"
+        className="min-h-32 border border-line-strong bg-bg px-3 py-2"
       />
 
-      <label className="text-sm text-white/70">Why built it</label>
+      <label className="text-sm text-fg-muted">Why built it</label>
       <textarea
         name="whyBuilt"
         data-fill-target
         value={whyBuilt}
         onChange={(event) => setWhyBuilt(event.target.value)}
         placeholder="Why you built it..."
-        className="min-h-32 border border-white/20 bg-black px-3 py-2"
+        className="min-h-32 border border-line-strong bg-bg px-3 py-2"
       />
     </div>
   );

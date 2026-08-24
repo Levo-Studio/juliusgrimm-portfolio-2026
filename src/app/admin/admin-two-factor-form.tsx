@@ -51,9 +51,9 @@ export const AdminTwoFactorForm = (_props: Props): React.JSX.Element => {
   };
 
   return (
-    <form action={formAction} className="w-full max-w-md space-y-4 border border-white/20 bg-black/80 p-6">
-      <h1 className="font-inria text-2xl">Two-Factor Verification</h1>
-      <p className="font-inria text-sm text-white/70">Enter the 6-digit code from your authenticator app.</p>
+    <form action={formAction} className="w-full max-w-md space-y-4 border border-line-strong bg-bg/80 p-6">
+      <h1 className="text-2xl">Two-Factor Verification</h1>
+      <p className="text-sm text-fg-muted">Enter the 6-digit code from your authenticator app.</p>
       <input type="hidden" name="code" value={code} />
 
       <div className="flex gap-2">
@@ -71,18 +71,18 @@ export const AdminTwoFactorForm = (_props: Props): React.JSX.Element => {
             onKeyDown={(event) => {
               if (event.key === "Backspace" && !digits[idx] && idx > 0) refs.current[idx - 1]?.focus();
             }}
-            className="h-12 w-12 border border-white/20 bg-black text-center font-inria text-xl text-white outline-none focus:border-[#5BE38B]"
+            className="h-12 w-12 border border-line-strong bg-bg text-center text-xl text-fg outline-none focus:border-accent"
           />
         ))}
       </div>
 
-      {state.error ? <p className="font-inria text-sm text-[#E35B5B]">{state.error}</p> : null}
+      {state.error ? <p className="text-sm text-danger">{state.error}</p> : null}
 
       <Button className="w-full" disabled={pending}>
         {pending ? "Verifying..." : "Verify and continue"}
       </Button>
 
-      <Link href="/admin" className="block text-center font-inria text-sm text-white/70 underline">
+      <Link href="/admin" className="block text-center text-sm text-fg-muted underline">
         Back to login
       </Link>
     </form>

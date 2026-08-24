@@ -90,8 +90,8 @@ export const ProjectTechEditor = ({ initialTech }: Props): React.JSX.Element => 
   return (
     <div className="space-y-3">
       <div className="flex items-center justify-between">
-        <p className="text-sm text-white/70">Frameworks & Tech Stack</p>
-        <Button type="button" onClick={addRow} className="border border-[#5BE38B] bg-[rgba(91,227,139,0.1)] text-[#5BE38B]">
+        <p className="text-sm text-fg-muted">Frameworks & Tech Stack</p>
+        <Button type="button" onClick={addRow} className="border border-accent bg-[color-mix(in_srgb,var(--accent)_10%,transparent)] text-accent">
           Add tech
         </Button>
       </div>
@@ -102,37 +102,37 @@ export const ProjectTechEditor = ({ initialTech }: Props): React.JSX.Element => 
             key={item.label}
             type="button"
             onClick={() => addSuggestion(item.label, item.colorCategory)}
-            className="border border-white/20 bg-black px-3 py-1.5 text-xs text-white/80 transition hover:border-[#5BE38B] hover:text-[#5BE38B]"
+            className="border border-line-strong bg-bg px-3 py-1.5 text-xs text-fg-body transition hover:border-accent hover:text-accent"
           >
             + {item.label}
           </button>
         ))}
       </div>
 
-      {feedback ? <p className="text-xs text-[#5BE38B]">{feedback}</p> : null}
+      {feedback ? <p className="text-xs text-accent">{feedback}</p> : null}
 
       {tech.map((item, index) => (
-        <div key={`tech-${index}`} className="grid gap-2 border border-white/15 bg-[#060606] p-3 md:grid-cols-[1.3fr_160px_90px_90px]">
+        <div key={`tech-${index}`} className="grid gap-2 border border-line-strong bg-[#060606] p-3 md:grid-cols-[1.3fr_160px_90px_90px]">
           <input type="hidden" name="techSortOrder" value={item.sortOrder} />
           <input
             name="techLabel"
             value={item.label}
             onChange={(event) => updateRow(index, { label: event.target.value })}
             placeholder="e.g. Next.js"
-            className="border border-white/20 bg-black px-3 py-2"
+            className="border border-line-strong bg-bg px-3 py-2"
           />
           <select
             name="techColorCategory"
             value={item.colorCategory}
             onChange={(event) => updateRow(index, { colorCategory: event.target.value as ColorCategory })}
-            className="border border-white/20 bg-black px-3 py-2"
+            className="border border-line-strong bg-bg px-3 py-2"
           >
             <option value="green">Green</option>
             <option value="orange">Orange</option>
             <option value="red">Red</option>
             <option value="blue">Blue</option>
           </select>
-          <Button type="button" onClick={() => removeRow(index)} className="border border-[#E35B5B] bg-[rgba(227,91,91,0.1)] text-[#E35B5B]">
+          <Button type="button" onClick={() => removeRow(index)} className="border border-danger bg-[color-mix(in_srgb,var(--danger)_10%,transparent)] text-danger">
             Remove
           </Button>
         </div>

@@ -18,7 +18,7 @@ export default async function AdminPage({ searchParams }: Props): Promise<React.
 
   if (!user) {
     return (
-      <main className="flex min-h-screen items-center justify-center bg-black p-8 text-white">
+      <main className="flex min-h-screen items-center justify-center bg-bg p-8 text-fg">
         <AdminLoginForm />
       </main>
     );

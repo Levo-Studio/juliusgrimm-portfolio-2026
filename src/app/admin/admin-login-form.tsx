@@ -44,19 +44,19 @@ export const AdminLoginForm = (_props: Props): React.JSX.Element => {
   };
 
   return (
-    <form action={formAction} className="w-full max-w-md space-y-4 border border-white/20 bg-black/80 p-6">
-      <h1 className="font-inria text-2xl">Admin Login</h1>
+    <form action={formAction} className="w-full max-w-md space-y-4 border border-line-strong bg-bg/80 p-6">
+      <h1 className="text-2xl">Admin Login</h1>
 
       <Input name="email" type="email" required placeholder="me@juliusgrimm.dev" />
       <Input name="password" type="password" required placeholder="••••••••••••" />
 
-      {state.error ? <p className="font-inria text-sm text-[#E35B5B]">{state.error}</p> : null}
+      {state.error ? <p className="text-sm text-danger">{state.error}</p> : null}
 
       <Button className="w-full" disabled={pending}>
         {pending ? "Signing in..." : "Sign in"}
       </Button>
 
-      <Button type="button" variant="ghost" className="w-full border border-white/20 text-white" onClick={signInWithPasskey} disabled={passkeyPending}>
+      <Button type="button" variant="ghost" className="w-full border border-line-strong text-fg" onClick={signInWithPasskey} disabled={passkeyPending}>
         <KeyRound className="mr-2 size-4" />
         {passkeyPending ? "Signing in..." : "Sign in with Passkey"}
       </Button>

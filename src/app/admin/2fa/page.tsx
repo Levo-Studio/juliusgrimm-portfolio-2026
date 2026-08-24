@@ -10,7 +10,7 @@ export default async function AdminTwoFactorPage(): Promise<React.JSX.Element> {
   if (!pendingUserId) redirect("/admin");
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-black p-8 text-white">
+    <main className="flex min-h-screen items-center justify-center bg-bg p-8 text-fg">
       <AdminTwoFactorForm />
     </main>
   );

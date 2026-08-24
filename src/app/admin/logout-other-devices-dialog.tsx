@@ -16,21 +16,21 @@ export const LogoutOtherDevicesDialog = ({ csrfToken }: Props): React.JSX.Elemen
   return (
     <Dialog.Root open={open} onOpenChange={setOpen}>
       <Dialog.Trigger asChild>
-        <Button className="border border-[#E35B5B] bg-[rgba(227,91,91,0.1)] text-[#E35B5B] transition hover:bg-[rgba(227,91,91,0.2)]">
+        <Button className="border border-danger bg-[color-mix(in_srgb,var(--danger)_10%,transparent)] text-danger transition hover:bg-[color-mix(in_srgb,var(--danger)_20%,transparent)]">
           <LogOut className="mr-2 size-4" />
           Log out other devices
         </Button>
       </Dialog.Trigger>
       <Dialog.Portal>
-        <Dialog.Overlay className="dialog-overlay fixed inset-0 z-50 bg-black/70 backdrop-blur-sm" />
-        <Dialog.Content className="dialog-content fixed left-1/2 top-1/2 z-50 w-[92vw] max-w-md -translate-x-1/2 -translate-y-1/2 border border-white/15 bg-[#0a0a0a] p-6 text-white shadow-2xl">
+        <Dialog.Overlay className="dialog-overlay fixed inset-0 z-50 bg-bg/70 backdrop-blur-sm" />
+        <Dialog.Content className="dialog-content fixed left-1/2 top-1/2 z-50 w-[92vw] max-w-md -translate-x-1/2 -translate-y-1/2 border border-line-strong bg-[#0a0a0a] p-6 text-fg shadow-2xl">
           <div className="flex items-start gap-3">
-            <span className="mt-0.5 flex size-9 shrink-0 items-center justify-center border border-[#E35B5B]/40 bg-[rgba(227,91,91,0.1)] text-[#E35B5B]">
+            <span className="mt-0.5 flex size-9 shrink-0 items-center justify-center border border-danger/40 bg-[color-mix(in_srgb,var(--danger)_10%,transparent)] text-danger">
               <TriangleAlert className="size-5" />
             </span>
             <div>
-              <Dialog.Title className="font-inria text-xl">Log out other devices?</Dialog.Title>
-              <Dialog.Description className="mt-2 text-sm leading-relaxed text-white/70">
+              <Dialog.Title className="text-xl">Log out other devices?</Dialog.Title>
+              <Dialog.Description className="mt-2 text-sm leading-relaxed text-fg-muted">
                 This signs out every other active session. This device stays logged in; all others will need to sign in again.
               </Dialog.Description>
             </div>
@@ -38,11 +38,11 @@ export const LogoutOtherDevicesDialog = ({ csrfToken }: Props): React.JSX.Elemen
 
           <div className="mt-6 flex justify-end gap-2">
             <Dialog.Close asChild>
-              <Button className="border border-white/25 transition hover:border-white/40">Cancel</Button>
+              <Button className="border border-line-strong transition hover:border-line-strong">Cancel</Button>
             </Dialog.Close>
             <form action={logoutOtherDevices}>
               <input type="hidden" name="csrf" value={csrfToken} />
-              <Button className="border border-[#E35B5B] bg-[rgba(227,91,91,0.1)] text-[#E35B5B] transition hover:bg-[rgba(227,91,91,0.2)]">
+              <Button className="border border-danger bg-[color-mix(in_srgb,var(--danger)_10%,transparent)] text-danger transition hover:bg-[color-mix(in_srgb,var(--danger)_20%,transparent)]">
                 <LogOut className="mr-2 size-4" />
                 Log out other devices
               </Button>

@@ -35,14 +35,14 @@ export const AiCaseStudyGenerator = ({ csrf }: Props): React.JSX.Element => {
   };
 
   return (
-    <div className="grid gap-3 border border-[#5BE38B]/40 bg-[rgba(91,227,139,0.05)] p-5">
+    <div className="grid gap-3 border border-accent/40 bg-[rgba(91,227,139,0.05)] p-5">
       <div className="flex items-center justify-between gap-3">
-        <label className="text-sm text-[#5BE38B]">Describe the case study</label>
+        <label className="text-sm text-accent">Describe the case study</label>
         <Button
           type="button"
           onClick={onGenerate}
           disabled={pending}
-          className="border border-[#5BE38B] bg-[rgba(91,227,139,0.1)] text-[#5BE38B] transition hover:bg-[rgba(91,227,139,0.2)] disabled:opacity-70"
+          className="border border-accent bg-[color-mix(in_srgb,var(--accent)_10%,transparent)] text-accent transition hover:bg-[color-mix(in_srgb,var(--accent)_20%,transparent)] disabled:opacity-70"
         >
           {pending ? <span className="ai-dots">Generating</span> : "Generate with AI"}
         </Button>
@@ -51,14 +51,14 @@ export const AiCaseStudyGenerator = ({ csrf }: Props): React.JSX.Element => {
         value={prompt}
         onChange={(event) => setPrompt(event.target.value)}
         placeholder="e.g. VibeVote is an interactive song-requesting platform to replace paper requests and chaotic aux handovers at parties..."
-        className="min-h-28 border border-white/20 bg-black px-3 py-2"
+        className="min-h-28 border border-line-strong bg-bg px-3 py-2"
       />
-      <div className="h-0.5 w-full overflow-hidden bg-white/10" aria-hidden>
+      <div className="h-0.5 w-full overflow-hidden bg-tint" aria-hidden>
         {pending ? <div className="ai-shimmer h-full w-full" /> : null}
       </div>
-      <p className="text-xs text-white/50">Fills in title, subtitle, description, why-built and tech stack in your voice. You can edit all of it before saving.</p>
-      {error ? <p className="text-xs text-[#E35B5B]">{error}</p> : null}
-      {notice ? <p className="text-xs text-[#5BE38B]">{notice}</p> : null}
+      <p className="text-xs text-fg-muted">Fills in title, subtitle, description, why-built and tech stack in your voice. You can edit all of it before saving.</p>
+      {error ? <p className="text-xs text-danger">{error}</p> : null}
+      {notice ? <p className="text-xs text-accent">{notice}</p> : null}
     </div>
   );
 };
