@@ -22,6 +22,7 @@
   --draft: #e8c05a;
   --danger: #ff8b7a;
   --rule: #2e2e30;
+  --surface: #0d0d0f;
 }
 
 :root[data-theme="light"] {
@@ -40,6 +41,7 @@
   --draft: #a6791a;
   --danger: #c2402c;
   --rule: #d4d4d2;
+  --surface: #ffffff;
 }
 
 @media (prefers-color-scheme: light) {
@@ -59,6 +61,7 @@
     --draft: #a6791a;
     --danger: #c2402c;
     --rule: #d4d4d2;
+    --surface: #ffffff;
   }
 }
 
@@ -78,6 +81,7 @@
   --color-draft: var(--draft);
   --color-danger: var(--danger);
   --color-rule: var(--rule);
+  --color-surface: var(--surface);
   --font-sans: var(--font-geist-sans), system-ui, sans-serif;
   --font-mono: var(--font-geist-mono), ui-monospace, monospace;
 }
@@ -96,14 +100,6 @@ body {
   min-height: 100vh;
   font-family: var(--font-geist-sans), system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
-}
-
-/* Compatibility aliases: the old Inria/Instrument split collapses into Geist.
-   Kept so pages outside the redesign scope (impressum, 404) stay styled; removed
-   from each file as it is migrated. */
-.font-inria,
-.font-instrument {
-  font-family: var(--font-geist-sans), system-ui, sans-serif;
 }
 
 ::selection {

@@ -144,7 +144,7 @@ export const AdminDashboard = ({ csrfToken, projects, survivalTags, sessions, pa
           {errorMessage ? <div className="mb-4 border border-danger bg-[color-mix(in_srgb,var(--danger)_10%,transparent)] px-4 py-3 text-sm text-danger">{errorMessage}</div> : null}
 
           {mobileOpen ? (
-            <div className="mb-6 border border-line-strong bg-[#070707] p-3 md:hidden">
+            <div className="mb-6 border border-line-strong bg-surface p-3 md:hidden">
               <button onClick={() => setMobileOpen(false)} className="mb-2 inline-flex border border-line-strong p-2"><PanelLeftClose className="size-4" /></button>
               <div className="space-y-2">
                 <button onClick={() => { setTab("overview"); setMobileOpen(false); }} className="flex w-full items-center gap-2 border border-line-strong p-3 text-left"><LayoutDashboard className="size-4" />Overview</button>
@@ -159,7 +159,7 @@ export const AdminDashboard = ({ csrfToken, projects, survivalTags, sessions, pa
           {tab === "overview" ? (
             <div className="space-y-5">
               <div className="grid gap-4 xl:grid-cols-4">
-                <article className="border border-line-strong bg-[#070707] p-4">
+                <article className="border border-line-strong bg-surface p-4">
                   <p className="text-xs uppercase text-fg-muted">Total Projects</p>
                   <p className="mt-2 text-4xl">{projects.length}</p>
                 </article>
@@ -174,7 +174,7 @@ export const AdminDashboard = ({ csrfToken, projects, survivalTags, sessions, pa
               </div>
 
               <div className="grid gap-4">
-                <section className="border border-line-strong bg-[#070707] p-5">
+                <section className="border border-line-strong bg-surface p-5">
                   <h2 className="flex items-center gap-2 text-xl"><FolderOpen className="size-5" /> Recent Case Studies</h2>
                   <div className="mt-4 space-y-2">
                     {projects.slice(0, 5).map((project) => (
@@ -276,7 +276,7 @@ export const AdminDashboard = ({ csrfToken, projects, survivalTags, sessions, pa
             </div>
           ) : tab === "survival-kit" ? (
             <div className="space-y-4">
-              <section className="border border-line-strong bg-[#070707] p-4 md:p-5">
+              <section className="border border-line-strong bg-surface p-4 md:p-5">
                 <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
                   <div>
                     <h2 className="flex items-center gap-2 text-xl md:text-2xl"><Tags className="size-5" /> Survival Kit Tags</h2>
@@ -295,7 +295,7 @@ export const AdminDashboard = ({ csrfToken, projects, survivalTags, sessions, pa
             </div>
           ) : (
             <div className="space-y-8">
-              <section className="border border-line-strong bg-[#070707] p-4 md:p-5">
+              <section className="border border-line-strong bg-surface p-4 md:p-5">
                 <h2 className="text-xl md:text-2xl">Security</h2>
                 <p className="mt-1 text-sm text-fg-muted">Passkeys and 2FA controls.</p>
                 <div className="mt-4 space-y-4">
@@ -373,7 +373,7 @@ export const AdminDashboard = ({ csrfToken, projects, survivalTags, sessions, pa
                 </div>
               </section>
 
-              <section className="border border-line-strong bg-[#070707] p-4 md:p-5">
+              <section className="border border-line-strong bg-surface p-4 md:p-5">
                 <h2 className="text-xl md:text-2xl">Change Password</h2>
                 <form action={pwAction} className="mt-4 grid gap-3 md:max-w-xl">
                   <input type="hidden" name="csrf" value={csrfToken} />
@@ -386,7 +386,7 @@ export const AdminDashboard = ({ csrfToken, projects, survivalTags, sessions, pa
                 </form>
               </section>
 
-              <section className="border border-line-strong bg-[#070707] p-4 md:p-5">
+              <section className="border border-line-strong bg-surface p-4 md:p-5">
                 <div className="flex flex-wrap items-center justify-between gap-3">
                   <h2 className="text-xl md:text-2xl">Sessions</h2>
                   <LogoutOtherDevicesDialog csrfToken={csrfToken} />

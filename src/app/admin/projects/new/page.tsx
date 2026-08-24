@@ -47,7 +47,7 @@ export default async function AdminProjectCreatePage({ searchParams }: Search): 
 
         <AiCaseStudyGenerator csrf={csrfToken} model={env.MISTRAL_MODEL ?? "mistral-large-latest"} />
 
-        <form id="project-create-form" action={createProject} className="grid gap-3 border border-line-strong bg-[#070707] p-5">
+        <form id="project-create-form" action={createProject} className="grid gap-3 border border-line-strong bg-surface p-5">
           <input type="hidden" name="csrf" value={csrfToken} />
 
           <CaseStudyFields />

@@ -6,8 +6,8 @@ import { cn } from "@/lib/utils";
 const buttonVariants = cva("inline-flex items-center justify-center whitespace-nowrap text-sm transition-colors disabled:pointer-events-none disabled:opacity-50", {
   variants: {
     variant: {
-      default: "border border-[#5BE38B] bg-[rgba(91,227,139,0.1)] text-[#5BE38B]",
-      ghost: "border border-white/20 text-white"
+      default: "border border-accent bg-[color-mix(in_srgb,var(--accent)_10%,transparent)] text-accent",
+      ghost: "border border-line-strong text-fg"
     },
     size: {
       default: "px-4 py-2",
