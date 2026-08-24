@@ -20,7 +20,7 @@ const DESTINATIONS = [
 export default function NotFound(): React.JSX.Element {
   return (
     <main className="flex min-h-screen flex-col bg-bg text-fg">
-      <SiteHeader back={{ label: "← Startseite", href: "/" }} />
+      <SiteHeader back={{ label: "← Home", href: "/" }} />
 
       <div className="grid flex-1 grid-cols-1 content-start gap-x-10 gap-y-4 px-[22px] pt-16 pb-10 md:grid-cols-[120px_minmax(0,640px)] md:px-14 md:pt-24">
         <p className="font-mono text-[10px] font-medium uppercase leading-[1.6] tracking-[0.16em] text-accent md:pt-[7px]">

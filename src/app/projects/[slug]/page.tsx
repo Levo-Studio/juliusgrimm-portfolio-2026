@@ -77,7 +77,7 @@ export default async function ProjectDetailPage({ params }: Props): Promise<Reac
     <main className="min-h-screen bg-bg text-fg">
       <JsonLd data={projectSchema} />
       <Reveal />
-      <SiteHeader back={{ label: "← Alle Projekte", href: "/#projects" }} />
+      <SiteHeader back={{ label: "← All projects", href: "/#projects" }} />
 
       {/* Label column, logo + date above the title. */}
       <div className="grid grid-cols-1 gap-x-10 gap-y-4 px-[22px] pt-10 pb-8 md:grid-cols-[120px_minmax(0,640px)] md:px-14 md:pt-16 md:pb-12">

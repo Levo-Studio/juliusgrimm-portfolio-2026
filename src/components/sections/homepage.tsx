@@ -162,7 +162,7 @@ export const Homepage = async (): Promise<React.JSX.Element> => {
             Source code
           </Link>
           <Link href="/impressum" className="transition-colors hover:text-fg">
-            Impressum
+            Legal notice
           </Link>
         </span>
       </footer>

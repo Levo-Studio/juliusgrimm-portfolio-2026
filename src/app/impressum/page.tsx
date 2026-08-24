@@ -4,7 +4,7 @@ import { SectionShell } from "@/components/shared/section-shell";
 import { SiteHeader } from "@/components/sections/site-header";
 import { Reveal } from "@/components/sections/reveal";
 
-const title = "Impressum";
+const title = "Legal notice";
 const description = "Legal notice (Impressum) and contact details for juliusgrimm.dev, provided in accordance with German law (§ 5 DDG).";
 
 export const metadata: Metadata = {
@@ -34,11 +34,11 @@ export default function ImpressumPage(): React.JSX.Element {
   return (
     <main className="min-h-screen bg-bg text-fg">
       <Reveal />
-      <SiteHeader back={{ label: "← Startseite", href: "/" }} />
+      <SiteHeader back={{ label: "← Home", href: "/" }} />
 
       <div className="grid grid-cols-1 gap-x-10 gap-y-4 px-[22px] pt-10 pb-8 md:grid-cols-[120px_minmax(0,640px)] md:px-14 md:pt-16 md:pb-12">
         <p className="font-mono text-[10px] font-medium uppercase leading-[1.6] tracking-[0.16em] text-fg-muted md:pt-[7px]">
-          Impressum
+          Legal notice
         </p>
         <div>
           <h1 className="m-0 text-[30px] font-light leading-[1.16] tracking-[-0.022em] md:text-[42px] md:leading-[1.14] md:tracking-[-0.024em]">
