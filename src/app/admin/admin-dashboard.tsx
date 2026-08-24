@@ -234,7 +234,7 @@ export const AdminDashboard = ({ csrfToken, projects, survivalTags, sessions, pa
                 <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
                   <div>
                     <h2 className="m-0 text-[20px] font-light tracking-[-0.02em] md:text-[22px]">Survival kit</h2>
-                    <p className="mt-1.5 text-[12px] leading-[1.6] text-fg-muted">Manage the tags shown in the TECH STACK section.</p>
+                    <p className="mt-1.5 text-[12px] leading-[1.6] text-fg-muted">These are the tags on the homepage stack section.</p>
                   </div>
                   <Link href="/#tech-stack" className="text-[12px] text-accent transition-opacity hover:opacity-80">View homepage</Link>
                 </div>
@@ -278,7 +278,7 @@ export const AdminDashboard = ({ csrfToken, projects, survivalTags, sessions, pa
                               <p className="text-fg-muted">Created: {new Date(passkey.createdAt).toLocaleString("de-DE")}</p>
                               <p className="text-fg-muted">Last used: {passkey.lastUsedAt ? new Date(passkey.lastUsedAt).toLocaleString("de-DE") : "Never"}</p>
                             </div>
-                            <Button className="border border-danger bg-[color-mix(in_srgb,var(--danger)_10%,transparent)] text-danger">Delete</Button>
+                            <Button variant="danger">Delete</Button>
                           </form>
                         ))
                       )}
@@ -291,7 +291,7 @@ export const AdminDashboard = ({ csrfToken, projects, survivalTags, sessions, pa
                       {twoFactorEnabled ? (
                         <form action={disableTwoFactor}>
                           <input type="hidden" name="csrf" value={csrfToken} />
-                          <Button className="border border-danger bg-[color-mix(in_srgb,var(--danger)_10%,transparent)] text-danger">
+                          <Button variant="danger">
                             <ShieldCheck className="mr-2 size-4" />
                             Disable 2FA
                           </Button>
@@ -318,7 +318,7 @@ export const AdminDashboard = ({ csrfToken, projects, survivalTags, sessions, pa
                         <form action={twoFactorConfirmAction} className="flex flex-wrap items-center gap-2">
                           <input type="hidden" name="csrf" value={csrfToken} />
                           <input name="code" placeholder="123456" inputMode="numeric" className="border border-line-strong bg-bg px-3 py-2" />
-                          <Button disabled={twoFactorConfirmPending} className="border border-accent bg-[color-mix(in_srgb,var(--accent)_10%,transparent)] text-accent">
+                          <Button disabled={twoFactorConfirmPending} >
                             {twoFactorConfirmPending ? "Verifying..." : "Enable 2FA"}
                           </Button>
                         </form>
@@ -331,7 +331,7 @@ export const AdminDashboard = ({ csrfToken, projects, survivalTags, sessions, pa
               </section>
 
               <section className="rounded-[10px] border border-line-strong bg-surface p-5 md:p-6">
-                <h2 className="text-[20px] font-light tracking-[-0.02em] md:text-[22px]">Change Password</h2>
+                <h2 className="m-0 text-[20px] font-light tracking-[-0.02em] md:text-[22px]">Change password</h2>
                 <form action={pwAction} className="mt-4 grid gap-3 md:max-w-xl">
                   <input type="hidden" name="csrf" value={csrfToken} />
                   <input name="currentPassword" type="password" required placeholder="Current password" className="border border-line-strong bg-bg px-3 py-2" />
@@ -339,13 +339,13 @@ export const AdminDashboard = ({ csrfToken, projects, survivalTags, sessions, pa
                   <input name="confirmPassword" type="password" required placeholder="Confirm new password" className="border border-line-strong bg-bg px-3 py-2" />
                   {pwState.error ? <p className="text-[12px] text-danger">{pwState.error}</p> : null}
                   {pwState.message ? <p className="text-sm text-accent">{pwState.message}</p> : null}
-                  <Button disabled={pwPending} className="justify-self-start border border-accent bg-[color-mix(in_srgb,var(--accent)_10%,transparent)] text-accent">{pwPending ? "Saving..." : "Update password"}</Button>
+                  <Button disabled={pwPending} className="justify-self-start">{pwPending ? "Saving…" : "Update password"}</Button>
                 </form>
               </section>
 
               <section className="rounded-[10px] border border-line-strong bg-surface p-5 md:p-6">
                 <div className="flex flex-wrap items-center justify-between gap-3">
-                  <h2 className="text-[20px] font-light tracking-[-0.02em] md:text-[22px]">Sessions</h2>
+                  <h2 className="m-0 text-[20px] font-light tracking-[-0.02em] md:text-[22px]">Sessions</h2>
                   <LogoutOtherDevicesDialog csrfToken={csrfToken} />
                 </div>
                 <div className="mt-4 space-y-2">
@@ -357,7 +357,7 @@ export const AdminDashboard = ({ csrfToken, projects, survivalTags, sessions, pa
                         <p className="flex items-center gap-2"><Monitor className="size-4" />{session.userAgent ?? "Unknown device"}</p>
                         <p className="mt-1 flex items-center gap-2 text-fg-muted"><Smartphone className="size-4" />{session.ipAddress ?? "Unknown IP"}</p>
                       </div>
-                      <Button className="border border-danger bg-[color-mix(in_srgb,var(--danger)_10%,transparent)] text-danger">Revoke</Button>
+                      <Button variant="danger">Revoke</Button>
                     </form>
                   ))}
                 </div>

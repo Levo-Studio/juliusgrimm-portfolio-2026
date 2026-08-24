@@ -23,13 +23,13 @@ export const LogoutOtherDevicesDialog = ({ csrfToken }: Props): React.JSX.Elemen
       </Dialog.Trigger>
       <Dialog.Portal>
         <Dialog.Overlay className="dialog-overlay fixed inset-0 z-50 bg-bg/70 backdrop-blur-sm" />
-        <Dialog.Content className="dialog-content fixed left-1/2 top-1/2 z-50 w-[92vw] max-w-md -translate-x-1/2 -translate-y-1/2 border border-line-strong bg-[#0a0a0a] p-6 text-fg shadow-2xl">
+        <Dialog.Content className="dialog-content fixed left-1/2 top-1/2 z-50 w-[92vw] max-w-md -translate-x-1/2 -translate-y-1/2 border border-line-strong bg-surface p-6 text-fg shadow-2xl">
           <div className="flex items-start gap-3">
             <span className="mt-0.5 flex size-9 shrink-0 items-center justify-center border border-danger/40 bg-[color-mix(in_srgb,var(--danger)_10%,transparent)] text-danger">
               <TriangleAlert className="size-5" />
             </span>
             <div>
-              <Dialog.Title className="text-xl">Log out other devices?</Dialog.Title>
+              <Dialog.Title className="m-0 text-[18px] font-light tracking-[-0.02em]">Log out other devices?</Dialog.Title>
               <Dialog.Description className="mt-2 text-sm leading-relaxed text-fg-muted">
                 This signs out every other active session. This device stays logged in; all others will need to sign in again.
               </Dialog.Description>

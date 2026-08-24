@@ -28,7 +28,7 @@ export const DeleteProjectDialog = ({ csrfToken, projectId, projectTitle }: Prop
               <TriangleAlert className="size-5" />
             </span>
             <div>
-              <Dialog.Title className="text-xl">Delete case study?</Dialog.Title>
+              <Dialog.Title className="m-0 text-[18px] font-light tracking-[-0.02em]">Delete case study?</Dialog.Title>
               <Dialog.Description className="mt-2 text-sm leading-relaxed text-fg-muted">
                 This permanently deletes <span className="text-danger">{projectTitle}</span> along with its links and tech stack. This can&apos;t be undone.
               </Dialog.Description>
