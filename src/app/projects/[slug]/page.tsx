@@ -79,10 +79,13 @@ export default async function ProjectDetailPage({ params }: Props): Promise<Reac
     <main className="flex min-h-screen flex-col bg-bg text-fg">
       <JsonLd data={projectSchema} />
       <Reveal />
-      <SiteHeader back={{ label: "← All projects", href: "/#projects" }} />
+      <SiteHeader back={{ label: "← All projects", href: `/#project-${project.slug}` }} />
 
       {/* Label column, logo + date above the title. */}
-      <div className="grid grid-cols-1 gap-x-10 gap-y-4 px-[22px] pt-10 pb-8 md:px-14 md:pt-16 md:pb-12 lg:grid-cols-[120px_minmax(0,min(1380px,60vw))]">
+      <div
+        data-reveal
+        className="grid grid-cols-1 gap-x-10 gap-y-4 px-[22px] pt-10 pb-8 md:px-14 md:pt-16 md:pb-12 lg:grid-cols-[120px_minmax(0,min(1380px,60vw))]"
+      >
         <p className="flex h-[18px] items-center font-mono text-[10px] font-medium uppercase leading-none tracking-[0.16em] text-fg-muted">
           Case study
         </p>
@@ -103,7 +106,7 @@ export default async function ProjectDetailPage({ params }: Props): Promise<Reac
       </div>
 
       <div className="flex flex-col gap-7 px-[22px] pb-10 md:gap-[34px] md:px-14 md:pb-16">
-        <SectionShell label="Context" className="lg:grid-cols-[120px_minmax(0,min(1380px,60vw))]">
+        <SectionShell label="Context" reveal={false} className="lg:grid-cols-[120px_minmax(0,min(1380px,60vw))]">
           <div className="flex flex-col gap-[18px] text-[15px] leading-[1.68] text-fg-body md:text-[16px]">
             {paragraphs(project.description).map((text) => (
               <HighlightedParagraph key={text} className="m-0 text-pretty">
@@ -113,7 +116,7 @@ export default async function ProjectDetailPage({ params }: Props): Promise<Reac
           </div>
         </SectionShell>
 
-        <SectionShell label="Why I built it" className="lg:grid-cols-[120px_minmax(0,min(1380px,60vw))]">
+        <SectionShell label="Why I built it" reveal={false} className="lg:grid-cols-[120px_minmax(0,min(1380px,60vw))]">
           <div className="flex flex-col gap-3.5 text-[15px] leading-[1.68] text-fg-body md:gap-[18px] md:text-[16px]">
             {paragraphs(project.whyBuilt).map((text) => (
               <HighlightedParagraph key={text} className="m-0 text-pretty">
@@ -124,7 +127,7 @@ export default async function ProjectDetailPage({ params }: Props): Promise<Reac
         </SectionShell>
 
         {project.techStack.length > 0 ? (
-          <SectionShell label="Stack">
+          <SectionShell label="Stack" reveal={false}>
             <div className="flex flex-wrap gap-[7px] md:gap-2">
               {project.techStack.map((tech) => (
                 <span
@@ -139,7 +142,7 @@ export default async function ProjectDetailPage({ params }: Props): Promise<Reac
         ) : null}
 
         {links.length > 0 ? (
-          <SectionShell label="Links">
+          <SectionShell label="Links" reveal={false}>
             {/* The project's own site leads in the accent; everything after it is secondary. */}
             <div className="flex flex-col gap-2.5 text-[14px] md:flex-row md:gap-[22px]">
               {links.map((link, position) => (
@@ -158,7 +161,7 @@ export default async function ProjectDetailPage({ params }: Props): Promise<Reac
         ) : null}
 
         {next.length > 0 ? (
-          <SectionShell label="Next">
+          <SectionShell label="Next" reveal={false}>
             <div className="flex flex-col border-t border-line">
               {next.map((entry) => (
                 <Link
