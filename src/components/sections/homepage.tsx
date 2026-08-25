@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { SectionShell } from "@/components/shared/section-shell";
 import { ProjectIcon } from "@/components/shared/project-icon";
+import { SaveScrollLink } from "@/components/shared/save-scroll-link";
 import { SiteHeader } from "@/components/sections/site-header";
 import { HeroCodeCloud } from "@/components/sections/hero-code-cloud";
 import { Reveal } from "@/components/sections/reveal";
@@ -48,7 +49,7 @@ export const Homepage = async (): Promise<React.JSX.Element> => {
       <section data-reveal className="relative overflow-hidden px-[22px] pt-14 pb-15 md:px-14 md:pt-[92px] md:pb-25">
         <HeroCodeCloud />
         <div className="relative">
-          <p className="mb-5 text-[10px] font-medium leading-none tracking-[0.14em] text-accent md:mb-7 md:text-[11px]">
+          <p className="mb-5 text-[10px] font-medium leading-none text-accent md:mb-7 md:text-[11px]">
             @julius_gr_
           </p>
           <h1 className="m-0 max-w-[15ch] text-[34px] font-light leading-[1.14] tracking-[-0.022em] md:text-[54px] md:leading-[1.12] md:tracking-[-0.024em]">
@@ -85,7 +86,7 @@ export const Homepage = async (): Promise<React.JSX.Element> => {
               const favicon = getFaviconUrl(getProjectSiteUrl(project.links));
               const month = getProjectMonthShort(project.createdAt);
               return (
-                <Link
+                <SaveScrollLink
                   key={project.id}
                   id={`project-${project.slug}`}
                   data-row
@@ -106,7 +107,7 @@ export const Homepage = async (): Promise<React.JSX.Element> => {
                   <span className="mt-[3px] font-mono text-[10px] leading-none text-fg-faint md:text-[11px] lg:mt-0 lg:text-right">
                     {month}
                   </span>
-                </Link>
+                </SaveScrollLink>
               );
             })}
           </div>

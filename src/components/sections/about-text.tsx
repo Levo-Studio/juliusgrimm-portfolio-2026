@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from "react";
 import gsap from "gsap";
+import { skipEntranceAnimation } from "@/components/sections/scroll-to-hash";
 
 type AboutTextProps = { children: string };
 
@@ -19,7 +20,7 @@ export const AboutText = ({ children }: AboutTextProps): React.JSX.Element => {
     const words = gsap.utils.toArray<HTMLElement>(scope.querySelectorAll("[data-word]"));
     if (words.length === 0) return;
 
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches || skipEntranceAnimation()) {
       gsap.set(words, { opacity: 1, y: 0 });
       return;
     }

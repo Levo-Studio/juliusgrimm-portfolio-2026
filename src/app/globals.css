@@ -164,6 +164,7 @@ body {
 
 .row-link {
   border-left: 1px solid transparent;
+  outline: none;
   transition: background-color 0.18s ease, padding-left 0.18s ease, border-left-color 0.18s ease, color 0.25s ease;
 }
 
@@ -175,15 +176,24 @@ body {
   }
 }
 
+/* Landing on a row via the fragment jump (returning from a case study) focuses
+   it natively — same treatment as hover instead of the browser's default ring. */
+.row-link:focus-visible {
+  background-color: var(--tint);
+}
+
 /* Marks the row you just came back from a case study to — a plain tint fade,
    no border, so it reads as a soft highlight rather than a hover state. */
 .row-flash {
-  animation: row-flash 1.3s cubic-bezier(0.2, 0.7, 0.2, 1);
+  animation: row-flash 4s ease-in-out;
 }
 
 @keyframes row-flash {
-  from { background-color: var(--tint); }
-  to { background-color: transparent; }
+  0% { background-color: transparent; }
+  25% { background-color: transparent; }
+  35% { background-color: var(--tint); }
+  85% { background-color: var(--tint); }
+  100% { background-color: transparent; }
 }
 
 /* ── Admin navigation ──────────────────────────────────────────────────────
