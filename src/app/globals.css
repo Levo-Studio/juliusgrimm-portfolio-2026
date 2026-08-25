@@ -88,6 +88,10 @@
 
 * {
   border-color: var(--line);
+  /* Swapping data-theme flips every color custom property at once; this crossfades
+     the swap instead of letting it snap. More specific transitions elsewhere win
+     over this since a class selector beats the universal one. */
+  transition: background-color 0.25s ease, color 0.25s ease, border-color 0.25s ease, fill 0.25s ease, stroke 0.25s ease;
 }
 
 html,
@@ -256,7 +260,7 @@ body {
 }
 
 .dialog-content {
-  animation: dialog-pop 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  animation: dialog-pop 0.2s cubic-bezier(0.16, 1, 0.3, 1) backwards;
 }
 
 @keyframes dialog-fade {
@@ -272,6 +276,10 @@ body {
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;
+  }
+
+  * {
+    transition: none !important;
   }
 
   .reveal-ready [data-reveal]:not([data-shown]),
