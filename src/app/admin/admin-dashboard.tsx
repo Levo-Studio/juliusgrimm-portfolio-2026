@@ -2,17 +2,20 @@
 
 import Link from "next/link";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import { useActionState, useEffect, useState } from "react";
 import gsap from "gsap";
 import { startRegistration } from "@simplewebauthn/browser";
 import { Menu, ShieldCheck, Monitor, Smartphone, KeyRound, LogOut, FolderOpen, Tags } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Toast } from "@/components/ui/toast";
 import type { PasswordState, TwoFactorState } from "@/app/admin/actions";
 import { changePassword, confirmTwoFactorSetup, deletePasskey, disableTwoFactor, logoutAdmin, revokeSession, saveSurvivalKitTags, startTwoFactorSetup, toggleProjectVisibility } from "@/app/admin/actions";
 import { SurvivalKitTagEditor } from "@/app/admin/survival-kit-tag-editor";
 import { AdminReveal } from "@/app/admin/admin-reveal";
 import { AdminNav, type AdminTab } from "@/app/admin/admin-nav";
 import { DeleteProjectDialog } from "@/app/admin/projects/delete-project-dialog";
+import { UnpublishProjectDialog } from "@/app/admin/projects/unpublish-project-dialog";
 import { LogoutOtherDevicesDialog } from "@/app/admin/logout-other-devices-dialog";
 import { ProjectIcon } from "@/components/shared/project-icon";
 import type { ColorCategory } from "@/types/project";
@@ -57,6 +60,7 @@ const passwordInit: PasswordState = { ok: false };
 const twoFactorInit: TwoFactorState = { ok: false };
 
 export const AdminDashboard = ({ csrfToken, projects, survivalTags, sessions, passkeys, twoFactorEnabled, initialTab, saved, errorMessage }: Props): React.JSX.Element => {
+  const router = useRouter();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [tab, setTab] = useState<AdminTab>(initialTab);
   const [pwState, pwAction, pwPending] = useActionState(changePassword, passwordInit);
@@ -140,16 +144,8 @@ export const AdminDashboard = ({ csrfToken, projects, survivalTags, sessions, pa
             </form>
           </div>
 
-          {saved ? (
-            <div className="mb-5 rounded-md border border-accent/40 bg-[color-mix(in_srgb,var(--accent)_10%,transparent)] px-4 py-3 text-[13px] text-accent">
-              Saved successfully.
-            </div>
-          ) : null}
-          {errorMessage ? (
-            <div className="mb-5 rounded-md border border-danger/40 bg-[color-mix(in_srgb,var(--danger)_10%,transparent)] px-4 py-3 text-[13px] text-danger">
-              {errorMessage}
-            </div>
-          ) : null}
+          {saved ? <Toast message="Saved successfully." tone="success" /> : null}
+          {errorMessage ? <Toast message={errorMessage} tone="error" /> : null}
 
           <AdminReveal key={tab}>
           {tab === "case-studies" ? (
@@ -184,7 +180,13 @@ export const AdminDashboard = ({ csrfToken, projects, survivalTags, sessions, pa
                 {projects.map((project) => (
                   <div
                     key={project.id}
-                    className="row-link grid grid-cols-[18px_minmax(0,1fr)] items-start gap-3 border-b border-line px-3 py-3.5 md:grid-cols-[18px_200px_minmax(0,1fr)_auto_auto] md:items-center md:gap-5"
+                    role="link"
+                    tabIndex={0}
+                    onClick={() => router.push(`/admin/projects/${project.id}`)}
+                    onKeyDown={(event) => {
+                      if (event.key === "Enter") router.push(`/admin/projects/${project.id}`);
+                    }}
+                    className="row-link grid cursor-pointer grid-cols-[18px_minmax(0,1fr)] items-start gap-3 border-b border-line px-3 py-3.5 md:grid-cols-[18px_200px_minmax(0,1fr)_auto_auto] md:items-center md:gap-5"
                   >
                     <ProjectIcon src={project.faviconUrl} title={project.title} size={18} />
 
@@ -202,20 +204,24 @@ export const AdminDashboard = ({ csrfToken, projects, survivalTags, sessions, pa
                       )}
                     </span>
 
-                    <span className="col-start-2 flex items-center gap-3 whitespace-nowrap text-[11px] text-fg-muted md:col-start-auto md:justify-end">
-                      <Link href={`/admin/projects/${project.id}`} className="transition-colors hover:text-fg">
-                        Edit
-                      </Link>
-                      {/* Publishing toggles in place; the row is the control, so there is
-                          no separate visibility screen to walk to. */}
-                      <form action={toggleProjectVisibility}>
-                        <input type="hidden" name="csrf" value={csrfToken} />
-                        <input type="hidden" name="id" value={project.id} />
-                        <input type="hidden" name="visible" value={project.visible ? "false" : "true"} />
-                        <button type="submit" className="transition-colors hover:text-fg">
-                          {project.visible ? "Unpublish" : "Publish"}
-                        </button>
-                      </form>
+                    {/* Clicking anywhere on the row opens it for editing; these two controls
+                        stop that click from also firing so they can act on their own. */}
+                    <span
+                      className="col-start-2 flex items-center gap-3 whitespace-nowrap text-[11px] md:col-start-auto md:justify-end"
+                      onClick={(event) => event.stopPropagation()}
+                    >
+                      {project.visible ? (
+                        <UnpublishProjectDialog csrfToken={csrfToken} projectId={project.id} projectTitle={project.title} />
+                      ) : (
+                        <form action={toggleProjectVisibility}>
+                          <input type="hidden" name="csrf" value={csrfToken} />
+                          <input type="hidden" name="id" value={project.id} />
+                          <input type="hidden" name="visible" value="true" />
+                          <button type="submit" className="text-accent transition-opacity hover:opacity-70">
+                            Publish
+                          </button>
+                        </form>
+                      )}
                       <DeleteProjectDialog csrfToken={csrfToken} projectId={project.id} projectTitle={project.title} />
                     </span>
                   </div>
