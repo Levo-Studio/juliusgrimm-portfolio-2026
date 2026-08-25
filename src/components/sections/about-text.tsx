@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from "react";
 import gsap from "gsap";
+import { shouldHighlightWord } from "@/lib/text-highlight";
 
 type AboutTextProps = { children: string };
 
@@ -46,7 +47,10 @@ export const AboutText = ({ children }: AboutTextProps): React.JSX.Element => {
           without JS the words are simply visible instead of stuck at zero opacity. */}
       {words.map((word, index) => (
         <span key={`${word}-${index}`}>
-          <span data-word className="inline-block will-change-transform">
+          <span
+            data-word
+            className={`inline-block will-change-transform ${shouldHighlightWord(word, index) ? "text-accent" : ""}`}
+          >
             {word}
           </span>
           {index < words.length - 1 ? " " : ""}

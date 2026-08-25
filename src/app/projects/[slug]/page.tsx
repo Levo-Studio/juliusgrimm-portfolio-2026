@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { SectionShell } from "@/components/shared/section-shell";
 import { ProjectIcon } from "@/components/shared/project-icon";
+import { HighlightedParagraph } from "@/components/shared/highlighted-paragraph";
 import { JsonLd } from "@/components/shared/json-ld";
 import { SiteHeader } from "@/components/sections/site-header";
 import { Reveal } from "@/components/sections/reveal";
@@ -104,9 +105,9 @@ export default async function ProjectDetailPage({ params }: Props): Promise<Reac
         <SectionShell label="Context">
           <div className="flex flex-col gap-[18px] text-[15px] leading-[1.68] text-fg-body md:text-[16px]">
             {paragraphs(project.description).map((text) => (
-              <p key={text} className="m-0 text-pretty">
+              <HighlightedParagraph key={text} className="m-0 text-pretty">
                 {text}
-              </p>
+              </HighlightedParagraph>
             ))}
           </div>
         </SectionShell>
@@ -114,9 +115,9 @@ export default async function ProjectDetailPage({ params }: Props): Promise<Reac
         <SectionShell label="Why I built it">
           <div className="flex flex-col gap-3.5 text-[15px] leading-[1.68] text-fg-body md:gap-[18px] md:text-[16px]">
             {paragraphs(project.whyBuilt).map((text) => (
-              <p key={text} className="m-0 text-pretty">
+              <HighlightedParagraph key={text} className="m-0 text-pretty">
                 {text}
-              </p>
+              </HighlightedParagraph>
             ))}
           </div>
         </SectionShell>
