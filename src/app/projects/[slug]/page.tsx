@@ -74,7 +74,7 @@ export default async function ProjectDetailPage({ params }: Props): Promise<Reac
   };
 
   return (
-    <main className="min-h-screen bg-bg text-fg">
+    <main className="flex min-h-screen flex-col bg-bg text-fg">
       <JsonLd data={projectSchema} />
       <Reveal />
       <SiteHeader back={{ label: "← All projects", href: "/#projects" }} />
@@ -181,7 +181,7 @@ export default async function ProjectDetailPage({ params }: Props): Promise<Reac
         ) : null}
       </div>
 
-      <footer className="mt-10 border-t border-line px-[22px] py-[18px] font-mono text-[10px] leading-[1.7] text-fg-faint md:px-14 md:py-[22px] md:text-[11px] md:leading-[1.6]">
+      <footer className="mt-auto border-t border-line px-[22px] py-[18px] font-mono text-[10px] leading-[1.7] text-fg-faint md:px-14 md:py-[22px] md:text-[11px] md:leading-[1.6]">
         © {new Date().getFullYear()} Julius Grimm · Made with ❤️ and 47 open tabs.
       </footer>
     </main>
