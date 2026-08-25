@@ -67,9 +67,15 @@ export default function ImpressumPage(): React.JSX.Element {
             <p className="m-0">
               Kontakt:
               <br />
-              Telefon: +49 176 61028522
+              Telefon:{" "}
+              <Link href="tel:+4917661028522" className="text-accent transition-opacity hover:opacity-70">
+                +49 176 61028522
+              </Link>
               <br />
-              E-Mail: me@juliusgrimm.dev
+              E-Mail:{" "}
+              <Link href="mailto:me@juliusgrimm.dev" className="text-accent transition-opacity hover:opacity-70">
+                me@juliusgrimm.dev
+              </Link>
             </p>
           </div>
         </SectionShell>

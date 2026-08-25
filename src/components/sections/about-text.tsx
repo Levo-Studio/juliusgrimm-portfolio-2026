@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from "react";
 import gsap from "gsap";
+import { skipEntranceAnimation } from "@/components/sections/scroll-to-hash";
 
 type AboutTextProps = { children: string };
 
@@ -19,7 +20,7 @@ export const AboutText = ({ children }: AboutTextProps): React.JSX.Element => {
     const words = gsap.utils.toArray<HTMLElement>(scope.querySelectorAll("[data-word]"));
     if (words.length === 0) return;
 
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches || skipEntranceAnimation()) {
       gsap.set(words, { opacity: 1, y: 0 });
       return;
     }
@@ -35,18 +36,44 @@ export const AboutText = ({ children }: AboutTextProps): React.JSX.Element => {
     return () => ctx.revert();
   }, []);
 
-  const words = children.split(" ");
+  // Words (or phrases) wrapped in *asterisks* in the source string are hand-picked to
+  // highlight — the emphasis is chosen for what it says, not run through the
+  // random-per-word algorithm the case-study copy uses. A phrase can span several
+  // words: "*professional overthinker*" opens on the first word and closes on the last.
+  const rawWords = children.split(" ");
+  let openPhrase = false;
+  const words = rawWords.map((word) => {
+    let display = word;
+    let highlighted = openPhrase;
+
+    if (!openPhrase && display.startsWith("*")) {
+      display = display.slice(1);
+      highlighted = true;
+      openPhrase = true;
+    }
+    if (openPhrase && display.endsWith("*")) {
+      display = display.slice(0, -1);
+      openPhrase = false;
+    }
+
+    return { display, highlighted };
+  });
 
   return (
     <p
       ref={ref}
-      className="m-0 max-w-[56ch] text-[15px] leading-[1.6] text-pretty md:text-[17px] md:leading-[1.62]"
+      className="m-0 max-w-[56ch] text-[15px] leading-[1.6] text-pretty md:text-[17px] md:leading-[1.62] lg:max-w-[63ch]"
     >
       {/* The hidden start is CSS behind .reveal-ready, set by the pre-paint script —
           without JS the words are simply visible instead of stuck at zero opacity. */}
-      {words.map((word, index) => (
-        <span key={`${word}-${index}`} data-word className="inline-block will-change-transform">
-          {word}
+      {words.map(({ display, highlighted }, index) => (
+        <span key={`${display}-${index}`}>
+          <span
+            data-word
+            className={`inline-block will-change-transform ${highlighted ? "text-accent" : ""}`}
+          >
+            {display}
+          </span>
           {index < words.length - 1 ? " " : ""}
         </span>
       ))}
