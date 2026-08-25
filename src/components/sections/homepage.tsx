@@ -70,7 +70,7 @@ export const Homepage = async (): Promise<React.JSX.Element> => {
         {/* No reveal: the one line about who this is should not wait on a scroll. */}
         <SectionShell id="about" label="About" reveal={false}>
           <AboutText>
-            {"I'm Julius — founder, developer, and professional overthinker. I build fast digital products with an unhealthy attention to detail and a tendency to overengineer things that worked fine before."}
+            {"I'm Julius — founder, developer, and professional overthinker. I build fast digital products with an unhealthy attention to detail and a tendency to overengineer things that worked fine before. Everything I build ends up being a side project, solving my own problems in ways that cost more effort than doing them by hand, but that's the catch, and I'm down for every one."}
           </AboutText>
         </SectionShell>
 
