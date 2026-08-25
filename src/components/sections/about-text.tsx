@@ -45,8 +45,10 @@ export const AboutText = ({ children }: AboutTextProps): React.JSX.Element => {
       {/* The hidden start is CSS behind .reveal-ready, set by the pre-paint script —
           without JS the words are simply visible instead of stuck at zero opacity. */}
       {words.map((word, index) => (
-        <span key={`${word}-${index}`} data-word className="inline-block will-change-transform">
-          {word}
+        <span key={`${word}-${index}`}>
+          <span data-word className="inline-block will-change-transform">
+            {word}
+          </span>
           {index < words.length - 1 ? " " : ""}
         </span>
       ))}
