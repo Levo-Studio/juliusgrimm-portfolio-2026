@@ -175,6 +175,17 @@ body {
   }
 }
 
+/* Marks the row you just came back from a case study to — a plain tint fade,
+   no border, so it reads as a soft highlight rather than a hover state. */
+.row-flash {
+  animation: row-flash 1.3s cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+
+@keyframes row-flash {
+  from { background-color: var(--tint); }
+  to { background-color: transparent; }
+}
+
 /* ── Admin navigation ──────────────────────────────────────────────────────
    The mobile drawer slides in over the content; its backdrop fades. Nav items
    stagger in behind it so the panel does not arrive as one flat block.

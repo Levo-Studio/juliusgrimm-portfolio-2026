@@ -4,6 +4,7 @@ import { ProjectIcon } from "@/components/shared/project-icon";
 import { SiteHeader } from "@/components/sections/site-header";
 import { HeroCodeCloud } from "@/components/sections/hero-code-cloud";
 import { Reveal } from "@/components/sections/reveal";
+import { ScrollToHash } from "@/components/sections/scroll-to-hash";
 import { AboutText } from "@/components/sections/about-text";
 import { contactItems, levoStudioContactItems, SURVIVAL_KIT_GROUPS } from "@/lib/content";
 import { SiteFooter } from "@/components/sections/site-footer";
@@ -41,6 +42,7 @@ export const Homepage = async (): Promise<React.JSX.Element> => {
   return (
     <main className="flex min-h-screen flex-col bg-bg text-fg">
       <Reveal />
+      <ScrollToHash />
       <SiteHeader />
 
       <section data-reveal className="relative overflow-hidden px-[22px] pt-14 pb-15 md:px-14 md:pt-[92px] md:pb-25">
@@ -85,6 +87,7 @@ export const Homepage = async (): Promise<React.JSX.Element> => {
               return (
                 <Link
                   key={project.id}
+                  id={`project-${project.slug}`}
                   data-row
                   href={`/projects/${project.slug}`}
                   className="row-link grid grid-cols-[16px_minmax(0,1fr)_auto] items-start gap-3 border-b border-line px-1 py-[13px] md:py-[15px] md:pr-[14px] md:pl-3 lg:grid-cols-[18px_250px_minmax(0,1fr)_78px] lg:items-center lg:gap-[18px]"
