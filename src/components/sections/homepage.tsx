@@ -51,7 +51,7 @@ export const Homepage = async (): Promise<React.JSX.Element> => {
       <section data-reveal className="relative overflow-hidden px-[22px] pt-14 pb-15 md:px-14 md:pt-[92px] md:pb-25">
         <HeroCodeCloud />
         <div className="relative">
-          <p className="mb-5 font-mono text-[10px] font-medium uppercase leading-none tracking-[0.14em] text-accent md:mb-7 md:text-[11px]">
+          <p className="mb-5 font-mono text-[10px] font-medium leading-none tracking-[0.14em] text-accent md:mb-7 md:text-[11px]">
             @julius_gr_
           </p>
           <h1 className="m-0 max-w-[15ch] text-[34px] font-light leading-[1.14] tracking-[-0.022em] md:text-[54px] md:leading-[1.12] md:tracking-[-0.024em]">
@@ -59,8 +59,13 @@ export const Homepage = async (): Promise<React.JSX.Element> => {
           </h1>
           <p className="mt-[22px] text-[12px] leading-none text-fg-muted md:mt-[30px] md:text-[13px]">
             Julius Grimm ·{" "}
-            <Link href="https://levo-studio.com" target="_blank" rel="noreferrer" className="text-accent">
-              @levo_studio
+            <Link
+              href="https://levo-studio.com"
+              target="_blank"
+              rel="noreferrer"
+              className="text-accent transition-opacity hover:opacity-70"
+            >
+              @levo-studio
             </Link>
           </p>
         </div>
