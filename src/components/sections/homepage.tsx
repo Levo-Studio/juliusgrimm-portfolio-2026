@@ -18,7 +18,7 @@ const CONTACT_LINKS: Record<string, string> = {
   EMAIL: "mailto:me@juliusgrimm.dev",
   WhatsApp: "tel:+4917661028522",
   LinkedIn: "https://linkedin.com/in/julius-gr/",
-  Instagram: "https://instagram.com/julius_gr_",
+  Instagram: "https://www.instagram.com/justthatrandomcoder",
   GitHub: "https://github.com/justthatrandomcoder"
 };
 
@@ -50,7 +50,7 @@ export const Homepage = async (): Promise<React.JSX.Element> => {
         <HeroCodeCloud />
         <div className="relative">
           <p className="mb-5 text-[10px] font-medium leading-none text-accent md:mb-7 md:text-[11px]">
-            @julius_gr_
+            @JustThatRandomCoder
           </p>
           <h1 className="m-0 max-w-[15ch] text-[34px] font-light leading-[1.14] tracking-[-0.022em] md:text-[54px] md:leading-[1.12] md:tracking-[-0.024em]">
             Founder on accident. <span className="text-fg-muted">Engineer by design.</span>

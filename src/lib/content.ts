@@ -40,7 +40,7 @@ export const contactItems = [
   { title: "EMAIL", value: "me@juliusgrimm.dev", note: "Ancient technology. Surprisingly reliable. Hate typing it out." },
   { title: "WhatsApp", value: "+49 176 61028522", note: "Convenient. Mildly concerning." },
   { title: "LinkedIn", value: "@julius-gr", note: "Pretending to be professional." },
-  { title: "Instagram", value: "@julius_gr_", note: "Building things publicly instead of sleeping." },
+  { title: "Instagram", value: "@JustThatRandomCoder", note: "Building things publicly instead of sleeping." },
   { title: "GitHub", value: "@justthatrandomcoder", note: "Version-controlled overengineering." }
 ] as const;
 

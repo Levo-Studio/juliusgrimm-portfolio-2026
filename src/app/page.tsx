@@ -21,7 +21,7 @@ const personSchema = {
   sameAs: [
     "https://github.com/justthatrandomcoder",
     "https://linkedin.com/in/julius-gr/",
-    "https://instagram.com/julius_gr_"
+    "https://www.instagram.com/justthatrandomcoder"
   ]
 };
 
