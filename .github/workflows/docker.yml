@@ -3,10 +3,15 @@ name: Build and Push
 on:
   push:
     branches: [ "master", "main" ]
+  workflow_dispatch:
 
 env:
   REGISTRY: ghcr.io
   IMAGE_NAME: levo-studio/juliusgrimm-portfolio-2026
+  # Scaleway Container Registry (Amsterdam, privat)
+  SCW_REGISTRY: rg.nl-ams.scw.cloud
+  SCW_IMAGE_NAME: levo-studio/juliusgrimm-portfolio-2026
+  SCW_REGION: nl-ams
 
 jobs:
   build-and-push:
@@ -26,11 +31,20 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Log in to Scaleway Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.SCW_REGISTRY }}
+          username: nologin
+          password: ${{ secrets.SCW_SECRET_KEY }}
+
       - name: Extract metadata (tags, labels)
         id: meta
         uses: docker/metadata-action@v5
         with:
-          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          images: |
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+            ${{ env.SCW_REGISTRY }}/${{ env.SCW_IMAGE_NAME }}
           tags: |
             type=raw,value=build-${{ github.run_number }}
             type=sha,prefix={{branch}}-,format=short
@@ -51,9 +65,10 @@ jobs:
 
       - name: Verify pushed image digest
         run: |
-          IMAGE="${REGISTRY}/${IMAGE_NAME}@${{ steps.build.outputs.digest }}"
-          docker buildx imagetools inspect "$IMAGE" >/dev/null
-          echo "pushed image digest is available: $IMAGE"
+          for IMAGE in "${REGISTRY}/${IMAGE_NAME}" "${SCW_REGISTRY}/${SCW_IMAGE_NAME}"; do
+            docker buildx imagetools inspect "${IMAGE}@${{ steps.build.outputs.digest }}" >/dev/null
+            echo "pushed image digest is available: ${IMAGE}@${{ steps.build.outputs.digest }}"
+          done
 
       - name: Verify latest image revision
         run: |
@@ -68,15 +83,35 @@ jobs:
 
           echo "latest points to $REVISION"
 
-      - name: Trigger deployment webhook
+      # Scaleway: Container auf das neue Image umstellen. Läuft erst, wenn die
+      # Repository-Variable SCW_CONTAINER_ID gesetzt ist (nach Anlegen des Containers).
+      - name: Deploy to Scaleway Serverless Containers
+        if: ${{ vars.SCW_CONTAINER_ID != '' }}
         env:
-          DEPLOY_WEBHOOK_URL: ${{ secrets.DEPLOY_WEBHOOK_URL }}
+          SCW_SECRET_KEY: ${{ secrets.SCW_SECRET_KEY }}
+          SCW_CONTAINER_ID: ${{ vars.SCW_CONTAINER_ID }}
+          NEW_IMAGE: ${{ env.SCW_REGISTRY }}/${{ env.SCW_IMAGE_NAME }}:build-${{ github.run_number }}
         run: |
-          if [ -z "$DEPLOY_WEBHOOK_URL" ]; then
-            echo "DEPLOY_WEBHOOK_URL is not configured; skipping webhook."
-            exit 0
-          fi
+          set -euo pipefail
+          API="https://api.scaleway.com/containers/v1/regions/${SCW_REGION}/containers/${SCW_CONTAINER_ID}"
 
-          echo "Triggering deployment webhook..."
-          curl --fail --show-error --silent --retry 5 --retry-delay 5 --retry-all-errors "$DEPLOY_WEBHOOK_URL"
-          echo "Deployment webhook completed."
+          echo "Updating container to ${NEW_IMAGE} ..."
+          curl --fail-with-body --silent --show-error -X PATCH "$API" \
+            -H "X-Auth-Token: ${SCW_SECRET_KEY}" -H "Content-Type: application/json" \
+            -d "{\"image\": \"${NEW_IMAGE}\"}" >/dev/null
+
+          sleep 10
+          for i in $(seq 1 60); do
+            BODY="$(curl --fail --silent --show-error "$API" -H "X-Auth-Token: ${SCW_SECRET_KEY}")"
+            STATUS="$(echo "$BODY" | jq -r '.status')"
+            IMAGE="$(echo "$BODY" | jq -r '.image')"
+            echo "status: ${STATUS}"
+            if [ "$STATUS" = "ready" ] && [ "$IMAGE" = "$NEW_IMAGE" ]; then
+              echo "Deployment completed: ${IMAGE}"; exit 0
+            fi
+            if [ "$STATUS" = "error" ]; then
+              echo "Deployment failed – see Scaleway console logs."; exit 1
+            fi
+            sleep 10
+          done
+          echo "Timed out waiting for deployment."; exit 1
