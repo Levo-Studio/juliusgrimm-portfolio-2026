@@ -47,4 +47,12 @@ authenticator.options = {
   keyDecoder: (encodedSecret: string, encoding: BufferEncoding): string => base32Decode(encodedSecret).toString(encoding)
 };
 
-export { authenticator };
+/** New base32 TOTP secret for an admin user (stored as-is in admin_two_factor_secrets). */
+export const generateTotpSecret = (): string => authenticator.generateSecret();
+
+/** True when `token` is the code for the current 30-second step of `secret`. */
+export const verifyTotp = (token: string, secret: string): boolean => authenticator.check(token, secret);
+
+/** otpauth:// URI that authenticator apps scan from the setup QR code. */
+export const totpKeyUri = (accountName: string, issuer: string, secret: string): string =>
+  authenticator.keyuri(accountName, issuer, secret);

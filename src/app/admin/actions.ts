@@ -27,7 +27,7 @@ import { env } from "@/lib/env";
 import { parseProjectMonthInput } from "@/lib/project-meta";
 import { ensureSurvivalKitTags } from "@/server/survival-kit";
 import { CaseStudyGenerationError, generateCaseStudy, type CaseStudyDraft } from "@/server/ai/case-study";
-import { authenticator } from "@/server/totp";
+import { generateTotpSecret, totpKeyUri, verifyTotp } from "@/server/totp";
 
 const loginSchema = z.object({
   email: z.string(),
@@ -115,7 +115,7 @@ export const verifyTwoFactorLogin = async (_prevState: TwoFactorLoginState, form
 
   try {
     const [secret] = await db.select().from(adminTwoFactorSecrets).where(eq(adminTwoFactorSecrets.userId, userId)).limit(1);
-    if (!secret || !authenticator.check(code, secret.secretEncrypted)) {
+    if (!secret || !verifyTotp(code, secret.secretEncrypted)) {
       await audit({ userId, action: "failed_login_2fa", entityType: "auth" });
       return { ok: false, error: "Invalid 2FA code." };
     }
@@ -645,12 +645,12 @@ export const startTwoFactorSetup = async (_prev: TwoFactorState, formData: FormD
 
   let [secretRow] = await db.select().from(adminTwoFactorSecrets).where(eq(adminTwoFactorSecrets.userId, user.id)).limit(1);
   if (!secretRow) {
-    const secret = authenticator.generateSecret();
+    const secret = generateTotpSecret();
     [secretRow] = await db.insert(adminTwoFactorSecrets).values({ userId: user.id, secretEncrypted: secret }).returning();
   }
 
   const issuer = env.TOTP_ISSUER ?? "Julius Grimm Admin";
-  const otpAuthUrl = authenticator.keyuri(user.email, issuer, secretRow.secretEncrypted);
+  const otpAuthUrl = totpKeyUri(user.email, issuer, secretRow.secretEncrypted);
   const qrDataUrl = await QRCode.toDataURL(otpAuthUrl);
 
   return {
@@ -674,7 +674,7 @@ export const confirmTwoFactorSetup = async (_prev: TwoFactorState, formData: For
 
   const [secretRow] = await db.select().from(adminTwoFactorSecrets).where(eq(adminTwoFactorSecrets.userId, user.id)).limit(1);
   if (!secretRow) return { ok: false, error: "No pending 2FA setup found." };
-  if (!authenticator.check(code, secretRow.secretEncrypted)) return { ok: false, error: "Invalid authenticator code." };
+  if (!verifyTotp(code, secretRow.secretEncrypted)) return { ok: false, error: "Invalid authenticator code." };
 
   await db.update(adminUsers).set({ twoFactorEnabled: true, updatedAt: new Date() }).where(eq(adminUsers.id, user.id));
   await audit({ userId: user.id, action: "2fa_enabled", entityType: "auth" });
