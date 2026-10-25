@@ -1,0 +1,11 @@
+# pnpm 11+ no longer reads the "pnpm" field of package.json; settings live here.
+
+# Install scripts stay disabled for these packages (pnpm >= 11 fails the install on
+# unreviewed build scripts). Neither needs one: esbuild and sharp ship prebuilt
+# platform binaries as optional dependencies, which is how they already ran under pnpm 10.
+allowBuilds:
+  esbuild: false
+  sharp: false
+
+overrides:
+  postcss: 8.5.14
