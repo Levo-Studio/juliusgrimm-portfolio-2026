@@ -2,7 +2,8 @@
 
 import { useEffect, useRef, useState } from "react";
 import gsap from "gsap";
-import { CheckCircle2, TriangleAlert, X } from "lucide-react";
+import { TriangleAlert, X } from "lucide-react";
+import { CircleCheck } from "@/components/ui/icons";
 
 type ToastProps = {
   message: string;
@@ -21,7 +22,7 @@ export const Toast = ({ message, tone = "success", duration = 4000, onDismiss }:
   const [dismissed, setDismissed] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
   const barRef = useRef<HTMLDivElement>(null);
-  const Icon = tone === "success" ? CheckCircle2 : TriangleAlert;
+  const Icon = tone === "success" ? CircleCheck : TriangleAlert;
   const tones = TONE_CLASS[tone];
 
   const close = (): void => {
