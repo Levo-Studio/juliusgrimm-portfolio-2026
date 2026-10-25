@@ -95,4 +95,13 @@ describe("totpKeyUri", () => {
       "otpauth://totp/Julius%20Grimm%20Admin:me%40example.com?secret=JBSWY3DPEHPK3PXP&period=30&digits=6&algorithm=SHA1&issuer=Julius%20Grimm%20Admin"
     );
   });
+
+  it("encodes special characters and handles an empty issuer like otplib 12", () => {
+    expect(totpKeyUri("me@x.de", "Grimm & Co: Admin/ä", "JBSWY3DPEHPK3PXP")).toBe(
+      "otpauth://totp/Grimm%20%26%20Co%3A%20Admin%2F%C3%A4:me%40x.de?secret=JBSWY3DPEHPK3PXP&period=30&digits=6&algorithm=SHA1&issuer=Grimm%20%26%20Co%3A%20Admin%2F%C3%A4"
+    );
+    expect(totpKeyUri("a b+c@x.de", "", "JBSWY3DPEHPK3PXP")).toBe(
+      "otpauth://totp/a%20b%2Bc%40x.de:a%20b%2Bc%40x.de?secret=JBSWY3DPEHPK3PXP&period=30&digits=6&algorithm=SHA1"
+    );
+  });
 });
