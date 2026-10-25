@@ -1,7 +1,7 @@
 "use client";
 
 import { useActionState, useState } from "react";
-import { startAuthentication } from "@simplewebauthn/browser";
+import { startAuthentication, type PublicKeyCredentialRequestOptionsJSON } from "@simplewebauthn/browser";
 import { KeyRound } from "lucide-react";
 import Image from "next/image";
 import type { LoginState } from "@/app/admin/actions";
@@ -23,8 +23,8 @@ export const AdminLoginForm = (_props: Props): React.JSX.Element => {
         const payload = (await optionsResponse.json()) as { error?: string };
         throw new Error(payload.error ?? "Could not start passkey login.");
       }
-      const options = (await optionsResponse.json()) as Parameters<typeof startAuthentication>[0];
-      const authResponse = await startAuthentication(options);
+      const optionsJSON = (await optionsResponse.json()) as PublicKeyCredentialRequestOptionsJSON;
+      const authResponse = await startAuthentication({ optionsJSON });
       const verifyResponse = await fetch("/api/admin/passkeys/login/verify", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
