@@ -179,8 +179,8 @@ importers:
         specifier: 13.1.1
         version: 13.1.1
       bcryptjs:
-        specifier: 2.4.3
-        version: 2.4.3
+        specifier: 3.0.3
+        version: 3.0.3
       class-variance-authority:
         specifier: 0.7.1
         version: 0.7.1
@@ -230,9 +230,6 @@ importers:
       '@testing-library/jest-dom':
         specifier: 6.6.3
         version: 6.6.3
-      '@types/bcryptjs':
-        specifier: 2.4.6
-        version: 2.4.6
       '@types/node':
         specifier: 24.19.2
         version: 24.19.2
@@ -1596,9 +1593,6 @@ packages:
     resolution: {integrity: sha512-IteBhl4XqYNkM54f4ejhLRJiZNqcSCoXUOG2CPK7qbD322KjQozM4kHQOfkG2oln9b9HTYqs+Sae8vBATubxxA==}
     engines: {node: '>=14', npm: '>=6', yarn: '>=1'}
 
-  '@types/bcryptjs@2.4.6':
-    resolution: {integrity: sha512-9xlo6R2qDs5uixm0bcIqCeMCE6HiQsIyel9KQySStiyqNl2tnj2mP3DX1Nf56MD6KMenNNlBBsy3LJ7gUEQPXQ==}
-
   '@types/estree@1.0.8':
     resolution: {integrity: sha512-dWHzHa2WqEXI/O1E9OjrocMTKJl2mSrEolh1Iomrv6U+JuNwaHXsXx9bLu5gG7BUWFIN0skIQJQ/L1rIex4X6w==}
 
@@ -1690,8 +1684,9 @@ packages:
     engines: {node: '>=6.0.0'}
     hasBin: true
 
-  bcryptjs@2.4.3:
-    resolution: {integrity: sha512-V/Hy/X9Vt7f3BbPJEi8BdVFMByHi+jNXrYkW3huaybV/kQ0KJg0Y6PkEMbn+zeT+i+SiKZ/HMqJGIIt4LZDqNQ==}
+  bcryptjs@3.0.3:
+    resolution: {integrity: sha512-GlF5wPWnSa/X5LKM1o0wz0suXIINz1iHRLvTS+sLyi7XPbe5ycmYI3DlZqVGZZtDgl4DmasFg7gOB3JYbphV5g==}
+    hasBin: true
 
   buffer-from@1.1.2:
     resolution: {integrity: sha512-E+XQCRwSbaaiChtv6k6Dwgc+bx+Bs6vuKJHHl5kox/BaKbhiXzqQOwK4cO22yElGp2OCmjwVhT3HmxgyPGnJfQ==}
@@ -3558,8 +3553,6 @@ snapshots:
       lodash: 4.18.1
       redent: 3.0.0
 
-  '@types/bcryptjs@2.4.6': {}
-
   '@types/estree@1.0.8': {}
 
   '@types/estree@1.0.9': {}
@@ -3656,7 +3649,7 @@ snapshots:
 
   baseline-browser-mapping@2.10.29: {}
 
-  bcryptjs@2.4.3: {}
+  bcryptjs@3.0.3: {}
 
   buffer-from@1.1.2: {}
 
