@@ -13,7 +13,11 @@ import {
 import { URL_CASES } from "@/tests/url-cases";
 
 // The accepted input sets below were recorded with zod 3.23.8 and pin the behaviour of the
-// admin forms across the zod 4 migration.
+// admin forms across the zod 4 migration. Two deliberate differences under zod 4:
+// - z.url() returns the input trimmed (zod 3 kept surrounding whitespace, which the URL
+//   parser ignores anyway); the accepted set is unchanged.
+// - z.uuid() only accepts RFC 9562 UUIDs. Every id the forms submit comes from Postgres
+//   gen_random_uuid() (version 4), so only ids that can never exist are newly rejected.
 
 const EMAIL_CASES: Array<[string, boolean]> = [
   ["me@juliusgrimm.dev", true],
@@ -37,14 +41,13 @@ const EMAIL_CASES: Array<[string, boolean]> = [
   ["", false]
 ];
 
-// Every id the forms submit comes from Postgres gen_random_uuid() (RFC 9562 version 4).
 const UUID_CASES: Array<[string, boolean]> = [
   ["8b3afaca-7d36-46a4-bc69-989ff1e1638f", true],
   ["8B3AFACA-7D36-46A4-BC69-989FF1E1638F", true],
   ["00000000-0000-0000-0000-000000000000", true],
   ["ffffffff-ffff-ffff-ffff-ffffffffffff", true],
-  ["12345678-1234-1234-1234-123456789abc", true],
-  ["12345678-1234-0234-8234-123456789abc", true],
+  ["12345678-1234-1234-1234-123456789abc", false], // variant nibble 1: not RFC 9562
+  ["12345678-1234-0234-8234-123456789abc", false], // version nibble 0: not RFC 9562
   ["8b3afaca7d3646a4bc69989ff1e1638f", false],
   ["fallback-0", false],
   ["{8b3afaca-7d36-46a4-bc69-989ff1e1638f}", false],
@@ -71,7 +74,7 @@ describe("project link url", () => {
   it.each(URL_CASES)("%j -> %s", (url, accepted) => {
     const result = projectLinkSchema.safeParse({ label: "Site", url, visible: true, sortOrder: 1 });
     expect(result.success).toBe(accepted);
-    if (result.success) expect(result.data.url).toBe(url);
+    if (result.success) expect(result.data.url).toBe(url.trim());
   });
 
   it("rejects an empty url", () => {
@@ -84,7 +87,7 @@ describe("project imageUrl", () => {
     for (const schema of [projectSchema, projectCreateSchema]) {
       const result = schema.safeParse({ ...validProject, imageUrl });
       expect(result.success).toBe(accepted);
-      if (result.success) expect(result.data.imageUrl).toBe(imageUrl);
+      if (result.success) expect(result.data.imageUrl).toBe(imageUrl.trim());
     }
   });
 

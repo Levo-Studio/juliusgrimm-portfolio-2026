@@ -4,7 +4,7 @@ import { z } from "zod";
 // "use server" module may only export async functions, and keeping them here lets the
 // accepted input sets be unit-tested directly.
 
-export const adminEmailSchema = z.string().email();
+export const adminEmailSchema = z.email();
 
 export const loginSchema = z.object({
   email: z.string(),
@@ -16,13 +16,13 @@ export const twoFactorLoginSchema = z.object({
 });
 
 export const projectSchema = z.object({
-  id: z.string().uuid().optional(),
+  id: z.uuid().optional(),
   slug: z.string().optional().default(""),
   title: z.string().min(2),
   subtitle: z.string().min(2),
   description: z.string().min(10),
   whyBuilt: z.string().min(10),
-  imageUrl: z.string().url().optional().or(z.literal("")),
+  imageUrl: z.url().optional().or(z.literal("")),
   createdAt: z.string().optional().default(""),
   visible: z.enum(["true", "false"]),
   csrf: z.string().optional()
@@ -34,7 +34,7 @@ export const projectCreateSchema = z.object({
   subtitle: z.string().trim().min(2),
   description: z.string().trim().min(10),
   whyBuilt: z.string().trim().min(10),
-  imageUrl: z.string().url().optional().or(z.literal("")),
+  imageUrl: z.url().optional().or(z.literal("")),
   createdAt: z.string().optional().default(""),
   visible: z.enum(["true", "false"]),
   csrf: z.string().optional()
@@ -42,7 +42,7 @@ export const projectCreateSchema = z.object({
 
 export const projectLinkSchema = z.object({
   label: z.string().min(1).max(80),
-  url: z.string().url(),
+  url: z.url(),
   visible: z.boolean(),
   sortOrder: z.number().int().min(0)
 });
@@ -64,11 +64,11 @@ export const generateCaseStudySchema = z.object({
   csrf: z.string().optional()
 });
 
-export const deleteProjectSchema = z.object({ id: z.string().uuid(), csrf: z.string().optional() });
+export const deleteProjectSchema = z.object({ id: z.uuid(), csrf: z.string().optional() });
 
-export const toggleSchema = z.object({ id: z.string().uuid(), visible: z.enum(["true", "false"]), csrf: z.string().optional() });
+export const toggleSchema = z.object({ id: z.uuid(), visible: z.enum(["true", "false"]), csrf: z.string().optional() });
 
-export const sessionSchema = z.object({ sessionId: z.string().uuid(), csrf: z.string().optional() });
+export const sessionSchema = z.object({ sessionId: z.uuid(), csrf: z.string().optional() });
 
 export const passwordSchema = z.object({ currentPassword: z.string().min(12), newPassword: z.string().min(12), confirmPassword: z.string().min(12), csrf: z.string().optional() });
 
@@ -78,7 +78,7 @@ export const twoFactorConfirmSchema = z.object({ csrf: z.string().optional(), co
 
 export const twoFactorDisableSchema = z.object({ csrf: z.string().optional() });
 
-export const deletePasskeySchema = z.object({ csrf: z.string().optional(), authenticatorId: z.string().uuid() });
+export const deletePasskeySchema = z.object({ csrf: z.string().optional(), authenticatorId: z.uuid() });
 
 export type ProjectLinkInput = z.infer<typeof projectLinkSchema>;
 export type ProjectTechInput = z.infer<typeof projectTechSchema>;

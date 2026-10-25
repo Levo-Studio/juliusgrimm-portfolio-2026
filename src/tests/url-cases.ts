@@ -1,5 +1,6 @@
 // [input, accepted] pairs for URL fields (admin forms and env vars), recorded with
 // zod 3.23.8 `z.string().url()`, which accepts anything the WHATWG URL parser accepts.
+// zod 4 `z.url()` accepts exactly the same set (it trims the returned value).
 export const URL_CASES: Array<[string, boolean]> = [
   ["https://example.com", true],
   ["http://localhost:3000/x?y=1#z", true],
