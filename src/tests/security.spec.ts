@@ -133,6 +133,26 @@ test.describe("public pages under the CSP", () => {
     await expectCleanPage(page, seen);
   });
 
+  test("the image optimizer serves local images only", async ({ page, request }) => {
+    const local = await request.get("/_next/image?url=%2Fjg_logo.png&w=32&q=75");
+    expect(local.status()).toBe(200);
+    expect(local.headers()["content-type"]).toMatch(/^image\//);
+
+    const remote = await request.get(`/_next/image?url=${encodeURIComponent("https://example.com/logo.png")}&w=32&q=75`);
+    expect(remote.status()).toBe(400);
+
+    await page.goto("/");
+    const logo = page.locator('header img[src*="jg_logo.png"]');
+    await expect(logo).toBeVisible();
+    expect(await logo.evaluate((img) => (img as HTMLImageElement).naturalWidth)).toBeGreaterThan(0);
+  });
+
+  test("the passkey verify endpoint answers bad input with 400, not 500", async ({ request }) => {
+    const response = await request.post("/api/admin/passkeys/login/verify", { headers: { "content-type": "application/json" }, data: "{not json" });
+    expect(response.status()).toBe(400);
+    expect(await response.json()).toEqual({ error: "Invalid passkey payload." });
+  });
+
   test("the favicon resolver keeps its own sandbox CSP", async ({ request }) => {
     const response = await request.get("/api/favicon?u=https%3A%2F%2Fexample.invalid");
     expect(response.headers()["content-security-policy"]).toBeUndefined();
@@ -190,6 +210,7 @@ test.describe("admin under the CSP", () => {
     await cdp.send("WebAuthn.addVirtualAuthenticator", {
       options: { protocol: "ctap2", transport: "internal", hasResidentKey: true, hasUserVerification: true, isUserVerified: true, automaticPresenceSimulation: true }
     });
+    await expect.poll(() => hydrated(page)).toBe(true);
     await page.getByRole("button", { name: "Settings" }).first().click();
     const reloaded = page.waitForEvent("load");
     await page.getByRole("button", { name: "Register passkey" }).click();
@@ -207,6 +228,8 @@ test.describe("admin under the CSP", () => {
     await logOut(page);
     await page.getByRole("button", { name: "Sign in with passkey" }).click();
     await expect(page.getByText("Admin / Case studies")).toBeVisible();
+    // Passkey sign-in ends in a full page load; wait for React before using the tabs.
+    await expectCleanPage(page, seen);
 
     // 4. Enable 2FA (QR code is a data: image), then sign in with password + code.
     await page.getByRole("button", { name: "Settings" }).first().click();
