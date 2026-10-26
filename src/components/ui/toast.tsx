@@ -62,7 +62,8 @@ export const Toast = ({ message, tone = "success", duration = 4000, onDismiss }:
 
     return () => ctx.revert();
     // Mount-only on purpose: the entrance animation and auto-dismiss timer run once per toast.
-    // `close` is recreated every render, so listing it would restart the animation each render.
+    // `close` is recreated every render, so listing it would restart the animation each render;
+    // `duration` and `onDismiss` (via `close`) are deliberately read once at mount.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
