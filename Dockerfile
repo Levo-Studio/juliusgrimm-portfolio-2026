@@ -1,14 +1,19 @@
-FROM node:22-alpine AS base
+# Node 24 LTS on Alpine, pinned to the multi-arch index digest so every build starts from
+# the same base image. Dependabot (docker ecosystem) bumps tag and digest together.
+FROM node:24.22.1-alpine3.24@sha256:06d7adf3e0ef61a13f1d28682726366f97a15aa1888c934d3ecec86c33918b53 AS base
 
 ENV PNPM_HOME="/pnpm"
 ENV PATH="$PNPM_HOME:$PATH"
 
 RUN corepack enable
-RUN corepack prepare pnpm@10.7.1 --activate
+# Install exactly the pnpm version from package.json's "packageManager" field, so the
+# image and local development cannot drift apart. package.json is bind-mounted, not copied.
+RUN --mount=type=bind,source=package.json,target=/tmp/package.json \
+    corepack install --global "$(node -p "require('/tmp/package.json').packageManager")"
 
 FROM base AS deps
 WORKDIR /app
-COPY package.json pnpm-lock.yaml ./
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 RUN pnpm install --frozen-lockfile
 
 FROM base AS builder
