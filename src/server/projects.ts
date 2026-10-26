@@ -1,6 +1,7 @@
 import { and, asc, eq } from "drizzle-orm";
 import { db } from "@/server/db/client";
 import { projectLinks, projects, projectTechStack } from "@/server/db/schema";
+import { hostnameOf } from "@/lib/favicon-parse";
 import type { Project } from "@/types/project";
 import type { ColorCategory } from "@/types/project";
 
@@ -173,4 +174,22 @@ export const getProjectBySlug = async (slug: string): Promise<Project | null> =>
     const fallback = fallbackProjects.find((project) => project.slug === slug) ?? null;
     return fallback;
   }
+};
+
+const hostsOf = (urls: string[]): string[] => urls.map(hostnameOf).filter((host): host is string => host !== null);
+
+/**
+ * Hosts the public favicon resolver may look up: every project link's host, hidden projects
+ * and hidden links included (the admin dashboard shows their icons too), plus the hosts of
+ * the fallback projects shown while the database is unavailable.
+ */
+export const getFaviconHosts = async (): Promise<Set<string>> => {
+  const hosts = new Set(hostsOf(fallbackProjects.flatMap((project) => project.links.map((link) => link.url))));
+  try {
+    const rows = await db.select({ url: projectLinks.url }).from(projectLinks);
+    for (const host of hostsOf(rows.map((row) => row.url))) hosts.add(host);
+  } catch {
+    /* database unavailable: the fallback hosts are what the site shows */
+  }
+  return hosts;
 };

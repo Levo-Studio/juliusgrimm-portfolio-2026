@@ -1,8 +1,10 @@
 import type { Metadata } from "next";
 import Script from "next/script";
+import { headers } from "next/headers";
 import "./globals.css";
 import { geistSans, geistMono } from "@/lib/fonts";
 import { ThemeScript } from "@/components/shared/theme-script";
+import { ANALYTICS_SCRIPT_SRC, ANALYTICS_WEBSITE_ID } from "@/lib/analytics";
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://juliusgrimm.dev"),
@@ -64,18 +66,22 @@ export const metadata: Metadata = {
   }
 };
 
-export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>): React.JSX.Element {
+export default async function RootLayout({ children }: Readonly<{ children: React.ReactNode }>): Promise<React.JSX.Element> {
+  // Set per request by src/proxy.ts; the CSP only lets scripts carrying it run.
+  const nonce = (await headers()).get("x-nonce") ?? undefined;
+
   return (
     <html lang="en" className={`${geistSans.variable} ${geistMono.variable}`} suppressHydrationWarning>
       <head>
-        <ThemeScript />
+        <ThemeScript nonce={nonce} />
       </head>
       <body>
         {children}
         <Script
-          src="https://analytics.levo-studio.com/script.js"
-          data-website-id="8b3afaca-7d36-46a4-bc69-989ff1e1638f"
+          src={ANALYTICS_SCRIPT_SRC}
+          data-website-id={ANALYTICS_WEBSITE_ID}
           strategy="afterInteractive"
+          nonce={nonce}
         />
       </body>
     </html>

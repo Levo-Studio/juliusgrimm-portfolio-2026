@@ -6,6 +6,7 @@
  */
 const script = `(function(){try{var t=localStorage.getItem("theme");if(t==="light"||t==="dark"){document.documentElement.setAttribute("data-theme",t)}}catch(e){}document.documentElement.classList.add("reveal-ready")})()`;
 
-export const ThemeScript = (): React.JSX.Element => (
-  <script dangerouslySetInnerHTML={{ __html: script }} />
+/** `nonce` comes from the per-request CSP set in src/proxy.ts; without it the script is blocked. */
+export const ThemeScript = ({ nonce }: { nonce?: string }): React.JSX.Element => (
+  <script nonce={nonce} dangerouslySetInnerHTML={{ __html: script }} />
 );

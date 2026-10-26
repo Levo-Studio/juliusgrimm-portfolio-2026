@@ -2,6 +2,18 @@
 const BLOCKED_HOSTNAMES = new Set(["localhost", "127.0.0.1", "0.0.0.0", "::1", "metadata.google.internal"]);
 const BLOCKED_SUFFIXES = [".local", ".internal", ".localhost", ".home.arpa"];
 
+/** Hostname form used to compare hosts: lowercase, no IPv6 brackets, no trailing root dot. */
+export const normalizeHostname = (hostname: string): string => hostname.toLowerCase().replace(/^\[|\]$/g, "").replace(/\.+$/, "");
+
+/** Normalised hostname of `raw`, or null when it is not an absolute URL. */
+export const hostnameOf = (raw: string): string | null => {
+  try {
+    return normalizeHostname(new URL(raw).hostname);
+  } catch {
+    return null;
+  }
+};
+
 /**
  * The resolver endpoint is public, so a caller could aim it at infrastructure only the
  * server can reach. Bare IPs are refused outright — every legitimate project link is a
@@ -16,7 +28,7 @@ export const publicHttpUrl = (raw: string): URL | null => {
   }
   if (url.protocol !== "http:" && url.protocol !== "https:") return null;
 
-  const host = url.hostname.toLowerCase().replace(/^\[|\]$/g, "");
+  const host = normalizeHostname(url.hostname);
   if (BLOCKED_HOSTNAMES.has(host)) return null;
   if (BLOCKED_SUFFIXES.some((suffix) => host.endsWith(suffix))) return null;
   if (!host.includes(".")) return null;

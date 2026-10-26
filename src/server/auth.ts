@@ -4,27 +4,37 @@ import { cookies, headers } from "next/headers";
 import { and, eq, isNull, ne } from "drizzle-orm";
 import { db } from "@/server/db/client";
 import { adminSessions, adminUsers, auditLogs } from "@/server/db/schema";
+import { createRateLimiter } from "@/server/rate-limit";
 
 const SESSION_COOKIE = "admin_session";
 const CSRF_COOKIE = "admin_csrf";
 const TWO_FACTOR_COOKIE = "admin_2fa_pending";
 const sessionMs = 1000 * 60 * 60 * 24 * 7;
-const attempts = new Map<string, { count: number; until: number }>();
 const isProd = process.env.NODE_ENV === "production";
+
+/** Every auth limit below counts attempts in the same 10-minute window. */
+export const AUTH_RATE_WINDOW_MS = 10 * 60 * 1000;
+/** Password sign-ins per email and client IP. */
+export const LOGIN_ATTEMPTS_PER_CLIENT = 10;
+/**
+ * Password sign-ins per email across all clients, so rotating IPs does not multiply the
+ * guesses. A third party can use this to block password sign-in for that email for one
+ * window; passkey sign-in is not affected. Twice the per-client limit leaves the owner
+ * room to mistype on a second device while one client is already locked.
+ */
+export const LOGIN_ATTEMPTS_PER_EMAIL = 20;
+/** 2FA codes per pending sign-in user; a 6-digit code must not be guessable by retrying. */
+export const TWO_FACTOR_ATTEMPTS_PER_USER = 5;
+
+const limiter = createRateLimiter(AUTH_RATE_WINDOW_MS);
 
 const hashToken = (token: string): string => createHash("sha256").update(token).digest("hex");
 
-export const rateLimitAuth = (identifier: string): boolean => {
-  const now = Date.now();
-  const state = attempts.get(identifier);
-  if (!state || state.until < now) {
-    attempts.set(identifier, { count: 1, until: now + 10 * 60 * 1000 });
-    return true;
-  }
-  if (state.count >= 10) return false;
-  attempts.set(identifier, { ...state, count: state.count + 1 });
-  return true;
-};
+/** Counts one attempt for `identifier`; false once `max` attempts were made in the window. */
+export const rateLimitAuth = (identifier: string, max = LOGIN_ATTEMPTS_PER_CLIENT): boolean => limiter.hit(identifier, max);
+
+/** Number of keys the limiter currently tracks (expired keys are pruned). */
+export const rateLimitEntryCount = (): number => limiter.size();
 
 export const verifyPassword = async (password: string, hash: string): Promise<boolean> => bcrypt.compare(password, hash);
 
@@ -68,8 +78,16 @@ export const getSessionUser = async (): Promise<{ id: string; email: string } | 
   return user ?? null;
 };
 
+/** Ends the current session: revokes its row, so the token stops working even if it was copied, and drops the cookie. */
 export const clearSession = async (): Promise<void> => {
   const cookieStore = await cookies();
+  const token = cookieStore.get(SESSION_COOKIE)?.value;
+  if (token) {
+    await db
+      .update(adminSessions)
+      .set({ revokedAt: new Date() })
+      .where(and(eq(adminSessions.tokenHash, hashToken(token)), isNull(adminSessions.revokedAt)));
+  }
   cookieStore.delete(SESSION_COOKIE);
 };
 
@@ -135,13 +153,6 @@ export const getPendingTwoFactorUserId = async (): Promise<string | null> => {
   const expiresAt = Number(expiresRaw);
   if (!userId || Number.isNaN(expiresAt) || expiresAt < Date.now()) return null;
   return userId;
-};
-
-export const generateCsrfToken = async (): Promise<string> => {
-  const token = randomBytes(16).toString("hex");
-  const cookieStore = await cookies();
-  cookieStore.set(CSRF_COOKIE, token, { httpOnly: true, secure: isProd, sameSite: "lax", path: "/" });
-  return token;
 };
 
 export const verifyCsrfToken = async (token: string): Promise<boolean> => {

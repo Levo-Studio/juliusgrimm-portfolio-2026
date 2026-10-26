@@ -17,8 +17,11 @@ import {
   getPendingTwoFactorUserId,
   getSessionUser,
   hashPassword,
+  LOGIN_ATTEMPTS_PER_CLIENT,
+  LOGIN_ATTEMPTS_PER_EMAIL,
   rateLimitAuth,
   revokeOtherSessions,
+  TWO_FACTOR_ATTEMPTS_PER_USER,
   verifyMutationRequest,
   verifyPassword
 } from "@/server/auth";
@@ -69,7 +72,9 @@ export const loginAdmin = async (_prevState: LoginState, formData: FormData): Pr
 
   const headerBag = await headers();
   const loginFingerprint = `${email}::${headerBag.get("x-forwarded-for") ?? headerBag.get("x-real-ip") ?? "unknown-ip"}`;
-  if (!rateLimitAuth(loginFingerprint)) return { ok: false, error: "Too many login attempts. Please wait a few minutes." };
+  // Per client first, so a client that is already blocked does not use up the email's budget.
+  const allowed = rateLimitAuth(loginFingerprint, LOGIN_ATTEMPTS_PER_CLIENT) && rateLimitAuth(`login-email::${email}`, LOGIN_ATTEMPTS_PER_EMAIL);
+  if (!allowed) return { ok: false, error: "Too many login attempts. Please wait a few minutes." };
 
   try {
     const [{ totalUsers }] = await db.select({ totalUsers: count() }).from(adminUsers);
@@ -124,6 +129,13 @@ export const verifyTwoFactorLogin = async (_prevState: TwoFactorLoginState, form
 
   const code = parsed.data.code.replace(/\D/g, "");
   if (code.length !== 6) return { ok: false, error: "Enter a valid 6-digit code." };
+
+  // Keyed on the user, not the cookie: signing in again with the password must not reset it.
+  if (!rateLimitAuth(`2fa::${userId}`, TWO_FACTOR_ATTEMPTS_PER_USER)) {
+    await clearPendingTwoFactor();
+    await audit({ userId, action: "login_2fa_locked", entityType: "auth" });
+    return { ok: false, error: "Too many 2FA attempts. Please wait a few minutes and sign in again." };
+  }
 
   try {
     const [secret] = await db.select().from(adminTwoFactorSecrets).where(eq(adminTwoFactorSecrets.userId, userId)).limit(1);
@@ -544,7 +556,10 @@ export const revokeSession = async (formData: FormData): Promise<void> => {
   const parsed = sessionSchema.safeParse(Object.fromEntries(formData.entries()));
   if (!parsed.success || !(await verifyMutationRequest(parsed.data.csrf))) return;
 
-  await db.update(adminSessions).set({ revokedAt: new Date() }).where(and(eq(adminSessions.id, parsed.data.sessionId), isNull(adminSessions.revokedAt)));
+  await db
+    .update(adminSessions)
+    .set({ revokedAt: new Date() })
+    .where(and(eq(adminSessions.id, parsed.data.sessionId), eq(adminSessions.userId, user.id), isNull(adminSessions.revokedAt)));
   await audit({ userId: user.id, action: "session_revoke", entityType: "session", entityId: parsed.data.sessionId });
   revalidatePath("/admin");
 };
@@ -583,6 +598,8 @@ export const changePassword = async (_prev: PasswordState, formData: FormData): 
   if (!(await verifyPassword(parsed.data.currentPassword, dbUser.passwordHash))) return { ok: false, error: "Current password is incorrect." };
 
   await db.update(adminUsers).set({ passwordHash: await hashPassword(parsed.data.newPassword), updatedAt: new Date() }).where(eq(adminUsers.id, user.id));
+  // Anyone signed in with the old password is signed out; this device stays signed in.
+  await revokeOtherSessions(user.id);
   await audit({ userId: user.id, action: "password_change", entityType: "auth" });
   return { ok: true, message: "Password updated." };
 };

@@ -76,16 +76,18 @@ const assertion = (privateKey: KeyObject, signCount: number, challenge = CHALLEN
   };
 };
 
-const post = async (body: unknown) => {
+const postRaw = async (body: string) => {
   process.env.DATABASE_URL ??= "postgresql://build:build@localhost:5432/build";
   const { POST } = await import("@/app/api/admin/passkeys/login/verify/route");
   const request = new NextRequest(`${ORIGIN}/api/admin/passkeys/login/verify`, {
     method: "POST",
     headers: { host: "localhost:3000", cookie: `webauthn_auth_challenge=${CHALLENGE}`, "content-type": "application/json" },
-    body: JSON.stringify(body)
+    body
   });
   return POST(request);
 };
+
+const post = (body: unknown) => postRaw(JSON.stringify(body));
 
 describe("POST /api/admin/passkeys/login/verify", () => {
   const { privateKey, publicKey } = generateKeyPairSync("ec", { namedCurve: "P-256" });
@@ -113,16 +115,41 @@ describe("POST /api/admin/passkeys/login/verify", () => {
     expect(createSession).toHaveBeenCalledWith(storedRow.userId);
   });
 
-  // The route lets verification errors propagate (Next answers 500); no session is created.
-  it("rejects an assertion signed for another challenge", async () => {
+  // Verification errors are a rejected sign-in: 400 with the route's JSON error, no session.
+  it("rejects an assertion signed for another challenge with 400", async () => {
     selectResults.push([storedRow], [{ id: storedRow.userId }]);
-    await expect(post({ response: assertion(privateKey, 8, "b3RoZXItY2hhbGxlbmdl") })).rejects.toThrow(/challenge/);
+    const response = await post({ response: assertion(privateKey, 8, "b3RoZXItY2hhbGxlbmdl") });
+    expect(response.status).toBe(400);
+    expect(await response.json()).toEqual({ error: "Passkey verification failed." });
+    expect(createSession).not.toHaveBeenCalled();
+    expect(updateSet).not.toHaveBeenCalled();
+  });
+
+  it("rejects a replayed (non-increasing) counter with 400", async () => {
+    selectResults.push([storedRow], [{ id: storedRow.userId }]);
+    const response = await post({ response: assertion(privateKey, 7) });
+    expect(response.status).toBe(400);
+    expect(await response.json()).toEqual({ error: "Passkey verification failed." });
+    expect(createSession).not.toHaveBeenCalled();
+    expect(updateSet).not.toHaveBeenCalled();
+  });
+
+  it("rejects a malformed assertion with 400", async () => {
+    selectResults.push([storedRow], [{ id: storedRow.userId }]);
+    const response = await post({ response: { id: CREDENTIAL_ID, response: { clientDataJSON: "%%%" } } });
+    expect(response.status).toBe(400);
+    expect(await response.json()).toEqual({ error: "Passkey verification failed." });
     expect(createSession).not.toHaveBeenCalled();
   });
 
-  it("rejects a replayed (non-increasing) counter", async () => {
-    selectResults.push([storedRow], [{ id: storedRow.userId }]);
-    await expect(post({ response: assertion(privateKey, 7) })).rejects.toThrow(/counter/);
+  it.each([
+    ["invalid JSON", "{not json"],
+    ["an empty body", ""],
+    ["JSON null", "null"]
+  ])("answers %s with 400", async (_label, body) => {
+    const response = await postRaw(body);
+    expect(response.status).toBe(400);
+    expect(await response.json()).toEqual({ error: "Invalid passkey payload." });
     expect(createSession).not.toHaveBeenCalled();
   });
 });
