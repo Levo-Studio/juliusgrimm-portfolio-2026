@@ -42,7 +42,8 @@ export const AboutText = ({ children }: AboutTextProps): React.JSX.Element => {
   // words: "*professional overthinker*" opens on the first word and closes on the last.
   const rawWords = children.split(" ");
   let openPhrase = false;
-  const words = rawWords.map((word) => {
+  const words: { display: string; highlighted: boolean }[] = [];
+  for (const word of rawWords) {
     let display = word;
     let highlighted = openPhrase;
 
@@ -56,8 +57,8 @@ export const AboutText = ({ children }: AboutTextProps): React.JSX.Element => {
       openPhrase = false;
     }
 
-    return { display, highlighted };
-  });
+    words.push({ display, highlighted });
+  }
 
   return (
     <p

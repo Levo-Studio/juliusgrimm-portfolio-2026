@@ -26,7 +26,7 @@ export const skipEntranceAnimation = (): boolean => sessionStorage.getItem(SKIP_
  */
 export const ScrollToHash = (): null => {
   useEffect(() => {
-    const cleanupTimeout = setTimeout(() => sessionStorage.removeItem(SKIP_ENTRANCE_STORAGE_KEY), 100);
+    setTimeout(() => sessionStorage.removeItem(SKIP_ENTRANCE_STORAGE_KEY), 100);
     const storedTarget = sessionStorage.getItem(SCROLL_TARGET_STORAGE_KEY);
     const savedY = sessionStorage.getItem(SCROLL_POSITION_STORAGE_KEY);
     sessionStorage.removeItem(SCROLL_TARGET_STORAGE_KEY);

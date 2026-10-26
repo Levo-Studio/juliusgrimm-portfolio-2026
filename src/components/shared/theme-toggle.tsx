@@ -25,6 +25,9 @@ export const ThemeToggle = ({ compact = false }: ThemeToggleProps): React.JSX.El
   useEffect(() => {
     try {
       const stored = localStorage.getItem("theme");
+      // Adopting the stored theme after mount is deliberate: reading it during render would
+      // make the first client render differ from the server HTML (hydration mismatch).
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       if (stored === "light" || stored === "dark" || stored === "auto") setTheme(stored);
     } catch {
       /* storage unavailable (private mode, blocked cookies) — stay on auto */

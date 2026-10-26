@@ -7,11 +7,9 @@ import Image from "next/image";
 import type { LoginState } from "@/app/admin/actions";
 import { loginAdmin } from "@/app/admin/actions";
 
-type Props = Record<string, never>;
-
 const initialState: LoginState = { ok: false };
 
-export const AdminLoginForm = (_props: Props): React.JSX.Element => {
+export const AdminLoginForm = (): React.JSX.Element => {
   const [state, formAction, pending] = useActionState(loginAdmin, initialState);
   const [passkeyPending, setPasskeyPending] = useState(false);
 
@@ -34,6 +32,9 @@ export const AdminLoginForm = (_props: Props): React.JSX.Element => {
         const payload = (await verifyResponse.json()) as { error?: string };
         throw new Error(payload.error ?? "Passkey login failed.");
       }
+      // A full page load is intentional: the server-rendered admin pages must be requested
+      // fresh with the session cookie that was just set, not reused from the client router.
+      // eslint-disable-next-line @next/next/no-location-assign-relative-destination
       window.location.href = "/admin";
     } catch (error) {
       console.error(error);
