@@ -14,8 +14,10 @@ import { URL_CASES } from "@/tests/url-cases";
 
 // The accepted input sets below were recorded with zod 3.23.8 and pin the behaviour of the
 // admin forms across the zod 4 migration. Two deliberate differences under zod 4:
-// - z.url() returns the input trimmed (zod 3 kept surrounding whitespace, which the URL
-//   parser ignores anyway); the accepted set is unchanged.
+// - z.url() trims the input (including Unicode whitespace such as U+00A0, which zod 3
+//   rejected) and strips tab/newline characters from the returned value; see
+//   src/tests/url-cases.ts for the exact cases. Every other URL is accepted or rejected
+//   as before.
 // - z.uuid() only accepts RFC 9562 UUIDs. Every id the forms submit comes from Postgres
 //   gen_random_uuid() (version 4), so only ids that can never exist are newly rejected.
 
@@ -71,10 +73,10 @@ describe("adminEmailSchema", () => {
 });
 
 describe("project link url", () => {
-  it.each(URL_CASES)("%j -> %s", (url, accepted) => {
+  it.each(URL_CASES)("%j -> %s", (url, accepted, output) => {
     const result = projectLinkSchema.safeParse({ label: "Site", url, visible: true, sortOrder: 1 });
     expect(result.success).toBe(accepted);
-    if (result.success) expect(result.data.url).toBe(url.trim());
+    if (result.success) expect(result.data.url).toBe(output ?? url.trim());
   });
 
   it("rejects an empty url", () => {
@@ -83,11 +85,11 @@ describe("project link url", () => {
 });
 
 describe("project imageUrl", () => {
-  it.each(URL_CASES)("%j -> %s", (imageUrl, accepted) => {
+  it.each(URL_CASES)("%j -> %s", (imageUrl, accepted, output) => {
     for (const schema of [projectSchema, projectCreateSchema]) {
       const result = schema.safeParse({ ...validProject, imageUrl });
       expect(result.success).toBe(accepted);
-      if (result.success) expect(result.data.imageUrl).toBe(imageUrl.trim());
+      if (result.success) expect(result.data.imageUrl).toBe(output ?? imageUrl.trim());
     }
   });
 

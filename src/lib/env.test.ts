@@ -8,14 +8,14 @@ const loadSchema = async () => {
 };
 
 describe("envSchema", () => {
-  it.each(URL_CASES)("URL vars: %j -> %s", async (url, accepted) => {
+  it.each(URL_CASES)("URL vars: %j -> %s", async (url, accepted, output) => {
     const envSchema = await loadSchema();
     const result = envSchema.safeParse({ DATABASE_URL: url, AUTH_URL: url, WEBAUTHN_ORIGIN: url });
     expect(result.success).toBe(accepted);
     if (result.success) {
-      expect(result.data.DATABASE_URL).toBe(url.trim());
-      expect(result.data.AUTH_URL).toBe(url.trim());
-      expect(result.data.WEBAUTHN_ORIGIN).toBe(url.trim());
+      expect(result.data.DATABASE_URL).toBe(output ?? url.trim());
+      expect(result.data.AUTH_URL).toBe(output ?? url.trim());
+      expect(result.data.WEBAUTHN_ORIGIN).toBe(output ?? url.trim());
     }
   });
 
