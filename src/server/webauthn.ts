@@ -1,4 +1,5 @@
 import type { NextRequest } from "next/server";
+import { COSEALG } from "@simplewebauthn/server/helpers";
 import { env } from "@/lib/env";
 
 export type WebauthnConfig = {
@@ -19,3 +20,9 @@ export const getWebauthnConfig = (request: NextRequest): WebauthnConfig => {
   };
 };
 
+/**
+ * Public-key algorithms offered and accepted for new passkeys: EdDSA, ES256, RS256, i.e. the
+ * @simplewebauthn/server 13 defaults. From v14 the library default also puts ML-DSA-44 first
+ * when the runtime exposes it, which would let new passkeys depend on an experimental Node API.
+ */
+export const SUPPORTED_ALGORITHM_IDS: number[] = [COSEALG.EdDSA, COSEALG.ES256, COSEALG.RS256];

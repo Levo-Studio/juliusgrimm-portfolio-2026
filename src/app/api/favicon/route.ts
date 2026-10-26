@@ -50,7 +50,7 @@ const fetchFollowing = async (start: URL, ms: number, init?: RequestInit): Promi
   return null;
 };
 
-const readCapped = async (response: Response, cap: number): Promise<Uint8Array | null> => {
+const readCapped = async (response: Response, cap: number): Promise<Uint8Array<ArrayBuffer> | null> => {
   const declared = Number(response.headers.get("content-length") ?? "0");
   if (declared > cap) return null;
 
