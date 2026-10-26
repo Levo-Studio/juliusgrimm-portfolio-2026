@@ -3,7 +3,7 @@ import { verifyRegistrationResponse } from "@simplewebauthn/server";
 import { db } from "@/server/db/client";
 import { adminAuthenticators } from "@/server/db/schema";
 import { audit, getSessionUser } from "@/server/auth";
-import { getWebauthnConfig } from "@/server/webauthn";
+import { getWebauthnConfig, SUPPORTED_ALGORITHM_IDS } from "@/server/webauthn";
 
 type Body = { response: unknown };
 
@@ -21,7 +21,8 @@ export const POST = async (request: Request): Promise<NextResponse> => {
     response: body.response as Parameters<typeof verifyRegistrationResponse>[0]["response"],
     expectedChallenge: challenge,
     expectedOrigin: config.origin,
-    expectedRPID: config.rpID
+    expectedRPID: config.rpID,
+    supportedAlgorithmIDs: SUPPORTED_ALGORITHM_IDS
   });
 
   if (!verification.verified || !verification.registrationInfo) {

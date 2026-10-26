@@ -4,7 +4,7 @@ import { generateRegistrationOptions } from "@simplewebauthn/server";
 import { db } from "@/server/db/client";
 import { adminAuthenticators } from "@/server/db/schema";
 import { getSessionUser } from "@/server/auth";
-import { getWebauthnConfig } from "@/server/webauthn";
+import { getWebauthnConfig, SUPPORTED_ALGORITHM_IDS } from "@/server/webauthn";
 
 type ExcludedTransports = NonNullable<Parameters<typeof generateRegistrationOptions>[0]["excludeCredentials"]>[number]["transports"];
 
@@ -26,6 +26,7 @@ export const POST = async (request: Request): Promise<NextResponse> => {
     userDisplayName: user.email,
     userID: new TextEncoder().encode(user.id),
     attestationType: "none",
+    supportedAlgorithmIDs: SUPPORTED_ALGORITHM_IDS,
     authenticatorSelection: { residentKey: "preferred", userVerification: "preferred" },
     excludeCredentials: existing.map((item) => ({
       id: item.credentialId,
