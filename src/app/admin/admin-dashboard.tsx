@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { useActionState, useEffect, useState } from "react";
 import gsap from "gsap";
 import { startRegistration, type PublicKeyCredentialCreationOptionsJSON } from "@simplewebauthn/browser";
-import { Menu, ShieldCheck, Monitor, Smartphone, KeyRound, LogOut, FolderOpen, Tags } from "lucide-react";
+import { Menu, ShieldCheck, Monitor, Smartphone, KeyRound, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Toast } from "@/components/ui/toast";
 import type { PasswordState, TwoFactorState } from "@/app/admin/actions";

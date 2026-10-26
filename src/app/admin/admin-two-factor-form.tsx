@@ -6,11 +6,9 @@ import Image from "next/image";
 import type { TwoFactorLoginState } from "@/app/admin/actions";
 import { verifyTwoFactorLogin } from "@/app/admin/actions";
 
-type Props = Record<string, never>;
-
 const initialState: TwoFactorLoginState = { ok: false };
 
-export const AdminTwoFactorForm = (_props: Props): React.JSX.Element => {
+export const AdminTwoFactorForm = (): React.JSX.Element => {
   const [state, formAction, pending] = useActionState(verifyTwoFactorLogin, initialState);
   const [code, setCode] = useState("");
 
