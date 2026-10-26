@@ -207,4 +207,27 @@ describe("favicon route", () => {
       ALLOWED_HOSTS.pop();
     }
   });
+  it("refuses a non-default port on an allowed host", async () => {
+    const fetchMock = vi.fn(async () => image());
+    vi.stubGlobal("fetch", fetchMock);
+
+    for (const target of ["https://example.dev:6379", "http://example.dev:8080/", "https://example.dev:22"]) {
+      expect((await call(target)).status, target).toBe(404);
+    }
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+
+  it("does not follow a redirect or declared icon to a non-default port", async () => {
+    const seen: string[] = [];
+    vi.stubGlobal("fetch", vi.fn(async (input: RequestInfo | URL) => {
+      const url = String(input);
+      seen.push(url);
+      if (url === "https://redirects.dev/") return html('<link rel="icon" href="https://cdn.example.net:6379/icon.png">');
+      if (url === "https://redirects.dev/favicon.ico") return new Response(null, { status: 302, headers: { location: "http://cdn.example.net:11211/icon.png" } });
+      return image();
+    }));
+
+    expect((await call("https://redirects.dev")).status).toBe(404);
+    expect(seen.some((url) => /:(6379|11211)\//.test(url))).toBe(false);
+  });
 });

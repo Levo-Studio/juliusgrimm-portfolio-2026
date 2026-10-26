@@ -62,6 +62,9 @@ const resolvesPublicly = async (hostname: string): Promise<boolean> => {
 const fetchFollowing = async (start: URL, ms: number, init?: RequestInit): Promise<Response | null> => {
   let current: URL | null = start;
   for (let hop = 0; hop <= MAX_REDIRECTS && current; hop += 1) {
+    // Web sites live on the default port; any other port could reach a different service
+    // (a database, a cache) on an allowed or public host.
+    if (current.port !== "") return null;
     if (!(await resolvesPublicly(current.hostname))) return null;
     const response: Response = await fetchWithTimeout(current.toString(), ms, init);
     if (response.status < 300 || response.status >= 400) return response;
@@ -94,7 +97,7 @@ export const GET = async (request: Request): Promise<NextResponse> => {
   if (!target) return notFound();
 
   const site = publicHttpUrl(target);
-  if (!site) return notFound();
+  if (!site || site.port !== "") return notFound();
   if (!(await getFaviconHosts()).has(normalizeHostname(site.hostname))) return notFound();
 
   // Resolve which URL the icon lives at, cached by Next for a day.
