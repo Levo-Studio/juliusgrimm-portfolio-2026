@@ -19,8 +19,13 @@ const hasCredentialId = (value: unknown): value is { id: string } =>
 export const POST = async (request: Request): Promise<NextResponse> => {
   const req = request as unknown as import("next/server").NextRequest;
   const config = getWebauthnConfig(req);
-  const body = (await request.json()) as Body;
-  if (!hasCredentialId(body.response)) return NextResponse.json({ error: "Invalid passkey payload." }, { status: 400 });
+  let body: Body;
+  try {
+    body = (await request.json()) as Body;
+  } catch {
+    return NextResponse.json({ error: "Invalid passkey payload." }, { status: 400 });
+  }
+  if (!body || !hasCredentialId(body.response)) return NextResponse.json({ error: "Invalid passkey payload." }, { status: 400 });
 
   const challenge = req.cookies.get("webauthn_auth_challenge")?.value;
   if (!challenge) return NextResponse.json({ error: "Missing challenge" }, { status: 400 });
@@ -32,18 +37,25 @@ export const POST = async (request: Request): Promise<NextResponse> => {
     .limit(1);
   if (!authenticator) return NextResponse.json({ error: "Passkey not found." }, { status: 400 });
 
-  const verification = await verifyAuthenticationResponse({
-    response: body.response as AuthResponse,
-    expectedChallenge: challenge,
-    expectedOrigin: config.origin,
-    expectedRPID: config.rpID,
-    credential: {
-      id: authenticator.credentialId,
-      publicKey: Buffer.from(authenticator.publicKey, "base64url"),
-      counter: authenticator.counter,
-      transports: parseTransports(authenticator.transports)
-    }
-  });
+  // The library throws for a wrong challenge, origin or RP ID, a replayed counter and a
+  // malformed assertion: all of them are a rejected sign-in, not a server error.
+  let verification: Awaited<ReturnType<typeof verifyAuthenticationResponse>>;
+  try {
+    verification = await verifyAuthenticationResponse({
+      response: body.response as AuthResponse,
+      expectedChallenge: challenge,
+      expectedOrigin: config.origin,
+      expectedRPID: config.rpID,
+      credential: {
+        id: authenticator.credentialId,
+        publicKey: Buffer.from(authenticator.publicKey, "base64url"),
+        counter: authenticator.counter,
+        transports: parseTransports(authenticator.transports)
+      }
+    });
+  } catch {
+    return NextResponse.json({ error: "Passkey verification failed." }, { status: 400 });
+  }
 
   if (!verification.verified) return NextResponse.json({ error: "Passkey verification failed." }, { status: 400 });
 

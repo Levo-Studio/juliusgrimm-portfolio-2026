@@ -34,6 +34,9 @@ export const ProjectIcon = ({ src, title, size = 18 }: ProjectIconProps): React.
   }
 
   return (
+    // Icons are arbitrary external URLs with an onError fallback to the letter badge;
+    // next/image would route them through the image optimizer and change loading behaviour.
+    // eslint-disable-next-line @next/next/no-img-element
     <img
       src={src}
       alt=""

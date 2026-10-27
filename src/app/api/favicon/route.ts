@@ -1,5 +1,8 @@
+import { lookup } from "dns/promises";
 import { NextResponse } from "next/server";
-import { declaredIconHref, publicHttpUrl } from "@/lib/favicon-parse";
+import { declaredIconHref, normalizeHostname, publicHttpUrl } from "@/lib/favicon-parse";
+import { isPublicAddress } from "@/lib/ip-address";
+import { getFaviconHosts } from "@/server/projects";
 
 /**
  * Resolves a project's real favicon.
@@ -12,6 +15,9 @@ import { declaredIconHref, publicHttpUrl } from "@/lib/favicon-parse";
  * Speed comes from caching, not from guessing: the HTML lookup goes through Next's
  * fetch cache and the response carries a long public Cache-Control, so a given domain
  * is fetched for real about once a day and served from cache in between.
+ *
+ * The endpoint is public, so it only serves hosts that appear in project links, and every
+ * fetch hop (the site, each redirect, the icon) must resolve to public addresses only.
  */
 
 const HTML_TIMEOUT_MS = 4000;
@@ -36,10 +42,30 @@ const fetchWithTimeout = async (url: string, ms: number, init?: RequestInit): Pr
   }
 };
 
+/**
+ * True when every A/AAAA record of `hostname` is a public address. A name that points at
+ * loopback, a private network or cloud metadata is refused even though its spelling passed
+ * publicHttpUrl. fetch resolves the name again when it connects, so a DNS server answering
+ * differently on the second query (DNS rebinding) is not covered by this check; closing that
+ * gap would need the checked address pinned for the connection.
+ */
+const resolvesPublicly = async (hostname: string): Promise<boolean> => {
+  try {
+    const addresses = await lookup(normalizeHostname(hostname), { all: true, verbatim: true });
+    return addresses.length > 0 && addresses.every(({ address }) => isPublicAddress(address));
+  } catch {
+    return false;
+  }
+};
+
 /** Follows redirects by hand so every hop is re-checked, not just the first. */
 const fetchFollowing = async (start: URL, ms: number, init?: RequestInit): Promise<Response | null> => {
   let current: URL | null = start;
   for (let hop = 0; hop <= MAX_REDIRECTS && current; hop += 1) {
+    // Web sites live on the default port; any other port could reach a different service
+    // (a database, a cache) on an allowed or public host.
+    if (current.port !== "") return null;
+    if (!(await resolvesPublicly(current.hostname))) return null;
     const response: Response = await fetchWithTimeout(current.toString(), ms, init);
     if (response.status < 300 || response.status >= 400) return response;
 
@@ -50,7 +76,7 @@ const fetchFollowing = async (start: URL, ms: number, init?: RequestInit): Promi
   return null;
 };
 
-const readCapped = async (response: Response, cap: number): Promise<Uint8Array | null> => {
+const readCapped = async (response: Response, cap: number): Promise<Uint8Array<ArrayBuffer> | null> => {
   const declared = Number(response.headers.get("content-length") ?? "0");
   if (declared > cap) return null;
 
@@ -71,7 +97,8 @@ export const GET = async (request: Request): Promise<NextResponse> => {
   if (!target) return notFound();
 
   const site = publicHttpUrl(target);
-  if (!site) return notFound();
+  if (!site || site.port !== "") return notFound();
+  if (!(await getFaviconHosts()).has(normalizeHostname(site.hostname))) return notFound();
 
   // Resolve which URL the icon lives at, cached by Next for a day.
   let iconUrl: URL | null = null;

@@ -5,8 +5,8 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useActionState, useEffect, useState } from "react";
 import gsap from "gsap";
-import { startRegistration } from "@simplewebauthn/browser";
-import { Menu, ShieldCheck, Monitor, Smartphone, KeyRound, LogOut, FolderOpen, Tags } from "lucide-react";
+import { startRegistration, type PublicKeyCredentialCreationOptionsJSON } from "@simplewebauthn/browser";
+import { Menu, ShieldCheck, Monitor, Smartphone, KeyRound, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Toast } from "@/components/ui/toast";
 import type { PasswordState, TwoFactorState } from "@/app/admin/actions";
@@ -97,8 +97,8 @@ export const AdminDashboard = ({ csrfToken, projects, survivalTags, sessions, pa
         const payload = (await optionsResponse.json()) as { error?: string };
         throw new Error(payload.error ?? "Failed to start passkey registration.");
       }
-      const options = (await optionsResponse.json()) as Parameters<typeof startRegistration>[0];
-      const registrationResponse = await startRegistration(options);
+      const optionsJSON = (await optionsResponse.json()) as PublicKeyCredentialCreationOptionsJSON;
+      const registrationResponse = await startRegistration({ optionsJSON });
       const verifyResponse = await fetch("/api/admin/passkeys/register/verify", {
         method: "POST",
         headers: { "Content-Type": "application/json" },

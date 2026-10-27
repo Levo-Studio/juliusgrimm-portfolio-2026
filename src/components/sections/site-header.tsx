@@ -26,7 +26,7 @@ export const SiteHeader = ({ back }: SiteHeaderProps): React.JSX.Element => {
   return (
     <header className="flex items-center justify-between px-[22px] py-4 md:px-14 md:py-[22px]">
       <Link href="/" aria-label="Julius Grimm — home">
-        <Image src="/jg_logo.png" alt="" width={22} height={22} className="size-5 md:size-[22px]" priority />
+        <Image src="/jg_logo.png" alt="" width={22} height={22} className="size-5 md:size-[22px]" preload />
       </Link>
 
       {back ? (

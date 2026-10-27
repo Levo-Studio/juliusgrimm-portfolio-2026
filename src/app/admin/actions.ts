@@ -4,7 +4,6 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { isRedirectError } from "next/dist/client/components/redirect-error";
 import { headers } from "next/headers";
-import { z } from "zod";
 import { and, count, eq, isNull } from "drizzle-orm";
 import QRCode from "qrcode";
 import { db } from "@/server/db/client";
@@ -18,8 +17,11 @@ import {
   getPendingTwoFactorUserId,
   getSessionUser,
   hashPassword,
+  LOGIN_ATTEMPTS_PER_CLIENT,
+  LOGIN_ATTEMPTS_PER_EMAIL,
   rateLimitAuth,
   revokeOtherSessions,
+  TWO_FACTOR_ATTEMPTS_PER_USER,
   verifyMutationRequest,
   verifyPassword
 } from "@/server/auth";
@@ -27,16 +29,29 @@ import { env } from "@/lib/env";
 import { parseProjectMonthInput } from "@/lib/project-meta";
 import { ensureSurvivalKitTags } from "@/server/survival-kit";
 import { CaseStudyGenerationError, generateCaseStudy, type CaseStudyDraft } from "@/server/ai/case-study";
-import { authenticator } from "@/server/totp";
-
-const loginSchema = z.object({
-  email: z.string(),
-  password: z.string()
-});
-
-const twoFactorLoginSchema = z.object({
-  code: z.string()
-});
+import { generateTotpSecret, totpKeyUri, verifyTotp } from "@/server/totp";
+import {
+  adminEmailSchema,
+  deletePasskeySchema,
+  deleteProjectSchema,
+  generateCaseStudySchema,
+  loginSchema,
+  passwordSchema,
+  projectCreateSchema,
+  projectLinkSchema,
+  projectSchema,
+  projectTechSchema,
+  sessionSchema,
+  survivalTagSchema,
+  toggleSchema,
+  twoFactorConfirmSchema,
+  twoFactorDisableSchema,
+  twoFactorLoginSchema,
+  twoFactorSetupSchema,
+  type ProjectLinkInput,
+  type ProjectTechInput,
+  type SurvivalTagInput
+} from "@/app/admin/schemas";
 
 export type LoginState = { ok: boolean; error?: string };
 export type TwoFactorLoginState = { ok: boolean; error?: string };
@@ -51,13 +66,15 @@ export const loginAdmin = async (_prevState: LoginState, formData: FormData): Pr
 
   const email = parsed.data.email.trim().toLowerCase();
   const password = parsed.data.password;
-  if (!z.string().email().safeParse(email).success || password.length < 12) {
+  if (!adminEmailSchema.safeParse(email).success || password.length < 12) {
     return { ok: false, error: "Please use a valid email and a password with at least 12 characters." };
   }
 
   const headerBag = await headers();
   const loginFingerprint = `${email}::${headerBag.get("x-forwarded-for") ?? headerBag.get("x-real-ip") ?? "unknown-ip"}`;
-  if (!rateLimitAuth(loginFingerprint)) return { ok: false, error: "Too many login attempts. Please wait a few minutes." };
+  // Per client first, so a client that is already blocked does not use up the email's budget.
+  const allowed = rateLimitAuth(loginFingerprint, LOGIN_ATTEMPTS_PER_CLIENT) && rateLimitAuth(`login-email::${email}`, LOGIN_ATTEMPTS_PER_EMAIL);
+  if (!allowed) return { ok: false, error: "Too many login attempts. Please wait a few minutes." };
 
   try {
     const [{ totalUsers }] = await db.select({ totalUsers: count() }).from(adminUsers);
@@ -113,9 +130,16 @@ export const verifyTwoFactorLogin = async (_prevState: TwoFactorLoginState, form
   const code = parsed.data.code.replace(/\D/g, "");
   if (code.length !== 6) return { ok: false, error: "Enter a valid 6-digit code." };
 
+  // Keyed on the user, not the cookie: signing in again with the password must not reset it.
+  if (!rateLimitAuth(`2fa::${userId}`, TWO_FACTOR_ATTEMPTS_PER_USER)) {
+    await clearPendingTwoFactor();
+    await audit({ userId, action: "login_2fa_locked", entityType: "auth" });
+    return { ok: false, error: "Too many 2FA attempts. Please wait a few minutes and sign in again." };
+  }
+
   try {
     const [secret] = await db.select().from(adminTwoFactorSecrets).where(eq(adminTwoFactorSecrets.userId, userId)).limit(1);
-    if (!secret || !authenticator.check(code, secret.secretEncrypted)) {
+    if (!secret || !verifyTotp(code, secret.secretEncrypted)) {
       await audit({ userId, action: "failed_login_2fa", entityType: "auth" });
       return { ok: false, error: "Invalid 2FA code." };
     }
@@ -169,49 +193,6 @@ const resolveSlugSource = (slugInput: string, titleInput: string): string => {
   return titleInput;
 };
 
-const projectSchema = z.object({
-  id: z.string().uuid().optional(),
-  slug: z.string().optional().default(""),
-  title: z.string().min(2),
-  subtitle: z.string().min(2),
-  description: z.string().min(10),
-  whyBuilt: z.string().min(10),
-  imageUrl: z.string().url().optional().or(z.literal("")),
-  createdAt: z.string().optional().default(""),
-  visible: z.enum(["true", "false"]),
-  csrf: z.string().optional()
-});
-const projectCreateSchema = z.object({
-  slug: z.string().optional().default(""),
-  title: z.string().trim().min(2).max(160),
-  subtitle: z.string().trim().min(2),
-  description: z.string().trim().min(10),
-  whyBuilt: z.string().trim().min(10),
-  imageUrl: z.string().url().optional().or(z.literal("")),
-  createdAt: z.string().optional().default(""),
-  visible: z.enum(["true", "false"]),
-  csrf: z.string().optional()
-});
-
-const projectLinkSchema = z.object({
-  label: z.string().min(1).max(80),
-  url: z.string().url(),
-  visible: z.boolean(),
-  sortOrder: z.number().int().min(0)
-});
-
-const projectTechSchema = z.object({
-  label: z.string().min(1).max(80),
-  colorCategory: z.enum(["green", "orange", "red", "blue"]),
-  sortOrder: z.number().int().min(0)
-});
-
-const survivalTagSchema = z.object({
-  label: z.string().min(1).max(80),
-  colorCategory: z.enum(["green", "orange", "red", "blue"]),
-  sortOrder: z.number().int().min(0)
-});
-
 export const saveSurvivalKitTags = async (formData: FormData): Promise<void> => {
   const user = await getSessionUser();
   if (!user) redirect("/admin");
@@ -230,7 +211,7 @@ export const saveSurvivalKitTags = async (formData: FormData): Promise<void> => 
   const parsedTags = rawTags
     .filter((item) => item.label.length > 0)
     .map((item) => survivalTagSchema.safeParse(item))
-    .filter((result): result is { success: true; data: z.infer<typeof survivalTagSchema> } => result.success)
+    .filter((result): result is { success: true; data: SurvivalTagInput } => result.success)
     .map((result) => result.data);
 
   await ensureSurvivalKitTags();
@@ -306,7 +287,7 @@ export const upsertProject = async (formData: FormData): Promise<void> => {
   const parsedLinks = rawLinks
     .filter((item) => item.label.length > 0 && item.url.length > 0)
     .map((item) => projectLinkSchema.safeParse(item))
-    .filter((result): result is { success: true; data: z.infer<typeof projectLinkSchema> } => result.success)
+    .filter((result): result is { success: true; data: ProjectLinkInput } => result.success)
     .map((result) => result.data);
 
   await db.delete(projectLinks).where(eq(projectLinks.projectId, parsed.data.id));
@@ -333,7 +314,7 @@ export const upsertProject = async (formData: FormData): Promise<void> => {
   const parsedTech = rawTech
     .filter((item) => item.label.length > 0)
     .map((item) => projectTechSchema.safeParse(item))
-    .filter((result): result is { success: true; data: z.infer<typeof projectTechSchema> } => result.success)
+    .filter((result): result is { success: true; data: ProjectTechInput } => result.success)
     .map((result) => result.data);
   await db.delete(projectTechStack).where(eq(projectTechStack.projectId, parsed.data.id));
   if (parsedTech.length > 0) {
@@ -402,7 +383,7 @@ export const createProject = async (formData: FormData): Promise<void> => {
     const parsedLinks = rawLinks
       .filter((item) => item.label.length > 0 && item.url.length > 0)
       .map((item) => projectLinkSchema.safeParse(item))
-      .filter((result): result is { success: true; data: z.infer<typeof projectLinkSchema> } => result.success)
+      .filter((result): result is { success: true; data: ProjectLinkInput } => result.success)
       .map((result) => result.data);
 
     if (parsedLinks.length > 0) {
@@ -428,7 +409,7 @@ export const createProject = async (formData: FormData): Promise<void> => {
     const parsedTech = rawTech
       .filter((item) => item.label.length > 0)
       .map((item) => projectTechSchema.safeParse(item))
-      .filter((result): result is { success: true; data: z.infer<typeof projectTechSchema> } => result.success)
+      .filter((result): result is { success: true; data: ProjectTechInput } => result.success)
       .map((result) => result.data);
     if (parsedTech.length > 0) {
       await db.insert(projectTechStack).values(
@@ -462,11 +443,6 @@ export const createProject = async (formData: FormData): Promise<void> => {
 
 export type GenerateCaseStudyState = { ok: boolean; error?: string; draft?: CaseStudyDraft };
 
-const generateCaseStudySchema = z.object({
-  prompt: z.string().trim().min(10, "Please describe the case study in a bit more detail first.").max(2000),
-  csrf: z.string().optional()
-});
-
 export const generateCaseStudyDraft = async (input: { prompt: string; csrf?: string }): Promise<GenerateCaseStudyState> => {
   const user = await getSessionUser();
   if (!user) return { ok: false, error: "Not authenticated." };
@@ -489,8 +465,6 @@ export const generateCaseStudyDraft = async (input: { prompt: string; csrf?: str
   }
 };
 
-const deleteProjectSchema = z.object({ id: z.string().uuid(), csrf: z.string().optional() });
-
 export const deleteProject = async (formData: FormData): Promise<void> => {
   const user = await getSessionUser();
   if (!user) return;
@@ -503,8 +477,6 @@ export const deleteProject = async (formData: FormData): Promise<void> => {
   revalidatePath("/");
   revalidatePath("/admin");
 };
-
-const toggleSchema = z.object({ id: z.string().uuid(), visible: z.enum(["true", "false"]), csrf: z.string().optional() });
 
 export const toggleProjectVisibility = async (formData: FormData): Promise<void> => {
   const user = await getSessionUser();
@@ -578,15 +550,16 @@ export const createOrbitalyCaseStudy = async (formData: FormData): Promise<void>
   redirect("/admin?tab=case-studies&saved=1");
 };
 
-const sessionSchema = z.object({ sessionId: z.string().uuid(), csrf: z.string().optional() });
-
 export const revokeSession = async (formData: FormData): Promise<void> => {
   const user = await getSessionUser();
   if (!user) return;
   const parsed = sessionSchema.safeParse(Object.fromEntries(formData.entries()));
   if (!parsed.success || !(await verifyMutationRequest(parsed.data.csrf))) return;
 
-  await db.update(adminSessions).set({ revokedAt: new Date() }).where(and(eq(adminSessions.id, parsed.data.sessionId), isNull(adminSessions.revokedAt)));
+  await db
+    .update(adminSessions)
+    .set({ revokedAt: new Date() })
+    .where(and(eq(adminSessions.id, parsed.data.sessionId), eq(adminSessions.userId, user.id), isNull(adminSessions.revokedAt)));
   await audit({ userId: user.id, action: "session_revoke", entityType: "session", entityId: parsed.data.sessionId });
   revalidatePath("/admin");
 };
@@ -601,8 +574,6 @@ export const logoutOtherDevices = async (formData: FormData): Promise<void> => {
   await audit({ userId: user.id, action: "sessions_revoke_others", entityType: "session" });
   revalidatePath("/admin");
 };
-
-const passwordSchema = z.object({ currentPassword: z.string().min(12), newPassword: z.string().min(12), confirmPassword: z.string().min(12), csrf: z.string().optional() });
 
 export type PasswordState = { ok: boolean; error?: string; message?: string };
 export type TwoFactorState = {
@@ -627,14 +598,11 @@ export const changePassword = async (_prev: PasswordState, formData: FormData): 
   if (!(await verifyPassword(parsed.data.currentPassword, dbUser.passwordHash))) return { ok: false, error: "Current password is incorrect." };
 
   await db.update(adminUsers).set({ passwordHash: await hashPassword(parsed.data.newPassword), updatedAt: new Date() }).where(eq(adminUsers.id, user.id));
+  // Anyone signed in with the old password is signed out; this device stays signed in.
+  await revokeOtherSessions(user.id);
   await audit({ userId: user.id, action: "password_change", entityType: "auth" });
   return { ok: true, message: "Password updated." };
 };
-
-const twoFactorSetupSchema = z.object({ csrf: z.string().optional() });
-const twoFactorConfirmSchema = z.object({ csrf: z.string().optional(), code: z.string().min(6) });
-const twoFactorDisableSchema = z.object({ csrf: z.string().optional() });
-const deletePasskeySchema = z.object({ csrf: z.string().optional(), authenticatorId: z.string().uuid() });
 
 export const startTwoFactorSetup = async (_prev: TwoFactorState, formData: FormData): Promise<TwoFactorState> => {
   const user = await getSessionUser();
@@ -645,12 +613,12 @@ export const startTwoFactorSetup = async (_prev: TwoFactorState, formData: FormD
 
   let [secretRow] = await db.select().from(adminTwoFactorSecrets).where(eq(adminTwoFactorSecrets.userId, user.id)).limit(1);
   if (!secretRow) {
-    const secret = authenticator.generateSecret();
+    const secret = generateTotpSecret();
     [secretRow] = await db.insert(adminTwoFactorSecrets).values({ userId: user.id, secretEncrypted: secret }).returning();
   }
 
   const issuer = env.TOTP_ISSUER ?? "Julius Grimm Admin";
-  const otpAuthUrl = authenticator.keyuri(user.email, issuer, secretRow.secretEncrypted);
+  const otpAuthUrl = totpKeyUri(user.email, issuer, secretRow.secretEncrypted);
   const qrDataUrl = await QRCode.toDataURL(otpAuthUrl);
 
   return {
@@ -674,7 +642,7 @@ export const confirmTwoFactorSetup = async (_prev: TwoFactorState, formData: For
 
   const [secretRow] = await db.select().from(adminTwoFactorSecrets).where(eq(adminTwoFactorSecrets.userId, user.id)).limit(1);
   if (!secretRow) return { ok: false, error: "No pending 2FA setup found." };
-  if (!authenticator.check(code, secretRow.secretEncrypted)) return { ok: false, error: "Invalid authenticator code." };
+  if (!verifyTotp(code, secretRow.secretEncrypted)) return { ok: false, error: "Invalid authenticator code." };
 
   await db.update(adminUsers).set({ twoFactorEnabled: true, updatedAt: new Date() }).where(eq(adminUsers.id, user.id));
   await audit({ userId: user.id, action: "2fa_enabled", entityType: "auth" });

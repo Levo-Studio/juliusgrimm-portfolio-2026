@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { declaredIconHref, publicHttpUrl } from "@/lib/favicon-parse";
+import { declaredIconHref, hostnameOf, normalizeHostname, publicHttpUrl } from "@/lib/favicon-parse";
 
 describe("declaredIconHref", () => {
   it("finds a plain rel=icon", () => {
@@ -62,6 +62,8 @@ describe("publicHttpUrl", () => {
 
   it.each([
     ["localhost", "http://localhost:3000"],
+    ["localhost with a root dot", "http://localhost./"],
+    [".internal suffix with a root dot", "http://db.internal./"],
     ["loopback ip", "http://127.0.0.1/"],
     ["cloud metadata", "http://169.254.169.254/latest/meta-data/"],
     ["private range", "http://192.168.1.1/"],
@@ -73,5 +75,18 @@ describe("publicHttpUrl", () => {
     ["non-url", "not a url"]
   ])("refuses %s", (_label, url) => {
     expect(publicHttpUrl(url)).toBeNull();
+  });
+});
+
+describe("normalizeHostname", () => {
+  it("lowercases and drops IPv6 brackets and the trailing root dot", () => {
+    expect(normalizeHostname("Example.DEV.")).toBe("example.dev");
+    expect(normalizeHostname("[::1]")).toBe("::1");
+  });
+
+  it("reads the normalised host of a URL, or null", () => {
+    expect(hostnameOf("https://Orbitaly.de./x")).toBe("orbitaly.de");
+    expect(hostnameOf("https://bücher.example")).toBe("xn--bcher-kva.example");
+    expect(hostnameOf("not a url")).toBeNull();
   });
 });
