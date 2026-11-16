@@ -1,6 +1,6 @@
 # Node 24 LTS on Alpine, pinned to the multi-arch index digest so every build starts from
 # the same base image. Dependabot (docker ecosystem) bumps tag and digest together.
-FROM node:24.22.1-alpine3.24@sha256:06d7adf3e0ef61a13f1d28682726366f97a15aa1888c934d3ecec86c33918b53 AS base
+FROM node:26.13.1-alpine3.24@sha256:6bd9ab43c0ec0190ca7b2d193906cb8b7edf6e7f4afa43ddeccd6452710bffb5 AS base
 
 ENV PNPM_HOME="/pnpm"
 ENV PATH="$PNPM_HOME:$PATH"
